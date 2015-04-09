@@ -157,6 +157,16 @@ set confirm
 
 set hlsearch
 
+"set shiftround
+
+"set autoread
+"set display+=uhex
+set display+=lastline
+
+if has("wildmenu")
+    set wildmenu
+endif
+
 " tabs are forbidden in SR projects
 if g:PROJECT_name == "SR"
 	set expandtab
@@ -171,6 +181,14 @@ map <A-Down> gj
 map <A-Up> gk
 imap <A-Up> <C-o>gk
 imap <A-Down> <C-o>gj
+
+"reselect visual selection after <,> movements
+vnoremap < <gv
+vnoremap > >gv
+" make Y behave like other capitals 
+map Y y$
+" force saving files that require root permission 
+cmap w!! %!sudo tee > /dev/null %
 
 set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\[HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 set laststatus=2
@@ -1019,8 +1037,7 @@ if $CTAGS_FILE != ""
 	"	set tags+=,
 	"endif
 	set tags+=$CTAGS_FILE
-endif
-if $CTAGS_PREFIX != ""
+elseif $CTAGS_PREFIX != ""
 	"echo "tst"
 	let prefix = $CTAGS_PREFIX
 	let bre=0
@@ -1236,7 +1253,7 @@ endif
 
 if has('clipboard')
     if has('unnamedplus')
-        set clipboard=unnamedplus
+        set clipboard=unnamed,unnamedplus
     else
         set clipboard=unnamed
     endif
@@ -1245,12 +1262,16 @@ if has('clipboard')
     "If having problems in X11, than install autocutsel-0.10.0.tar.gz package to
     "sync X11 clipboards between each other
 	"
+    "
 	"Todo: add exclude pattern, when running with X forwarding through slow
 	"connection
 	"e.g set clipboard=autoselect,exclude:cons\\\|linux\\\|screen
 	"    set clipboard=autoselect,exclude:.*
-    "Todo: REMOVEME
-    set clipboard+=exclude:.*
+    "Warning: following line causes big problems with syntax highlighting and even crashed Vim on opening of Perl files (*.pl)
+    "Note: should disable X-clipboard on slow connections (because Vim can
+    " otherwise delay start for few seconds, by contacting X-server first and
+    " only then starting
+    "set clipboard+=exclude:.*
 endif
 
 if has("mouse_sgr")
