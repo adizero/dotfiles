@@ -530,7 +530,7 @@ function! MyDiff()
 	redraw!
 endfunction
 "ignore whitespace differences
-set diffopt=filler,context:6,iwhite
+set diffopt=filler,context:6
 "almost the same as without setting diffexpr (but can be easily changed in the future)
 set diffexpr=MyDiff()  "produces some artifacts on command line after execution
 
@@ -855,6 +855,7 @@ else
 			"map <Esc>[26~ <S-F4>
 			""map! <Esc>[26~ <S-F4>
             set timeout timeoutlen=1000 ttimeoutlen=100
+            "old-style  control sequences for function keys F1 to F4 (oldXtermFKeys)
             set <S-F1>=O1;2P
             set <S-F2>=O1;2Q
             set <S-F3>=O1;2R
