@@ -9,6 +9,7 @@ if has("win64") || has("win32") || has("win16")
 	" change to cygwin later (TODO)
 	let g:OS_ctags_command = 'c:\Apps\ctags57\ctags.exe'
 	let g:OS_system_includes_dir = 'c:\Apps\Dev-Cpp\include'
+    let g:OS_vimrc = "_vimrc"
 
 	"windows vista uses $HOME\.vim path, xp uses $HOME\vimfiles path
 	"so in xp we change it to $HOME\.vim and $HOME\.vim\after
@@ -37,6 +38,7 @@ else
 	"endif
 
 	let g:OS_system_includes_dir = '/usr/include'
+    let g:OS_vimrc = ".vimrc"
 
 	let my_uid=substitute(system('id'), '^uid=\([0-9]*\)(.*', '\1', "")
 	let my_login=substitute(system('id'), '^uid=\([0-9]*\)(\([^)]*\)).*', '\2', "")
@@ -133,6 +135,9 @@ set incsearch		" do incremental searching
 set tabstop=4
 
 set number				" line numbers
+if exists("+relativenumber")
+    set relativenumber      " relative line numbers
+endif
 set cindent
 set autoindent
 if has("mouse")
@@ -1026,6 +1031,7 @@ vmap <S-F12> <Esc>:lnext<Enter>v
 let mapleader = ','
 map <Leader>l :set invlist!<CR>
 map <Leader>n :set nu!<CR>
+map <Leader>N :set rnu!<CR>
 map <Leader>I :set diffopt-=iwhite<CR>
 map <Leader>i :set diffopt+=iwhite<CR>
 
@@ -1534,31 +1540,136 @@ let g:ccaseUseDialog = 0   " sets usage of windows input dialog
 "" map <Leader>1 :set path=.,/sgsn/src/oam/Gb-Mgt/**,/sgsn/src/oam/Trace-Mgt/**,/sgsn/src/oam/Common/**,/sgsn/common/**,/sgsn/cfg/**,/vob/3pp_tomas/usr/nectar/include/**,/vob/3pp_tomas/usr/nectar/nam/include/**,/vob/3pp_tomas/usr/nectar/oam/include/**,/vob/3pp_tomas/usr/tao/include/**,/vob/3pp_tomas/usr/include/**,/usr/include/**<CR>
 "" map <Leader>2 :set path=.,/sgsn/src/serv/cha/**,/sgsn/src/oam/Common/**,/sgsn/common/**,/sgsn/cfg/**,/vob/3pp_tomas/usr/nectar/include/**,/vob/3pp_tomas/usr/nectar/nam/include/**,/vob/3pp_tomas/usr/nectar/oam/include/**,/vob/3pp_tomas/usr/include/**,/usr/include/**<CR>
 
-function! DoPrettyXML()
-  " save the filetype so we can restore it later
-  let l:origft = &ft
-  set ft=
-  " delete the xml header if it exists. This will
-  " permit us to surround the document with fake tags
-  " without creating invalid xml.
-  1s/<?xml .*?>//e
-  " insert fake tags around the entire document.
-  " This will permit us to pretty-format excerpts of
-  " XML that may contain multiple top-level elements.
-  0put ='<PrettyXML>'
-  $put ='</PrettyXML>'
-  silent %!xmllint --format -
-  " xmllint will insert an <?xml?> header. it's easy enough to delete
-  " if you don't want it.
-  " delete the fake tags
-  2d
-  $d
-  " restore the 'normal' indentation, which is one extra level
-  " too deep due to the extra tags we wrapped around the document.
-  silent %<
-  " back to home
-  1
-  " restore the filetype
-  exe "set ft=" . l:origft
+"function! DoPrettyXML()
+"  " save the filetype so we can restore it later
+"  let l:origft = &ft
+"  set ft=
+"  " delete the xml header if it exists. This will
+"  " permit us to surround the document with fake tags
+"  " without creating invalid xml.
+"  1s/<?xml .*?>//e
+"  " insert fake tags around the entire document.
+"  " This will permit us to pretty-format excerpts of
+"  " XML that may contain multiple top-level elements.
+"  0put ='<PrettyXML>'
+"  $put ='</PrettyXML>'
+"  silent %!xmllint --format -
+"  " xmllint will insert an <?xml?> header. it's easy enough to delete
+"  " if you don't want it.
+"  " delete the fake tags
+"  2d
+"  $d
+"  " restore the 'normal' indentation, which is one extra level
+"  " too deep due to the extra tags we wrapped around the document.
+"  silent %<
+"  " back to home
+"  1
+"  " restore the filetype
+"  exe "set ft=" . l:origft
+"endfunction
+"command! PrettyXML call DoPrettyXML()
+
+" XML formatter
+function! DoFormatXML() range
+    " Save the file type
+    let l:origft = &ft
+
+    " Clean the file type
+    set ft=
+
+    " Add fake initial tag (so we can process multiple top-level elements)
+    exe ":let l:beforeFirstLine=" . a:firstline . "-1"
+    if l:beforeFirstLine < 0
+        let l:beforeFirstLine=0
+    endif
+    exe a:lastline . "put ='</PrettyXML>'"
+    exe l:beforeFirstLine . "put ='<PrettyXML>'"
+    exe ":let l:newLastLine=" . a:lastline . "+2"
+    if l:newLastLine > line('$')
+        let l:newLastLine=line('$')
+    endif
+
+    " Remove XML header
+    exe ":" . a:firstline . "," . a:lastline . "s/<\?xml\\_.*\?>\\_s*//e"
+
+    " Recalculate last line of the edited code
+    let l:newLastLine=search('</PrettyXML>')
+
+    " Execute external formatter
+    exe ":silent " . a:firstline . "," . l:newLastLine . "!xmllint --noblanks --format --recover -"
+
+    " Recalculate first and last lines of the edited code
+    let l:newFirstLine=search('<PrettyXML>')
+    let l:newLastLine=search('</PrettyXML>')
+    
+    " Get inner range
+    let l:innerFirstLine=l:newFirstLine+1
+    let l:innerLastLine=l:newLastLine-1
+
+    " Remove extra unnecessary indentation
+    exe ":silent " . l:innerFirstLine . "," . l:innerLastLine "s/^  //e"
+
+    " Remove fake tag
+    exe l:newLastLine . "d"
+    exe l:newFirstLine . "d"
+
+    " Put the cursor at the first line of the edited code
+    exe ":" . l:newFirstLine
+
+    " Restore the file type
+    exe "set ft=" . l:origft
 endfunction
-command! PrettyXML call DoPrettyXML()
+command! -range=% FormatXML <line1>,<line2>call DoFormatXML()
+
+"nmap <silent> <leader>x :%FormatXML<CR>
+"vmap <silent> <leader>x :FormatXML<CR>
+
+" ==========================
+" Experimental
+" ==========================
+"backup to ~/.vim/ 
+let g:user_backup_home = substitute(s:tags_home_base_path, '[\/]$', '', '') . g:OS_dir_separator . '.vim' . g:OS_dir_separator . 'backup'
+if isdirectory(g:user_backup_home) == 0
+    silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_backup_home
+endif
+let g:user_swap_home = substitute(s:tags_home_base_path, '[\/]$', '', '') . g:OS_dir_separator . '.vim' . g:OS_dir_separator . 'swap'
+if isdirectory(g:user_swap_home) == 0
+    silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_swap_home
+endif
+let g:user_undo_home = substitute(s:tags_home_base_path, '[\/]$', '', '') . g:OS_dir_separator . '.vim' . g:OS_dir_separator . 'undo'
+if isdirectory(g:user_undo_home) == 0
+    silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_undo_home
+endif
+"set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp 
+"set backupskip=/tmp/*,/private/tmp/* 
+"set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+
+"TODO improve with noundofile for specific files (like /tmp/* files)
+"au BufWritePre /tmp/* setlocal noundofile
+
+"VIM BUG: unfortunately VIM does not support double trailing slash in
+" backupdir specification (does store path into filename) - see https://code.google.com/p/vim/issues/detail?id=179
+let &backupdir=g:user_backup_home . g:OS_dir_separator . g:OS_dir_separator
+
+let &directory=g:user_swap_home . g:OS_dir_separator . g:OS_dir_separator
+set backup 
+set writebackup
+if has('persistent_undo')
+    let &undodir=g:user_undo_home . g:OS_dir_separator . g:OS_dir_separator
+    set undofile
+endif
+
+if has('clipboard')
+    if has('unnamedplus')
+        set clipboard=unnamedplus
+    else
+        set clipboard=unnamed
+    endif
+    "Note: in vim 7.3.74 and higher you can set clipboard=unnamedplus to alias unnamed register to the + register, which is the X Window clipboard.
+    "
+    "If having problems in X11, than install autocutsel-0.10.0.tar.gz package to
+    "sync X11 clipboards between each other
+endif
+
+" when .vimrc is edited, reload it
+autocmd! bufwritepost g:OS_vimrc source %
