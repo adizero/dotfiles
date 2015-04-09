@@ -1230,6 +1230,13 @@ if has('clipboard')
     "sync X11 clipboards between each other
 endif
 
+if has("mouse_sgr")
+	set ttymouse=sgr
+else
+	"if we have old vim or vim without mouse_sgr compiled, its better to not touch ttymouse setting
+	"set ttymouse=xterm2
+end
+
 " when .vimrc is edited, reload it
 if has('autocmd')
 "    autocmd! BufWritePost "*" . g:OS_dir_separator . g:OS_vimrc source %
