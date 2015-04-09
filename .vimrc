@@ -1042,6 +1042,71 @@ map <Leader>f :set foldenable!<CR>
 map <Leader>w :set wrap!<CR>
 
 "map <Leader>t :set tags=tags<CR>
+"map <Leader>f :echo line(".")<CR>
+function! ShowFeatureInfo(line_number)
+    "buffer featureinfo 
+    wincmd w
+    "echo system("/usr/local/timostools/setup_cli_find.pl -line " . a:line_number)
+    "read "!". "/usr/local/timostools/setup_cli_find.pl -line " . a:line_number
+    "exe "normal! i hello"
+    "execute "read !ls"
+    silent! normal gg
+    silent! normal dG
+    silent! execute "read !/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts
+    wincmd w
+endfunction
+
+function! ToggleFeatureInfoWindow(options)
+    if !exists("t:featureinfowindow")
+        let t:featureinfowindow = 0 
+        let t:featureinfowindow_teardown = 0 
+    endif
+    if t:featureinfowindow == 1
+        "remove window
+        "let l:tpn = tabpagenr()
+        "if l:tpn > 0
+        "    let l:tpn = l:tpn - 2
+        "endif
+        "exe "tabmove " . l:tpn
+        "tabclose
+        autocmd! FeatureInfo
+        bwipeout featureinfo
+        "autocmd! FocusGained * :echo system("/usr/local/timostools/setup_cli_find.pl -line " . line("."))
+        let t:featureinfowindow = 0
+    else
+        let t:featureinfo_opts = ""
+        let l:path = resolve(expand("%:t"))
+        if ((l:path == "setup_cli.cfg") || (l:path == "teardown_cli.cfg"))
+            if (l:path == "teardown_cli.cfg")
+                let t:featureinfo_opts = "-teardown"
+            endif
+        else
+            return
+        endif
+
+        "create window
+        "autocmd FocusGained * :call Highlight_cursor()
+        augroup FeatureInfo
+            autocmd!
+            autocmd CursorMoved <buffer> :call ShowFeatureInfo(line("."))
+        augroup END
+        "autocmd FocusGained * :echo system("/usr/local/timostools/setup_cli_find.pl -line " . line("."))
+        
+        exe "8new"
+        setlocal buftype=nofile
+        setlocal bufhidden=hide
+        setlocal noswapfile
+        file featureinfo 
+        exe "1000000"
+        exe "set nonu"
+        exe "set ro"
+        wincmd w
+        doautocmd FeatureInfo CursorMoved <buffer>
+        let t:featureinfowindow = 1
+    endif
+endfunction
+
+map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
 
 map <Leader>p :set paste!<CR>
 " mouse intergration switching
