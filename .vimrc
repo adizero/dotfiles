@@ -1,5 +1,32 @@
 set nocompatible
 
+"---VUNDLE---
+filetype off                  " required
+"set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+
+Plugin 'Valloric/YouCompleteMe'
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+"---VUNDLE---
+
+"Todo: enable Eclim
+let g:EclimDisabled = "defined"
+
+let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
+"Do not ask when starting vim
+let g:ycm_confirm_extra_conf = 0
+"set tags += $HOME/tmp/ycm.tags
+let g:ycm_collect_identifiers_from_tags_files = 1
+"let g:ycm_add_preview_to_completeopt = 1
+
 if has("win64") || has("win32") || has("win16")
 	let g:OS_name="windows"
 
@@ -118,7 +145,7 @@ autocmd! BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "nor
 set helplang=en
 set langmenu=en
 
-filetype plugin on
+"""filetype plugin on
 
 "set ttybuiltin "this is default
 "  set notbi
