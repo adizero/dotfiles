@@ -144,7 +144,7 @@ set autoindent
 if has("mouse")
 	set mouse=a				" use mouse in xterm to scroll
 endif
-set scrolloff=5 		" 5 lines bevore and after the current line when scrolling
+set scrolloff=5 		" 5 lines before and after the current line when scrolling
 set ignorecase			" ignore case
 set smartcase			" but don't ignore it, when search string contains uppercase letters
 set hid 				" allow switching buffers, which have unsaved changes
@@ -158,7 +158,7 @@ set confirm
 set hlsearch
 
 " tabs are forbidden in SR projects
-if expand("$PANOS") != "$PANOS"
+if g:PROJECT_name == "SR"
 	set expandtab
 endif
 
@@ -213,7 +213,7 @@ else
 endif
 
 " :auto BufEnter * let &titlestring = hostname() . "/" . expand("%:p")
-"Here the window title is reset when the user enters a new buffer. It contains the hostname, a forward slash, then the full path of the current fileFor an explanation of the %:p syntax see the Filename Modifiers section of the Executing External Commands recipe..
+"Here the window title is reset when the user enters a new buffer. It contains the hostname, a forward slash, then the full path of the current file - for an explanation of the %:p syntax see the Filename Modifiers section of the Executing External Commands recipe..
 "
 "Another example is to display the value of an environment variable in the window title along with the filename. For instance, Ruby on Rails developers could prefix the filename with the value of RAILS_ENV, which indicates whether the application is in development, production, staging, or testing mode:
 "let &titlestring=expand($RAILS_ENV) . ": " . expand("%:t")
@@ -395,9 +395,13 @@ vmap <C-]> y<Esc>:call SophTag("<C-r>0")<Enter>gv
 
 " F1 to display help
 if g:PROJECT_name == "SR"
-	nmap <F1> :execute "!sr_cscope.sh update"<CR> :cs reset<CR>
-	imap <F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:cs reset<CR>
-	vmap <F1> <Esc>:execute "!sr_cscope.sh update"<CR> :cs reset<CR>gv
+	nmap <F1> :execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>
+	imap <F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:cs reset<CR> <C-o>:<CR>
+	vmap <F1> <Esc>:execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>gv
+
+    nmap <S-F1> :execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>
+    imap <S-F1> <C-o>:execute "!sr_cscope.sh mibupdate"<CR> <C-o>:let &l:enc=&l:enc<CR>
+    vmap <S-F1> <Esc>:execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>gv
 else
 	nmap <F1> :call SophHelp()<Enter>
 	imap <F1> <C-o>:call SophHelp()<Enter>
@@ -525,7 +529,7 @@ function! MyDiff()
 	silent execute "!diff -a --binary " . opt . " " . v:fname_in . " " . v:fname_new . " > " . v:fname_out
 	redraw!
 endfunction
-"ignore whitespace when diff-ing
+"ignore whitespace differences
 set diffopt=filler,context:6,iwhite
 "almost the same as without setting diffexpr (but can be easily changed in the future)
 set diffexpr=MyDiff()  "produces some artifacts on command line after execution
@@ -671,6 +675,7 @@ map <Leader>d :call LetDiffOptionsForTab("-d")<CR>
 
 map <Leader>s :set spell!<CR>
 map <Leader>h :set hls!<CR>
+map <Leader>H :nohlsearch<CR>
 map <Leader>f :set foldenable!<CR>
 map <Leader>w :set wrap!<CR>
 
@@ -746,7 +751,7 @@ endfunction
 map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
 
 map <Leader>p :set paste!<CR>
-" mouse intergration switching
+" mouse integration switching
 function! SwitchMouse()
 	let opt = ""
 	if &mouse =~ "a"
@@ -856,10 +861,10 @@ else
             set <S-F4>=O1;2S
 
             "TODO: find some useful mappings for these 4 combinations
-            map <S-F1> :help S-F1
-            map <S-F2> :help S-F2
-            map <S-F3> :help S-F3
-            map <S-F4> :help S-F4
+            "map <S-F1> :help S-F1
+            "map <S-F2> :help S-F2
+            "map <S-F3> :help S-F3
+            "map <S-F4> :help S-F4
 
 			"map <Esc>[28~ <S-F5>
 			""map! <Esc>[28~ <S-F5>
@@ -911,7 +916,7 @@ else
 	endif
 endif
 
-" simple code completion - works correctly only in graphical modes (gVim) - XXX colides with cscope special stuff - CTRL+SPACE
+" simple code completion - works correctly only in graphical modes (gVim) - XXX collides with cscope special stuff - CTRL+SPACE
 "imap <C-Space> <C-n><C-p><Down>
 "imap <C-S-Space> <C-p><C-n><Up>
 imap <C-Space> <C-r>=CleverTabCompletion()<CR>
@@ -925,7 +930,7 @@ function! CleverTabCompletion()
 	  "use omni-completion 1. priority
 	  return "\<C-X>\<C-O>"
    elseif &dictionary != ''
-	  " no omni completion, try dictionary completio
+	  " no omni completion, try dictionary completion
 	  return "\<C-K>"
    else
 	  "use omni completion or dictionary completion
