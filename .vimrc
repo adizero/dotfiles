@@ -408,9 +408,16 @@ else
 	vmap <F1> <Esc>:call SophHelp()<Enter>gv
 endif
 
-nmap <S-F7> :call SophHelp()<Enter>
-imap <S-F7> <C-o>:call SophHelp()<Enter>
-vmap <S-F7> <Esc>:call SophHelp()<Enter>gv
+"if exists("loaded_gundo") -- loads only after .vimrc
+if v:version >= 703
+	nmap <S-F7> :GundoToggle<Enter>
+	imap <S-F7> <C-o>:GundoToggle<Enter>
+	vmap <S-F7> <Esc>:GundoToggle<Enter>gv
+else
+	nmap <S-F7> :call SophHelp()<Enter>
+	imap <S-F7> <C-o>:call SophHelp()<Enter>
+	vmap <S-F7> <Esc>:call SophHelp()<Enter>gv
+endif
 
 " F2 to save
 nmap <F2> :w<Enter>
@@ -1047,7 +1054,7 @@ if $CTAGS_PREFIX != ""
 endif
 
 " ============================
-" =      Tagbar plug-in     =
+" =      Tagbar plug-in      =
 " ============================
 let g:tagbar_ctags_bin = g:OS_ctags_command
 
@@ -1067,6 +1074,13 @@ let g:completekey ='<Tab>'
 " ============================
 "let g:loaded_ccase = 0  " set to 1 to abort loading ccase.vim plug-in
 let g:ccaseUseDialog = 0   " sets usage of windows input dialog
+
+" ============================
+" =    ifdef.vim plug-in     =
+" ============================
+let c_no_if0=1
+let c_no_if0_fold=1 "maybe unnecessary
+let c_no_comment_fold=1
 
 " ==========================
 " = Miscellaneous functions=
@@ -1217,6 +1231,7 @@ set writebackup
 if has('persistent_undo')
     let &undodir=g:user_undo_home . g:OS_dir_separator . g:OS_dir_separator
     set undofile
+    set undolevels=1000
 endif
 
 if has('clipboard')
@@ -1229,6 +1244,13 @@ if has('clipboard')
     "
     "If having problems in X11, than install autocutsel-0.10.0.tar.gz package to
     "sync X11 clipboards between each other
+	"
+	"Todo: add exclude pattern, when running with X forwarding through slow
+	"connection
+	"e.g set clipboard=autoselect,exclude:cons\\\|linux\\\|screen
+	"    set clipboard=autoselect,exclude:.*
+    "Todo: REMOVEME
+    set clipboard+=exclude:.*
 endif
 
 if has("mouse_sgr")
@@ -1243,3 +1265,24 @@ if has('autocmd')
 "    autocmd! BufWritePost "*" . g:OS_dir_separator . g:OS_vimrc source %
     execute "autocmd! BufWritePost " . g:OS_vimrc . " source %"
 endif
+
+"Todo: check Vim startup time via: vim --startuptime /tmp/startup.txt
+"
+
+" clipoard copy and paste functions
+"Todo: only when xsel is installed (perhaps distribute with vi ?)
+:command! -range Cz :silent :<line1>,<line2>w !xsel -i -b
+:command! -range Cx :silent :<line1>,<line2>w !xsel -i -p
+:command! -range Cv :silent :<line1>,<line2>w !xsel -i -s
+:cabbrev cv Cv
+:cabbrev cz Cz
+:cabbrev cx Cx
+
+:command! -range Pz :silent :r !xsel -o -b
+:command! -range Px :silent :r !xsel -o -p
+:command! -range Pv :silent :r !xsel -o -s
+
+:cabbrev pz Pz
+:cabbrev px Px
+:cabbrev pv Pv
+
