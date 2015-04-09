@@ -1336,6 +1336,12 @@ endfunction
 " bind function to the tab key
 imap <S-Tab> <C-r>=ShiftTabCompletion()<CR>
 
+" bind ,a to grep word under cursor
+nmap <Leader>a :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+
+" bind \ to Ag - similar to /, just enter search string
+nmap \ :grep!<SPACE>
+
 " ============================
 " =        OS specific       =
 " ============================
@@ -1343,7 +1349,23 @@ if osys == "windows"
 	set grepprg=findstr\ /R\ /S\ /N
 else
 	set grepprg=grep\ -nH\ $*\ /dev/null
-	
+
+    " The Silver Searcher
+    if executable('ag')
+      " Use ag over grep
+      set grepprg=ag\ --nogroup\ --nocolor
+      "\ --column
+      nmap <Leader>a :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
+      nmap \ :Ag<SPACE>
+
+      " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+      let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" -p ~/.agignore'
+      "--ignore *gen/work/ --ignore *gen/agent/ti-mibs/'
+
+      " ag is fast enough that CtrlP doesn't need to cache
+      let g:ctrlp_use_caching = 1
+    endif
+
 	"set equalprg=indent\ -gnu
 	"set equalprg=indent\ -nbad\ -bap\ -nbc\ -bbo\ -bl\ -bli0\ -bls\ -ncdb\ -nce\ -cp1\ -cs\ -di16\ -ndj\ -nfc1\ -nfca\ -hnl\ -i4\ -ip5\ -lp\ -pcs\ -nprs\ -psl\ -saf\ -sai\ -saw\ -nsc\ -nsob\ -nut
 	"set formatprg=par\ -w78j
