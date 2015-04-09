@@ -1044,16 +1044,19 @@ map <Leader>w :set wrap!<CR>
 "map <Leader>t :set tags=tags<CR>
 "map <Leader>f :echo line(".")<CR>
 function! ShowFeatureInfo(line_number)
-    "buffer featureinfo 
-    wincmd w
-    "echo system("/usr/local/timostools/setup_cli_find.pl -line " . a:line_number)
-    "read "!". "/usr/local/timostools/setup_cli_find.pl -line " . a:line_number
-    "exe "normal! i hello"
-    "execute "read !ls"
-    silent! normal gg
-    silent! normal dG
-    silent! execute "read !/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts
-    wincmd w
+    if (t:stored_line != a:line_number)
+        let t:stored_line = a:line_number
+        "buffer featureinfo 
+        wincmd w
+        "echo system("/usr/local/timostools/setup_cli_find.pl -line " . a:line_number)
+        "read "!". "/usr/local/timostools/setup_cli_find.pl -line " . a:line_number
+        "exe "normal! i hello"
+        "execute "read !ls"
+        silent! normal gg
+        silent! normal dG
+        silent! execute "read !/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts
+        wincmd w
+    endif
 endfunction
 
 function! ToggleFeatureInfoWindow(options)
@@ -1091,7 +1094,8 @@ function! ToggleFeatureInfoWindow(options)
             autocmd CursorMoved <buffer> :call ShowFeatureInfo(line("."))
         augroup END
         "autocmd FocusGained * :echo system("/usr/local/timostools/setup_cli_find.pl -line " . line("."))
-        
+       
+        let t:stored_line = -1
         exe "8new"
         setlocal buftype=nofile
         setlocal bufhidden=hide
