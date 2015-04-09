@@ -1,31 +1,49 @@
 set nocompatible
 
+"check vundle installation, if installed, then make use of it
+let vundle_readme=expand('~/.vim/bundle/Vundle.vim/README.md')
+if filereadable(vundle_readme)
 "---VUNDLE---
-filetype off                  " required
-"set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-" alternatively, pass a path where Vundle should install plugins
-"call vundle#begin('~/some/path/here')
+    filetype off                  " required
+    "set the runtime path to include Vundle and initialize
+    set rtp+=~/.vim/bundle/Vundle.vim
+    call vundle#begin()
+    " alternatively, pass a path where Vundle should install plugins
+    "call vundle#begin('~/some/path/here')
 
-" let Vundle manage Vundle, required
-Plugin 'gmarik/Vundle.vim'
+    " let Vundle manage Vundle, required
+    Plugin 'gmarik/Vundle.vim'
 
-Plugin 'Valloric/YouCompleteMe'
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
-filetype plugin indent on    " required
+    Plugin 'Valloric/YouCompleteMe'
+    " All of your Plugins must be added before the following line
+    call vundle#end()            " required
+    filetype plugin indent on    " required
 "---VUNDLE---
+endif
 
 "Todo: enable Eclim
 let g:EclimDisabled = "defined"
+
+"Todo: enable YouCompleteMe
+"let g:loaded_youcompleteme = "defined"
 
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 "Do not ask when starting vim
 let g:ycm_confirm_extra_conf = 0
 "set tags += $HOME/tmp/ycm.tags
+function! YCM_tagfiles()
+    return [expand("$HOME") . '/tmp/ycm.tags']
+endfunction
 let g:ycm_collect_identifiers_from_tags_files = 1
 "let g:ycm_add_preview_to_completeopt = 1
+let g:ycm_key_invoke_completion = '<C-Space>'
+
+let g:ycm_key_list_select_completion = ['<Down>']
+let g:ycm_key_list_previous_completion = ['<Up>']
+
+let g:ycm_always_populate_location_list = 1
+
+let g:ycm_disable_for_files_larger_than_kb = 2000
 
 if has("win64") || has("win32") || has("win16")
 	let g:OS_name="windows"
@@ -99,6 +117,8 @@ let g:header_source_flip_search_path = substitute('.,**,../include/**,../src/**,
 
 " set default path
 let &path=g:default_search_path
+
+"set suffixesadd=.h
 
 " =========================================
 " = Project/Versioning system integration =
@@ -184,6 +204,7 @@ set confirm
 
 set hlsearch
 
+set nostartofline
 "set shiftround
 
 "set autoread
@@ -579,7 +600,7 @@ function! MyDiff()
 		let opt = opt . t:diffoptions
 	endif
 	silent execute "!diff -a --binary " . opt . " " . v:fname_in . " " . v:fname_new . " > " . v:fname_out
-	redraw!
+"	redraw!
 endfunction
 "ignore whitespace differences
 set diffopt=filler,context:6
@@ -817,6 +838,8 @@ map <Leader>m :call SwitchMouse()<CR>
 " path leader mappings
 map <Leader>0 :let &path=g:default_search_path<CR>
 
+let g:color_scheme = ""
+
 " ============================
 " =        GUI options       =
 " ============================
@@ -868,20 +891,27 @@ if has("gui_running")
 	if g:OS_name == "windows"
 		"colorscheme zenburn
 		let g:molokai_original = 1
-		colorscheme molokai
+		let g:color_scheme = "molokai"
 
 		"set guifont=Lucida_Console:h8:cEASTEUROPE
 		"set guifont=Dina:h8:cANSI
-		set guifont=Envy\ Code\ R:h11:cEASTEUROPE
+		silent! set guifont=Envy\ Code\ R:h11:cEASTEUROPE
+        if &guifont != 'Envy Code R:h11:cEASTEUROPE'
+            silent! set guifont=Lucida_Console:h11:cEASTEUROPE
+        endif
 		set guioptions="aegmrLtT
 		
 		" maximize window on start
 		autocmd GUIEnter * simalt ~X
 	else
 		"colorscheme desert
-		colorscheme wombat256mod
+		let g:color_scheme = "wombat256mod"
 	
-		set guifont=Envy\ Code\ R\ 11
+		silent! set guifont=Envy\ Code\ R\ 11
+        if &guifont != 'Envy Code R 11'
+            silent! set guifont=Dejavu\ Sans\ Mono\ 11
+        endif
+
 		set guioptions="aegimrLtT
 	
 		" maximize window on start (still not good enough - it's not truly
@@ -895,10 +925,10 @@ else
 	"no GUI - console mode
 	if g:OS_name == "windows"
 		"8-color terminal in windows only, zellner looks OK
-		colorscheme zellner
+		let g:color_scheme = "zellner"
 	else
 		set t_Co=256 "override terminfo setting to enable 256 colors
-		colorscheme wombat256mod
+		let g:color_scheme = "wombat256mod"
 
 		if &term =~ "xterm"
 			""map Shift+F3..F10 keys (additional 8 combinations)
@@ -953,8 +983,8 @@ else
 			"map! <Left> <A-Left>
 
             "enabling C-Space mapping (otherwise C-Space does nothing)
-			map <C-@> <C-Space>
-			map! <C-@> <C-Space>
+"			map <C-@> <C-Space>
+"			map! <C-@> <C-Space>
 
 			"map <Esc><Esc>[OA <A-Up>
 			"map! <Esc><Esc>[OA <A-Up>
@@ -969,10 +999,18 @@ else
 	endif
 endif
 
+try
+    exec "colorscheme " . g:color_scheme
+catch /:E185:/
+    " E185 colorscheme not found
+    " just ignore
+endtry
+
 " simple code completion - works correctly only in graphical modes (gVim) - XXX collides with cscope special stuff - CTRL+SPACE
 "imap <C-Space> <C-n><C-p><Down>
 "imap <C-S-Space> <C-p><C-n><Up>
-imap <C-Space> <C-r>=CleverTabCompletion()<CR>
+
+"imap <C-Space> <C-r>=CleverTabCompletion()<CR>
 
 " ============================
 " =       Super S-TAB        =
@@ -992,6 +1030,14 @@ function! CleverTabCompletion()
   endif
 endfunction
 
+function! TabCompletion()
+    if pumvisible()
+        return "\<C-N>"
+    else
+        return "\<Tab>"
+    endif
+endfunction
+
 function! ShiftTabCompletion()
 	"check if at beginning of line or after a space
 	"let g:str = strpart( getline('.'), col('.'))
@@ -1009,10 +1055,16 @@ function! ShiftTabCompletion()
 		execute "normal \<LT>\<LT>"
 		return ""
 	else
-		return CleverTabCompletion()
+		"return CleverTabCompletion()
+        if pumvisible()
+            return "\<C-P>"
+        else
+            return "\<S-Tab>"
+        endif
 	endif
 endfunction
 " bind function to the tab key
+imap <Tab> <C-r>=TabCompletion()<CR>
 imap <S-Tab> <C-r>=ShiftTabCompletion()<CR>
 
 " bind ,a to grep word under cursor
@@ -1111,7 +1163,7 @@ let Tlist_Show_Menu = 1
 " ============================
 " =   CodeComplete plug-in   =
 " ============================
-let g:completekey ='<Tab>'
+let g:completekey ='<C-B>'
 
 " ============================
 " =    Clearcase plug-in     =
@@ -1126,6 +1178,18 @@ let c_no_if0=1
 let c_no_if0_fold=1 "maybe unnecessary
 let c_no_comment_fold=1
 
+" ============================
+" =     Clang Formatter      =
+" ============================
+" autodetects from l:shiftwidth \ "IndentWidth" : "4",
+" autodetects from l:expandtab \ "UseTab" : "false",
+" autoselects based on clang_format#code_style \ "BasedOnStyle" : "Google",
+" TODO: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
+let g:clang_format#code_style = "Google"
+let g:clang_format#style_options = {
+            \ "BreakBeforeBraces" : "Allman"}
+let g:clang_format#auto_formatexpr=1
+
 " ==========================
 " = Miscellaneous functions=
 " ==========================
@@ -1139,7 +1203,7 @@ function! MyCTags(fdir)
     endif
     
     silent! execute "!" . g:OS_ctags_command . " --languages=C,C++ -R --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+fq --tag-relative=yes " . l:path
-    redraw!
+"    redraw!
 endfunction
 
 "comm! CtagsP call MyCTags('.. ' . g:OS_system_includes_dir)
@@ -1181,7 +1245,7 @@ function! MyGenTagsCmd(gtcmd, ...)
         " E568 cscope problem: database already added
         " just ignore
     endtry
-    redraw!
+"    redraw!
 endfunction
 
 "com! -nargs=* Egt call MyGenTagsCmd("gt", <f-args>)
@@ -1280,7 +1344,7 @@ endif
 
 if has('clipboard')
     if has('unnamedplus')
-        set clipboard=unnamed,unnamedplus
+		set clipboard=unnamed,unnamedplus
     else
         set clipboard=unnamed
     endif
