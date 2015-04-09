@@ -949,9 +949,9 @@ elseif expand("$PANOS") != "$PANOS"
     imap <F5> <C-o>:VCSVimDiff<Enter>
     vmap <F5> <Esc>:VCSVimDiff<Enter>gv
 
-    nmap <F6> :VCSVimDiff HEAD<Enter>
-    imap <F6> <C-o>:VCSVimDiff HEAD<Enter>
-    vmap <F6> <Esc>:VCSVimDiff HEAD<Enter>gv
+    nmap <F6> :VCSVimDiff BRANCH<Enter>
+    imap <F6> <C-o>:VCSVimDiff BRANCH<Enter>
+    vmap <F6> <Esc>:VCSVimDiff BRANCH<Enter>gv
 
     nmap <F9> :VCSBlame!<Enter>
     imap <F9> <C-o>:VCSBlame!<Enter>
