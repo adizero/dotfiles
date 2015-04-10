@@ -1,5 +1,8 @@
 set nocompatible
 
+"must go before first shell execute command (e.g. execute !ls) from .vimrc
+let &t_ti="\e[?1049h"
+
 "check vundle installation, if installed, then make use of it
 let vundle_readme=expand('~/.vim/bundle/Vundle.vim/README.md')
 if filereadable(vundle_readme)
@@ -17,6 +20,7 @@ if filereadable(vundle_readme)
     Plugin 'Valloric/YouCompleteMe'
     Plugin 'terryma/vim-multiple-cursors'
 
+    Plugin 'adizero/vim-togglecursor'
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
     filetype plugin indent on    " required
@@ -29,7 +33,7 @@ endif
 let g:EclimDisabled = "defined"
 
 "Todo: enable YouCompleteMe
-"let g:loaded_youcompleteme = "defined"
+let g:loaded_youcompleteme = "defined"
 
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 "Do not ask when starting vim
@@ -157,7 +161,9 @@ endif
 " remove possible trailing slash before creating directory $HOME/.vim/sessions
 let g:user_sessions_home = substitute($HOME, '[\/]$', '', '') . g:OS_dir_separator . '.vim' . g:OS_dir_separator . 'sessions'
 let g:user_session_filename = 'session.vim'
+
 silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_sessions_home
+
 "autocmd VimEnter * call LoadSession()
 "autocmd VimLeave * call SaveSession()
 function! SaveSession()
@@ -234,7 +240,7 @@ endif
 
 set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
 
-imap jj	<Esc> 
+imap jk <Esc> 
 
 " follow visual lines (instead of lines) - comes into play when line wrapping is on
 map <A-Down> gj
@@ -437,7 +443,7 @@ endif
 " =Movement with CTRL,SHIFT and ARROWS=
 " =====================================
 if v:version > 700
-	" (CTRL+SHIFT+UP/DOWN works only in graphical modes (gVim)
+	" (CTRL+SHIFT+UP/DOWN works only in graphical modes
 	nmap <C-S-Up> <C-w>W
 	nmap <C-S-Down> <C-w>w
 	imap <C-S-Up> <C-o><C-w>W
@@ -485,9 +491,10 @@ imap <S-PageUp> _<Esc>mz"_xv`z<BS>o<Home><C-u>
 vmap <S-PageDown> <End><C-d><End>
 vmap <S-PageUp> <Home><C-u>
 
-" word deletion (gVim)
+" word deletion
 imap <C-BS> <C-w>
-imap <C-Del> _<Esc>mzew<BS>i<Del><Esc>v`z"_c
+"imap <C-Del> _<Esc>mzew<BS>i<Del><Esc>v`z"_c
+imap <C-Del> <C-o>de
 
 
 " ============================
@@ -1046,90 +1053,178 @@ else
 		"8-color terminal in windows only, zellner looks OK
 		let g:color_scheme = "zellner"
 	else
+        "set t_Cc=1
+        "set t_pa=32767
+
 		set t_Co=256 "override terminfo setting to enable 256 colors
+		"set t_AB='[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'
+		"set t_AF='[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m'
+		set t_AB=[4%p1%dm
+		set t_AF=[3%p1%dm
+		set t_mb=[5m
+		set t_nd=[C
+		set t_op=[39;49m
+		set t_se=[27m
+		set t_te=[?1049l
+		set t_vi=[?25l
+		set t_vs=[?12;25h
+		set t_vb=[?5h$<100/>[?5l
+		set t_ve=[?12l[?25h
+		set t_ti=[?1049h
+	
+		"no necessary, as t_AB,t_AF are used instead
+		set t_Sb=[4%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
+		set t_Sf=[3%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
+
 		let g:color_scheme = "wombat256mod"
 
 		if &term =~ "xterm"
-			""map Shift+F3..F10 keys (additional 8 combinations)
-			"map <Esc>[25~ <S-F3>
-			""map! <Esc>[25~ <S-F3>
-			"map <Esc>[26~ <S-F4>
-			""map! <Esc>[26~ <S-F4>
+			"see vim help -> :help xterm-function-keys
+
             set timeout timeoutlen=1000 ttimeoutlen=100
 
-            "new xterm (Lubuntu 13.04) 
-            "lxterminal (Lubuntu 13.04)
-            " old-style control sequences for function keys F1 to F4 (oldXtermFKeys)
-            set <S-F1>=O1;2P
-            set <S-F2>=O1;2Q
-            set <S-F3>=O1;2R
-            set <S-F4>=O1;2S
+			"terminal detection (based on ^[[>c), in screen surround query
+			"string with \eP...\e\\ (as always, when we want to talk to
+			"terminal underneath screen)
+			" the terminal's response is already stored in v:termresponse in Vim
 
-"            "?????
-"            set <S-F1>=[11;2~
-"            set <S-F2>=[12;2~
-"            set <S-F3>=[13;2~
-"            set <S-F4>=[14;2~
-"
-"            "old xterm/lxterm (Lubuntu 13.04)
-"            set <S-F1>=[1;2P
-"            set <S-F2>=[1;2Q
-"            set <S-F3>=[1;2R
-"            set <S-F4>=[1;2S
-
-            "TODO: find some useful mappings for these 4 combinations
-            "map <S-F1> :help S-F1
-            "map <S-F2> :help S-F2
-            "map <S-F3> :help S-F3
-            "map <S-F4> :help S-F4
-
-			"map <Esc>[28~ <S-F5>
-			""map! <Esc>[28~ <S-F5>
-			"map <Esc>[29~ <S-F6>
-			""map! <Esc>[29~ <S-F6>
-			"map <Esc>[31~ <S-F7>
-			""map! <Esc>[31~ <S-F7>
-			"map <Esc>[32~ <S-F8>
-			""map! <Esc>[32~ <S-F8>
-			"map <Esc>[33~ <S-F9>
-			""map! <Esc>[33~ <S-F9>
-			"map <Esc>[34~ <S-F10>
-			""map! <Esc>[34~ <S-F10>
+			"Screen          "old versions???"                   (nothing)
+			"Xterm           Xterm(278)                          ^[[>0;278;0c
+			"Xterm           Xterm(317)                          ^[[>41;317;0c
+			"Lxterminal      lxterminal (0.1.11-4ubuntu3)        ^[[>1;2802;0c
+			"Cygwin                                              ^[[>77;10103;0c
+			"PuTTY           0.62                                ^[[>0;136;0c
+			"Screen          4.00.03 (FAU)                       ^[[>83;40003;0c
+			"Screen          4.01.00devel (GNU) 2-May-06         ^[[>83;40100;0c
+			"Gnome-terminal  GNOME Terminal 3.6.2                ^[[>1;3409;0c
+			"Konsole         2.13.2                              ^[[>0;115;0c
 	
-            "enabling CTRL+cursor keys mappings (set above to cycle through windows)
-			map [A <C-Up>
-			"map! [A <C-Up>
-			map [B <C-Down>
-			"map! [B <C-Down>
-			map [C <C-Right>
-			"map! [C <C-Right>
-			map [D <C-Left>
-			"map! [D <C-Left>
+			"see vim help v:termresponse
+			"callback is called after response to t_RV reception -> TermResponse autocommand event
+			"only then is can be used for terminal identification
+			"echomsg "testing..." . v:termresponse
+			"
+			"for PuTTY answerback may be probably also used (based on ^E)
+			"
+			"TODO: implement somehow :-)
 
-            "enabling ALT+cursor keys mappings (set above to move through wrapped lines)
-			map <Up> <A-Up>
-			"map! <Up> <A-Up>
-			map <Down> <A-Down>
-			"map! <Down> <A-Down>
-			map <Right> <A-Right>
-			"map! <Right> <A-Right>
-			map <Left> <A-Left>
-			"map! <Left> <A-Left>
+			"old xterm/lxterminal F1-F4 (used only for no mod case - e.g. OP, ...)
+			set <F1>=O;*P
+			set <F2>=O;*Q
+			set <F3>=O;*R
+			set <F4>=O;*S
+			set <Home>=O;*H
+			set <End>=O;*F
 
-            "enabling C-Space mapping (otherwise C-Space does nothing)
-"			map <C-@> <C-Space>
-"			map! <C-@> <C-Space>
+			"konsole (universal case covers also the above for no mod case)
+			set <F1>=O*P
+			set <F2>=O*Q
+			set <F3>=O*R
+			set <F4>=O*S
 
+			"new xterm (wildcard used to handle all alt,control,shift combinations)
+			set <xF1>=[1;*P
+			set <xF2>=[1;*Q
+			set <xF3>=[1;*R
+			set <xF4>=[1;*S
+			set <xHome>=[1;*H
+			set <xEnd>=[1;*F
+
+			set <zHome>=[;*H
+			set <zEnd>=[;*F
+
+"			"old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
+"			set <xF1>=O1;*P
+"			set <xF2>=O1;*Q
+"			set <xF3>=O1;*R
+"			set <xF4>=O1;*S
+
+			map <xF1> <F1>
+			map! <xF1> <F1>
+			map <xF2> <F2>
+			map! <xF2> <F2>
+			map <xF3> <F3>
+			map! <xF3> <F3>
+			map <xF4> <F4>
+			map! <xF4> <F4>
+			map <xHome> <Home>
+			map! <xHome> <Home>
+			map <xEnd> <End>
+			map! <xEnd> <End>
+			map <zHome> <Home>
+			map! <zHome> <Home>
+			map <zEnd> <End>
+			map! <zEnd> <End>
+
+			"TODO: move before mapping of F1-F4 keys!!!!!!!!
+			"XXX: query terminal via: echo -n -e ""
+			" PuTTY usually shows PuTTY as a result
+
+
+"            "enabling CTRL+cursor keys mappings (set above to cycle through windows)
+"			map [A <C-Up>
+"			"map! [A <C-Up>
+"			map [B <C-Down>
+"			"map! [B <C-Down>
+"			map [C <C-Right>
+"			"map! [C <C-Right>
+"			map [D <C-Left>
+"			"map! [D <C-Left>
+"
+"            "enabling ALT+cursor keys mappings (set above to move through wrapped lines)
+"			map <Up> <A-Up>
+"			"map! <Up> <A-Up>
+"			map <Down> <A-Down>
+"			"map! <Down> <A-Down>
+"			map <Right> <A-Right>
+"			"map! <Right> <A-Right>
+"			map <Left> <A-Left>
+"			"map! <Left> <A-Left>
+
+            "enabling ctrl+space mapping (otherwise C-Space does nothing)
+			map <C-@> <C-Space>
+			map! <C-@> <C-Space>
+
+			"ctrl+backspace mapping (otherwise C-BS does nothing)
+			map <C-H> <C-BS>
+			map! <C-H> <C-BS>
+
+			"del is set without modifiers support (by default in Vim) => let's change that
+			set <Del>=[3;*~
+
+			"cleanup of Vim's internal duplicate bindings
+			set <S-Home>=
+			set <S-Left>=
+			set <S-Right>=
+			set <S-End>=
+
+			"newer xterm can do also right winmenu key
+			"set <WMENU>=[29;*~
+
+
+			"sample of mappings for ALT=<Esc> modes (do not use!)
 			"map <Esc><Esc>[OA <A-Up>
 			"map! <Esc><Esc>[OA <A-Up>
 			"map <Esc><Esc>[OB <A-Down>
 			"map! <Esc><Esc>[OB <A-Down>
 			"map <Esc><Esc>[OC <A-Right>
 			"map! <Esc><Esc>[OC <A-Right>
-			"map <Esc><Esc>[OD <A-Left>		
-			"map! <Esc><Esc>[OD <A-Left>		
+			"map <Esc><Esc>[OD <A-Left>
+			"map! <Esc><Esc>[OD <A-Left>
+			"map [1;3P <A-F1>
+			"map! [1;3P <A-F1>
+
+		elseif &term =~ "rxvt"
+            "rxvt (is well covered in default Vim mappings)
+"           set <F1>=[11;*~
+"           set <F2>=[12;*~
+"           set <F3>=[13;*~
+"           set <F4>=[14;*~
+"			set <Home>=[7;*~
+"			set <End>=[8;*~
 		endif
 
+		"common mappings
 	endif
 endif
 
@@ -1292,7 +1387,7 @@ let g:tagbar_ctags_bin = g:OS_ctags_command
 " =      TagList plug-in     =
 " ============================
 let Tlist_Ctags_Cmd = g:OS_ctags_command
-let Tlist_Show_Menu = 1
+let Tlist_Show_Menu = 0  " there is a bug in gVim with taglist show menu turned on (E792: Empty menu name)
 
 " ============================
 " =   CodeComplete plug-in   =
@@ -1533,4 +1628,30 @@ endif
 :cabbrev pz Pz
 :cabbrev px Px
 :cabbrev pv Pv
+
+"if &term == "xterm-256color-italic"
+" TODO enable italic support in wombat256 colorscheme
+if expand("$STY") != "$STY"
+	let &t_ZH = "\eP\e[3m\e\\"
+	let &t_ZR = "\eP\e[23m\e\\"
+else
+	let &t_ZH = "\e[3m"
+	let &t_ZR = "\e[23m"
+endif
+
+" delete wait time after ESC key is pushed in insert mode
+let &t_SI .= "\e[?7727h"
+let &t_EI .= "\e[?7727l"
+inoremap <special> <Esc>O[ <Esc>
+
+""if &term == "xterm-256color-italic"
+"" TODO check somehow, whether terminal is capable of cursor shape changes
+"" changing cursor shape (work in xterm and from screen inside of xterm)
+"if expand("$STY") != "$STY"
+"	let &t_SI .= "\eP\e[5 q\e\\"
+"    let &t_EI .= "\eP\e[2 q\e\\"
+"else
+"    let &t_SI .= "\e[5 q"
+"    let &t_EI .= "\e[2 q"
+"endif
 
