@@ -15,10 +15,14 @@ if filereadable(vundle_readme)
     Plugin 'gmarik/Vundle.vim'
 
     Plugin 'Valloric/YouCompleteMe'
+    Plugin 'terryma/vim-multiple-cursors'
+
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
     filetype plugin indent on    " required
 "---VUNDLE---
+else
+    filetype plugin indent on
 endif
 
 "Todo: enable Eclim
@@ -35,15 +39,25 @@ function! YCM_tagfiles()
     return [expand("$HOME") . '/tmp/ycm.tags']
 endfunction
 let g:ycm_collect_identifiers_from_tags_files = 1
+
 "let g:ycm_add_preview_to_completeopt = 1
 let g:ycm_key_invoke_completion = '<C-Space>'
+let g:ycm_cache_omnifunc = 0  "takes simply too much memory in big projects (1GB of sources)
 
 let g:ycm_key_list_select_completion = ['<Down>']
 let g:ycm_key_list_previous_completion = ['<Up>']
 
 let g:ycm_always_populate_location_list = 1
 
-let g:ycm_disable_for_files_larger_than_kb = 2000
+let g:ycm_disable_for_files_larger_than_kb = 7000
+
+function! Multiple_cursors_before()
+    let g:ycm_auto_trigger = 0
+endfunction
+ 
+function! Multiple_cursors_after()
+    let g:ycm_auto_trigger = 1
+endfunction
 
 if has("win64") || has("win32") || has("win16")
 	let g:OS_name="windows"
@@ -165,8 +179,6 @@ autocmd! BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "nor
 set helplang=en
 set langmenu=en
 
-"""filetype plugin on
-
 "set ttybuiltin "this is default
 "  set notbi
 "set ttymouse xterm2 "VIM autodetect from TERM env variable name (=~xterm => xterm2)
@@ -237,6 +249,92 @@ vnoremap > >gv
 map Y y$
 " force saving files that require root permission 
 cmap w!! %!sudo tee > /dev/null %
+
+"better jumping to function beginning/end (does not require {,} to be in the
+"first column of the file
+
+function! My_PreSection(count, bracket_to_find, search_flags, move_to_execute)
+    "echomsg "count " . a:count . " " . line(".") . ":" . col(".")
+    let i = a:count
+    while i > 0
+        """"normal "?{"  "did not work properly, replaced with search
+        let pos_save = getpos('.')
+        """let l = line(".")
+        """let c = col(".")
+        let b = search(a:bracket_to_find, a:search_flags)
+        """let line = getline(".")
+        """while (((a:search_flags == "bW") && (line(".") == l) && (col(".") != c)))
+        """    "to skip over { } { lines in .tcl scripts
+        """    let l = line(".")
+        """    let c = col(".")
+        """    let b = search(a:bracket_to_find, a:search_flags)
+        """endwhile
+        if b > 0
+            exe "normal " . a:move_to_execute
+            """if (a:search_flags == "W")
+            """    "to skip over { } { lines in .tcl scripts
+            """    let line = getline(".")
+            """    let line_part = line[col(".")+1:]
+            """    if (matchstr(line_part, "{") != "")
+            """        let i = i + 1
+            """    endif
+            """endif
+        else
+            call setpos('.', pos_save)
+            break
+        endif
+        let i = i - 1
+    endwhile
+endfunction 
+
+function! My_SectionJump(count, n_move, last_move)
+    let i = a:count
+    let pos_save_orig = getpos('.')
+    if a:last_move == "[["
+        exe "normal " . "99]}"
+        if getpos('.') == pos_save_orig
+            let i = i - 1
+        endif
+        call setpos('.', pos_save_orig)
+    endif
+    exe "normal " . a:n_move
+    let pos_save = getpos('.')
+    "let pos_save2 = []
+    if i > 0
+        while i > 0
+            exe "normal " . a:n_move
+            let i = i - 1
+        endwhile
+        let pos_save2 = getpos('.')
+    else
+        let pos_save2 = pos_save_orig
+    endif
+    "echomsg pos_save[0] . ":" . pos_save[1]
+    "echomsg pos_save2[0] . ":" . pos_save2[1]
+    if pos_save != pos_save2
+        exe "normal " . a:last_move
+    else
+        call setpos('.', pos_save_orig)
+    endif
+endfunction 
+
+"see :help map-operator
+"nnoremap [[ :set opfunc=My_PreSection<CR>g@
+"nnoremap [[ @=':call My_PreSection(v:count)'<CR>
+
+"map [[ ?{<CR>w99[{
+"map ][ /}<CR>b99]}
+"map ]] j0[[%/{<CR>
+"map [] k$][%?}<CR>
+
+nnoremap [[ :<C-U>call My_PreSection(v:count1, "{", "bW", "w99[{")<CR>
+nnoremap ][ :<C-U>call My_PreSection(v:count1, "}", "W", "b99]}")<CR>
+nnoremap ]] :<C-U>call My_SectionJump(v:count1, "][", "[[")<CR>
+nnoremap [] :<C-U>call My_SectionJump(v:count1, "[[", "][")<CR>
+
+
+set errorformat^=%-GIn\ file\ included\ from\ %f:%l:%c:,%-GIn\ file\ included\ from\ %f:%l:%c\\,,%-GIn\ file\ included\ from\ %f:%l:%c,%-GIn\ file\ included\ from\ %f:%l,%-G%*[\ ]from\ %f:%l:%c
+set errorformat^=%-G%n:%l:%c%.%#\ Tar\'ing\ up\ changed\ files,%-GBuilding\ list\ of\ req'd\ files\ -\ starting\ at\ %s\ %n:%l:%c\ %.%#,%-GDone\ at\ %s\ %n:%l:%c\ %.%#,%-G%n:%l:%c\ %m\ Sending\ changed\ files\ to\ server,%-G%n:%l:%c\ %s\\,\ Remotely\ executing\ %.%#,%-G###\ %n:%l:%c%.%#\,\ Rsyncing\ files\ with\ \ server\ %.%#,%-G%.%#%n:%l:%c%.%#\,\ Remotely\ SSH\ executing\ %.%#
 
 set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\[HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 set laststatus=2
@@ -600,7 +698,8 @@ function! MyDiff()
 		let opt = opt . t:diffoptions
 	endif
 	silent execute "!diff -a --binary " . opt . " " . v:fname_in . " " . v:fname_new . " > " . v:fname_out
-"	redraw!
+    "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
+    execute "redraw!" 
 endfunction
 "ignore whitespace differences
 set diffopt=filler,context:6
@@ -757,16 +856,33 @@ map <Leader>w :set wrap!<CR>
 function! ShowFeatureInfo(line_number)
     if (t:stored_line != a:line_number)
         let t:stored_line = a:line_number
-        "buffer featureinfo 
-        wincmd w
-        "echo system("/usr/local/timostools/setup_cli_find.pl -line " . a:line_number)
-        "read "!". "/usr/local/timostools/setup_cli_find.pl -line " . a:line_number
-        "exe "normal! i hello"
-        "execute "read !ls"
-        silent! normal gg
-        silent! normal dG
-        silent! execute "read !/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts
-        wincmd w
+     
+        "echomsg "mode " . mode()
+        let reselect = 0
+        if mode() == "v" || mode() == ""
+            let reselect = 1
+        endif
+
+        wincmd t
+
+        silent! normal! gg
+        silent! normal! "_dG
+
+        "silent! execute "read !/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts
+
+        let [save_g_reg, save_g_regtype] = [getreg('g'), getregtype('g')]
+        "call setreg('g', formatted, 'V')
+        let @g=system("/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts)
+        silent put! g
+        call setreg('g', save_g_reg, save_g_regtype)
+
+        wincmd p
+
+        if reselect > 0
+            "echomsg "reselect " . reselect
+            normal! gv
+        endif
+
     endif
 endfunction
 
@@ -807,15 +923,18 @@ function! ToggleFeatureInfoWindow(options)
         "autocmd FocusGained * :echo system("/usr/local/timostools/setup_cli_find.pl -line " . line("."))
        
         let t:stored_line = -1
-        exe "8new"
+        "exe "8new"
+        "wincmd K
+        topleft 8new
         setlocal buftype=nofile
         setlocal bufhidden=hide
         setlocal noswapfile
+        setlocal noscrollbind
         file featureinfo 
         exe "1000000"
         exe "set nonu"
         exe "set ro"
-        wincmd w
+        wincmd p
         doautocmd FeatureInfo CursorMoved <buffer>
         let t:featureinfowindow = 1
     endif
@@ -937,11 +1056,26 @@ else
 			"map <Esc>[26~ <S-F4>
 			""map! <Esc>[26~ <S-F4>
             set timeout timeoutlen=1000 ttimeoutlen=100
-            "old-style  control sequences for function keys F1 to F4 (oldXtermFKeys)
+
+            "new xterm (Lubuntu 13.04) 
+            "lxterminal (Lubuntu 13.04)
+            " old-style control sequences for function keys F1 to F4 (oldXtermFKeys)
             set <S-F1>=O1;2P
             set <S-F2>=O1;2Q
             set <S-F3>=O1;2R
             set <S-F4>=O1;2S
+
+"            "?????
+"            set <S-F1>=[11;2~
+"            set <S-F2>=[12;2~
+"            set <S-F3>=[13;2~
+"            set <S-F4>=[14;2~
+"
+"            "old xterm/lxterm (Lubuntu 13.04)
+"            set <S-F1>=[1;2P
+"            set <S-F2>=[1;2Q
+"            set <S-F3>=[1;2R
+"            set <S-F4>=[1;2S
 
             "TODO: find some useful mappings for these 4 combinations
             "map <S-F1> :help S-F1
@@ -1203,7 +1337,8 @@ function! MyCTags(fdir)
     endif
     
     silent! execute "!" . g:OS_ctags_command . " --languages=C,C++ -R --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+fq --tag-relative=yes " . l:path
-"    redraw!
+    "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
+    execute "redraw!" 
 endfunction
 
 "comm! CtagsP call MyCTags('.. ' . g:OS_system_includes_dir)
@@ -1245,7 +1380,8 @@ function! MyGenTagsCmd(gtcmd, ...)
         " E568 cscope problem: database already added
         " just ignore
     endtry
-"    redraw!
+    "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
+    execute "redraw!" 
 endfunction
 
 "com! -nargs=* Egt call MyGenTagsCmd("gt", <f-args>)
