@@ -29,10 +29,10 @@ else
     filetype plugin indent on
 endif
 
-"Todo: enable Eclim
+"Todo: enable Eclim (by removing following line)
 let g:EclimDisabled = "defined"
 
-"Todo: enable YouCompleteMe
+"Todo: enable YouCompleteMe (by removing following line)
 let g:loaded_youcompleteme = "defined"
 
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
@@ -1413,11 +1413,18 @@ let c_no_comment_fold=1
 " autodetects from l:shiftwidth \ "IndentWidth" : "4",
 " autodetects from l:expandtab \ "UseTab" : "false",
 " autoselects based on clang_format#code_style \ "BasedOnStyle" : "Google",
-" TODO: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
+"Todo: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
 let g:clang_format#code_style = "Google"
 let g:clang_format#style_options = {
             \ "BreakBeforeBraces" : "Allman"}
 let g:clang_format#auto_formatexpr=1
+
+" ============================
+" =        UltiSnips         =
+" ============================
+"Todo: enable (by removing following lines)
+let did_UltiSnips_plugin="defined"
+let did_UltiSnips_after="defined"
 
 " ==========================
 " = Miscellaneous functions=
