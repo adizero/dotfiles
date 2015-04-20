@@ -1,7 +1,269 @@
 set nocompatible
 
-"must go before first shell execute command (e.g. execute !ls) from .vimrc
-let &t_ti="\e[?1049h"
+if has("win64") || has("win32") || has("win16")
+    let g:OS_name="windows"
+
+    let g:OS_dir_separator = '\'
+    let g:OS_cat_command = 'type'
+    let g:OS_mkdir_command = 'mkdir'
+    "TODO: change to cygwin later
+    let g:OS_ctags_command = 'c:\Apps\ctags57\ctags.exe'
+    let g:OS_system_includes_dir = 'c:\Apps\Dev-Cpp\include'
+
+    let g:OS_vimrc = "_vimrc"
+
+    "windows vista uses $HOME\.vim path, xp uses $HOME\vimfiles path
+    "so in xp we change it to $HOME\.vim and $HOME\.vim\after
+    "but only the first and last component
+    let &runtimepath=substitute(&runtimepath, '\(^[^,]*\)vimfiles', '\1.vim', '') "replace first occurrence
+    let &runtimepath=substitute(&runtimepath, '\(,[^,]*\)vimfiles\([^,]*\)$', '\1.vim\2', '') "replace last occurrence
+    
+    "behave mswin
+    "source $VIMRUNTIME/mswin.vim
+
+    "let $VIMRUNTIME=fnamemodify($_, ":p")
+    language mes en
+else
+    "if SHELL env variable is set incorrectly and VIM cannot start shell, then
+    "  uncomment following line, that overrides SHELL env variable
+    "set shell=/bin/sh
+
+    let g:OS_name=system('uname -s')
+    
+    let g:OS_dir_separator = '/'
+    let g:OS_cat_command = 'cat'
+    let g:OS_mkdir_command = 'mkdir -p'
+    "let g:OS_ctags_command = '/opt/exp/bin/ctags'
+    "if filereadable(g:OS_ctags_command) == 0
+        let g:OS_ctags_command = 'ctags'
+    "endif
+    let g:OS_system_includes_dir = '/usr/include'
+
+    let g:OS_vimrc = ".vimrc"
+
+    "
+    " What was the name that we were called as?
+    "
+    let vinvoke=fnamemodify($_, ":p")
+    let fullp=substitute(vinvoke, '^\(.*[/]\).*$', '\1', "")
+    "
+    " It's possible that $VIMRUNTIME does not exist.
+    " Let's see if there is a directory vimshare below where we were started
+    "
+    if isdirectory($VIMRUNTIME) == 0
+        let vimshare=fullp . "vimshare"
+        if isdirectory(vimshare) == 1
+            let $VIMRUNTIME=vimshare . "/vim" . substitute(v:version, "50", "5", "")
+            let &helpfile=vimshare . "/vim" . substitute(v:version, "50", "5", "") . "/doc/help.txt"
+        endif
+    endif
+endif
+
+if !has("gui_running")
+    if g:OS_name != "windows"
+        "set t_Cc=1
+        "set t_pa=32767
+
+        "must go before first shell execute command (e.g. execute !ls) from .vimrc
+        "sets alternate screen mode
+        let &t_ti="\e[?1049h"
+
+        set t_ts=]0;
+        set t_fs=
+
+        set t_Co=256 "override terminfo setting to enable 256 colors
+        "set t_AB='[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'
+        "set t_AF='[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m'
+        set t_AB=[4%p1%dm
+        set t_AF=[3%p1%dm
+        set t_mb=[5m
+        set t_nd=[C
+        set t_op=[39;49m
+        set t_se=[27m
+        set t_te=[?1049l
+        set t_vi=[?25l
+        set t_vs=[?12;25h
+        set t_vb=[?5h$<100/>[?5l
+        set t_ve=[?12l[?25h
+        set t_ti=[?1049h
+
+        "not necessary, as t_AB,t_AF are used instead
+        set t_Sb=[4%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
+        set t_Sf=[3%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
+
+        if &term =~ "xterm"
+            "see vim help -> :help xterm-function-keys
+
+            set timeout timeoutlen=1000 ttimeoutlen=100
+
+            "terminal detection (based on ^[[>c), in screen surround query
+            "string with \eP...\e\\ (as always, when we want to talk to
+            "terminal underneath screen)
+            " the terminal's response is already stored in v:termresponse in Vim
+
+            "Screen          "old versions???"                   (nothing)
+            "Xterm           Xterm(278)                          ^[[>0;278;0c
+            "Xterm           Xterm(317)                          ^[[>41;317;0c
+            "Lxterminal      lxterminal (0.1.11-4ubuntu3)        ^[[>1;2802;0c
+            "Cygwin                                              ^[[>77;10103;0c
+            "PuTTY           0.62                                ^[[>0;136;0c
+            "Screen          4.00.03 (FAU)                       ^[[>83;40003;0c
+            "Screen          4.01.00devel (GNU) 2-May-06         ^[[>83;40100;0c
+            "Gnome-terminal  GNOME Terminal 3.6.2                ^[[>1;3409;0c
+            "Konsole         2.13.2                              ^[[>0;115;0c
+
+            "see vim help v:termresponse
+            "callback is called after response to t_RV reception -> TermResponse autocommand event
+            "only then is can be used for terminal identification
+            "echomsg "testing..." . v:termresponse
+            "
+            "for PuTTY answerback may be probably also used (based on ^E)
+            "
+            "TODO: implement somehow :-)
+
+            "old xterm/lxterminal F1-F4 (used only for no mod case - e.g. OP, ...)
+            set <F1>=O;*P
+            set <F2>=O;*Q
+            set <F3>=O;*R
+            set <F4>=O;*S
+            set <Home>=O;*H
+            set <End>=O;*F
+
+            "konsole (universal case covers also the above for no mod case)
+            set <F1>=O*P
+            set <F2>=O*Q
+            set <F3>=O*R
+            set <F4>=O*S
+
+            "new xterm (wildcard used to handle all alt,control,shift combinations)
+            set <xF1>=[1;*P
+            set <xF2>=[1;*Q
+            set <xF3>=[1;*R
+            set <xF4>=[1;*S
+            set <xHome>=[1;*H
+            set <xEnd>=[1;*F
+
+            set <zHome>=[;*H
+            set <zEnd>=[;*F
+
+        "			"old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
+        "			set <xF1>=O1;*P
+        "			set <xF2>=O1;*Q
+        "			set <xF3>=O1;*R
+        "			set <xF4>=O1;*S
+
+            map <xF1> <F1>
+            map! <xF1> <F1>
+            map <xF2> <F2>
+            map! <xF2> <F2>
+            map <xF3> <F3>
+            map! <xF3> <F3>
+            map <xF4> <F4>
+            map! <xF4> <F4>
+            map <xHome> <Home>
+            map! <xHome> <Home>
+            map <xEnd> <End>
+            map! <xEnd> <End>
+            map <zHome> <Home>
+            map! <zHome> <Home>
+            map <zEnd> <End>
+            map! <zEnd> <End>
+
+            "TODO: move before mapping of F1-F4 keys!!!!!!!!
+            "XXX: query terminal via: echo -n -e ""
+            " PuTTY usually shows PuTTY as a result
+
+
+        "            "enabling CTRL+cursor keys mappings (set above to cycle through windows)
+        "			map [A <C-Up>
+        "			"map! [A <C-Up>
+        "			map [B <C-Down>
+        "			"map! [B <C-Down>
+        "			map [C <C-Right>
+        "			"map! [C <C-Right>
+        "			map [D <C-Left>
+        "			"map! [D <C-Left>
+        "
+        "            "enabling ALT+cursor keys mappings (set above to move through wrapped lines)
+        "			map <Up> <A-Up>
+        "			"map! <Up> <A-Up>
+        "			map <Down> <A-Down>
+        "			"map! <Down> <A-Down>
+        "			map <Right> <A-Right>
+        "			"map! <Right> <A-Right>
+        "			map <Left> <A-Left>
+        "			"map! <Left> <A-Left>
+
+            "enabling ctrl+space mapping (otherwise C-Space does nothing)
+            map <C-@> <C-Space>
+            map! <C-@> <C-Space>
+
+            "ctrl+backspace mapping (otherwise C-BS does nothing)
+            map <C-H> <C-BS>
+            map! <C-H> <C-BS>
+
+            "del is set without modifiers support (by default in Vim) => let's change that
+            set <Del>=[3;*~
+
+            "cleanup of Vim's internal duplicate bindings
+            set <S-Home>=
+            set <S-Left>=
+            set <S-Right>=
+            set <S-End>=
+
+            "newer xterm can do also right winmenu key
+            "set <WMENU>=[29;*~
+
+
+            "sample of mappings for ALT=<Esc> modes (do not use!)
+            "map <Esc><Esc>[OA <A-Up>
+            "map! <Esc><Esc>[OA <A-Up>
+            "map <Esc><Esc>[OB <A-Down>
+            "map! <Esc><Esc>[OB <A-Down>
+            "map <Esc><Esc>[OC <A-Right>
+            "map! <Esc><Esc>[OC <A-Right>
+            "map <Esc><Esc>[OD <A-Left>
+            "map! <Esc><Esc>[OD <A-Left>
+
+        elseif &term =~ "rxvt"
+            "rxvt (is well covered in default Vim mappings)
+        "           set <F1>=[11;*~
+        "           set <F2>=[12;*~
+        "           set <F3>=[13;*~
+        "           set <F4>=[14;*~
+        "			set <Home>=[7;*~
+        "			set <End>=[8;*~
+        endif
+
+        "common mappings
+
+        "if &term == "xterm-256color-italic"
+        " TODO enable italic support in wombat256 colorscheme
+        if expand("$STY") != "$STY"
+            let &t_ZH = "\eP\e[3m\e\\"
+            let &t_ZR = "\eP\e[23m\e\\"
+        else
+            let &t_ZH = "\e[3m"
+            let &t_ZR = "\e[23m"
+        endif
+
+        " delete wait time after ESC key is pushed in insert mode
+        let &t_SI .= "\e[?7727h"
+        let &t_EI .= "\e[?7727l"
+        inoremap <special> <Esc>O[ <Esc>
+
+        ""if &term == "xterm-256color-italic"
+        "" TODO check somehow, whether terminal is capable of cursor shape changes
+        "" changing cursor shape (work in xterm and from screen inside of xterm)
+        "if expand("$STY") != "$STY"
+        "	let &t_SI .= "\eP\e[5 q\e\\"
+        "    let &t_EI .= "\eP\e[2 q\e\\"
+        "else
+        "    let &t_SI .= "\e[5 q"
+        "    let &t_EI .= "\e[2 q"
+        "endif
+    endif
+endif
 
 "check vundle installation, if installed, then make use of it
 let vundle_readme=expand('~/.vim/bundle/Vundle.vim/README.md')
@@ -63,64 +325,6 @@ function! Multiple_cursors_after()
     let g:ycm_auto_trigger = 1
 endfunction
 
-if has("win64") || has("win32") || has("win16")
-	let g:OS_name="windows"
-
-	let g:OS_dir_separator = '\'
-	let g:OS_cat_command = 'type'
-	let g:OS_mkdir_command = 'mkdir'
-    "TODO: change to cygwin later
-	let g:OS_ctags_command = 'c:\Apps\ctags57\ctags.exe'
-	let g:OS_system_includes_dir = 'c:\Apps\Dev-Cpp\include'
-
-    let g:OS_vimrc = "_vimrc"
-
-	"windows vista uses $HOME\.vim path, xp uses $HOME\vimfiles path
-	"so in xp we change it to $HOME\.vim and $HOME\.vim\after
-	"but only the first and last component
-	let &runtimepath=substitute(&runtimepath, '\(^[^,]*\)vimfiles', '\1.vim', '') "replace first occurrence
-	let &runtimepath=substitute(&runtimepath, '\(,[^,]*\)vimfiles\([^,]*\)$', '\1.vim\2', '') "replace last occurrence
-	
-	"behave mswin
-	"source $VIMRUNTIME/mswin.vim
-
-	"let $VIMRUNTIME=fnamemodify($_, ":p")
-	language mes en
-else
-	"if SHELL env variable is set incorrectly and VIM cannot start shell, then
-	"  uncomment following line, that overrides SHELL env variable
-	"set shell=/bin/sh
-
-	let g:OS_name=system('uname -s')
-	
-	let g:OS_dir_separator = '/'
-	let g:OS_cat_command = 'cat'
-	let g:OS_mkdir_command = 'mkdir -p'
-	"let g:OS_ctags_command = '/opt/exp/bin/ctags'
-	"if filereadable(g:OS_ctags_command) == 0
-		let g:OS_ctags_command = 'ctags'
-	"endif
-	let g:OS_system_includes_dir = '/usr/include'
-
-    let g:OS_vimrc = ".vimrc"
-
-	"
-	" What was the name that we were called as?
-	"
-	let vinvoke=fnamemodify($_, ":p")
-	let fullp=substitute(vinvoke, '^\(.*[/]\).*$', '\1', "")
-	"
-	" It's possible that $VIMRUNTIME does not exist.
-	" Let's see if there is a directory vimshare below where we were started
-	"
-	if isdirectory($VIMRUNTIME) == 0
-		let vimshare=fullp . "vimshare"
-		if isdirectory(vimshare) == 1
-			let $VIMRUNTIME=vimshare . "/vim" . substitute(v:version, "50", "5", "")
-			let &helpfile=vimshare . "/vim" . substitute(v:version, "50", "5", "") . "/doc/help.txt"
-		endif
-	endif
-endif
 
 let s:home_base_path=$HOME
 
@@ -362,9 +566,7 @@ endif
 " ============================
 " =       Window title       =
 " ============================
-"TODO setting of windows title based on environment / file edited / edit status ?
-set t_ts=]0;
-set t_fs=
+"TODO: setting of windows title based on environment / file edited / edit status ?
 set title
 
 ":auto BufEnter * let &titlestring= expand("%:t") . " (" . expand($REL) . "-" . expand($RELP) . " " . expand($VPLOAD) . expand($HOST_TAG) . " " . expand($SS) . " | " . expand($ROOT) . ")"
@@ -1053,178 +1255,7 @@ else
 		"8-color terminal in windows only, zellner looks OK
 		let g:color_scheme = "zellner"
 	else
-        "set t_Cc=1
-        "set t_pa=32767
-
-		set t_Co=256 "override terminfo setting to enable 256 colors
-		"set t_AB='[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'
-		"set t_AF='[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m'
-		set t_AB=[4%p1%dm
-		set t_AF=[3%p1%dm
-		set t_mb=[5m
-		set t_nd=[C
-		set t_op=[39;49m
-		set t_se=[27m
-		set t_te=[?1049l
-		set t_vi=[?25l
-		set t_vs=[?12;25h
-		set t_vb=[?5h$<100/>[?5l
-		set t_ve=[?12l[?25h
-		set t_ti=[?1049h
-	
-		"no necessary, as t_AB,t_AF are used instead
-		set t_Sb=[4%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
-		set t_Sf=[3%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
-
-		let g:color_scheme = "wombat256mod"
-
-		if &term =~ "xterm"
-			"see vim help -> :help xterm-function-keys
-
-            set timeout timeoutlen=1000 ttimeoutlen=100
-
-			"terminal detection (based on ^[[>c), in screen surround query
-			"string with \eP...\e\\ (as always, when we want to talk to
-			"terminal underneath screen)
-			" the terminal's response is already stored in v:termresponse in Vim
-
-			"Screen          "old versions???"                   (nothing)
-			"Xterm           Xterm(278)                          ^[[>0;278;0c
-			"Xterm           Xterm(317)                          ^[[>41;317;0c
-			"Lxterminal      lxterminal (0.1.11-4ubuntu3)        ^[[>1;2802;0c
-			"Cygwin                                              ^[[>77;10103;0c
-			"PuTTY           0.62                                ^[[>0;136;0c
-			"Screen          4.00.03 (FAU)                       ^[[>83;40003;0c
-			"Screen          4.01.00devel (GNU) 2-May-06         ^[[>83;40100;0c
-			"Gnome-terminal  GNOME Terminal 3.6.2                ^[[>1;3409;0c
-			"Konsole         2.13.2                              ^[[>0;115;0c
-	
-			"see vim help v:termresponse
-			"callback is called after response to t_RV reception -> TermResponse autocommand event
-			"only then is can be used for terminal identification
-			"echomsg "testing..." . v:termresponse
-			"
-			"for PuTTY answerback may be probably also used (based on ^E)
-			"
-			"TODO: implement somehow :-)
-
-			"old xterm/lxterminal F1-F4 (used only for no mod case - e.g. OP, ...)
-			set <F1>=O;*P
-			set <F2>=O;*Q
-			set <F3>=O;*R
-			set <F4>=O;*S
-			set <Home>=O;*H
-			set <End>=O;*F
-
-			"konsole (universal case covers also the above for no mod case)
-			set <F1>=O*P
-			set <F2>=O*Q
-			set <F3>=O*R
-			set <F4>=O*S
-
-			"new xterm (wildcard used to handle all alt,control,shift combinations)
-			set <xF1>=[1;*P
-			set <xF2>=[1;*Q
-			set <xF3>=[1;*R
-			set <xF4>=[1;*S
-			set <xHome>=[1;*H
-			set <xEnd>=[1;*F
-
-			set <zHome>=[;*H
-			set <zEnd>=[;*F
-
-"			"old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
-"			set <xF1>=O1;*P
-"			set <xF2>=O1;*Q
-"			set <xF3>=O1;*R
-"			set <xF4>=O1;*S
-
-			map <xF1> <F1>
-			map! <xF1> <F1>
-			map <xF2> <F2>
-			map! <xF2> <F2>
-			map <xF3> <F3>
-			map! <xF3> <F3>
-			map <xF4> <F4>
-			map! <xF4> <F4>
-			map <xHome> <Home>
-			map! <xHome> <Home>
-			map <xEnd> <End>
-			map! <xEnd> <End>
-			map <zHome> <Home>
-			map! <zHome> <Home>
-			map <zEnd> <End>
-			map! <zEnd> <End>
-
-			"TODO: move before mapping of F1-F4 keys!!!!!!!!
-			"XXX: query terminal via: echo -n -e ""
-			" PuTTY usually shows PuTTY as a result
-
-
-"            "enabling CTRL+cursor keys mappings (set above to cycle through windows)
-"			map [A <C-Up>
-"			"map! [A <C-Up>
-"			map [B <C-Down>
-"			"map! [B <C-Down>
-"			map [C <C-Right>
-"			"map! [C <C-Right>
-"			map [D <C-Left>
-"			"map! [D <C-Left>
-"
-"            "enabling ALT+cursor keys mappings (set above to move through wrapped lines)
-"			map <Up> <A-Up>
-"			"map! <Up> <A-Up>
-"			map <Down> <A-Down>
-"			"map! <Down> <A-Down>
-"			map <Right> <A-Right>
-"			"map! <Right> <A-Right>
-"			map <Left> <A-Left>
-"			"map! <Left> <A-Left>
-
-            "enabling ctrl+space mapping (otherwise C-Space does nothing)
-			map <C-@> <C-Space>
-			map! <C-@> <C-Space>
-
-			"ctrl+backspace mapping (otherwise C-BS does nothing)
-			map <C-H> <C-BS>
-			map! <C-H> <C-BS>
-
-			"del is set without modifiers support (by default in Vim) => let's change that
-			set <Del>=[3;*~
-
-			"cleanup of Vim's internal duplicate bindings
-			set <S-Home>=
-			set <S-Left>=
-			set <S-Right>=
-			set <S-End>=
-
-			"newer xterm can do also right winmenu key
-			"set <WMENU>=[29;*~
-
-
-			"sample of mappings for ALT=<Esc> modes (do not use!)
-			"map <Esc><Esc>[OA <A-Up>
-			"map! <Esc><Esc>[OA <A-Up>
-			"map <Esc><Esc>[OB <A-Down>
-			"map! <Esc><Esc>[OB <A-Down>
-			"map <Esc><Esc>[OC <A-Right>
-			"map! <Esc><Esc>[OC <A-Right>
-			"map <Esc><Esc>[OD <A-Left>
-			"map! <Esc><Esc>[OD <A-Left>
-			"map [1;3P <A-F1>
-			"map! [1;3P <A-F1>
-
-		elseif &term =~ "rxvt"
-            "rxvt (is well covered in default Vim mappings)
-"           set <F1>=[11;*~
-"           set <F2>=[12;*~
-"           set <F3>=[13;*~
-"           set <F4>=[14;*~
-"			set <Home>=[7;*~
-"			set <End>=[8;*~
-		endif
-
-		"common mappings
+        let g:color_scheme = "wombat256mod"
 	endif
 endif
 
@@ -1635,30 +1666,4 @@ endif
 :cabbrev pz Pz
 :cabbrev px Px
 :cabbrev pv Pv
-
-"if &term == "xterm-256color-italic"
-" TODO enable italic support in wombat256 colorscheme
-if expand("$STY") != "$STY"
-	let &t_ZH = "\eP\e[3m\e\\"
-	let &t_ZR = "\eP\e[23m\e\\"
-else
-	let &t_ZH = "\e[3m"
-	let &t_ZR = "\e[23m"
-endif
-
-" delete wait time after ESC key is pushed in insert mode
-let &t_SI .= "\e[?7727h"
-let &t_EI .= "\e[?7727l"
-inoremap <special> <Esc>O[ <Esc>
-
-""if &term == "xterm-256color-italic"
-"" TODO check somehow, whether terminal is capable of cursor shape changes
-"" changing cursor shape (work in xterm and from screen inside of xterm)
-"if expand("$STY") != "$STY"
-"	let &t_SI .= "\eP\e[5 q\e\\"
-"    let &t_EI .= "\eP\e[2 q\e\\"
-"else
-"    let &t_SI .= "\e[5 q"
-"    let &t_EI .= "\e[2 q"
-"endif
 
