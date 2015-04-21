@@ -1,3 +1,13 @@
+#this file is meant to be sourced from .bashrc
+#after sourcing call termInitialDetection (still from .bashrc)
+
+#to later force detection of terminal use termDetect command
+# (this is useful, when reattaching to running screen/tmux from different
+# terminal)
+
+#TODO: added iTerm detection (also leverage environent variables for Konsole, iTerm(2) detection,
+# when not in screen/tmux)
+
 #Screen          "old versions???"                   (nothing)
 #Xterm           Xterm(278)                          ^[[>0;278;0c
 #Xterm           Xterm(317)                          ^[[>41;317;0c
