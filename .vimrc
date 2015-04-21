@@ -1688,3 +1688,33 @@ endif
 :cabbrev px Px
 :cabbrev pv Pv
 
+"function to clean all non-visible buffers
+function! Wipeout()
+    " list of *all* buffer numbers
+    let l:buffers = range(1, bufnr('$'))
+
+    " what tab page are we in?
+    let l:currentTab = tabpagenr()
+
+    let buflist = []
+    for i in range(tabpagenr('$'))
+        call extend(buflist, tabpagebuflist(i + 1))
+    endfor
+
+    for buf in buflist
+        call remove(l:buffers, index(l:buffers, buf))
+    endfor
+
+    try
+        " if there are any buffers left, delete them
+        if len(l:buffers)
+            execute 'bwipeout' join(l:buffers)
+        endif
+    finally
+        " go back to our original tab page
+        execute 'tabnext' l:currentTab
+    endtry
+endfunction
+
+command! Wipeout :call Wipeout()
+cabbrev wipeout Wipeout
