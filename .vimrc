@@ -1,5 +1,12 @@
 set nocompatible
 
+"Todo: this is a hack for screen-bce/screen.rxvt to behave as xterm/rxvt in Vim
+if &term == "screen-bce" || &term == "screen"
+	let &term = "xterm"
+elseif &term == "screen.rxvt"
+	let &term = "rxvt"
+endif
+
 if has("win64") || has("win32") || has("win16")
     let g:OS_name="windows"
 
