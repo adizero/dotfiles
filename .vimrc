@@ -64,34 +64,36 @@ if !has("gui_running")
         "set t_Cc=1
         "set t_pa=32767
 
-        "must go before first shell execute command (e.g. execute !ls) from .vimrc
-        "sets alternate screen mode
-        let &t_ti="\e[?1049h"
-
-        set t_ts=]0;
-        set t_fs=
-
-        set t_Co=256 "override terminfo setting to enable 256 colors
-        "set t_AB='[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'
-        "set t_AF='[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m'
-        set t_AB=[4%p1%dm
-        set t_AF=[3%p1%dm
-        set t_mb=[5m
-        set t_nd=[C
-        set t_op=[39;49m
-        set t_se=[27m
-        set t_te=[?1049l
-        set t_vi=[?25l
-        set t_vs=[?12;25h
-        set t_vb=[?5h$<100/>[?5l
-        set t_ve=[?12l[?25h
-        set t_ti=[?1049h
-
-        "not necessary, as t_AB,t_AF are used instead
-        set t_Sb=[4%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
-        set t_Sf=[3%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
-
         if &term =~ "xterm"
+            "general termcap options
+
+            "must go before first shell execute command (e.g. execute !ls) from .vimrc
+            "sets alternate screen mode
+            let &t_ti="\e[?1049h"
+
+            set t_ts=]0;
+            set t_fs=
+
+            set t_Co=256 "override terminfo setting to enable 256 colors
+            "set t_AB='[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'
+            "set t_AF='[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m'
+            set t_AB=[4%p1%dm
+            set t_AF=[3%p1%dm
+            set t_mb=[5m
+            set t_nd=[C
+            set t_op=[39;49m
+            set t_se=[27m
+            set t_te=[?1049l
+            set t_vi=[?25l
+            set t_vs=[?12;25h
+            set t_vb=[?5h$<100/>[?5l
+            set t_ve=[?12l[?25h
+            set t_ti=[?1049h
+
+            "not necessary, as t_AB,t_AF are used instead
+            set t_Sb=[4%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
+            set t_Sf=[3%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
+
             "see vim help -> :help xterm-function-keys
 
             set timeout timeoutlen=1000 ttimeoutlen=100
@@ -118,7 +120,10 @@ if !has("gui_running")
             "echomsg "testing..." . v:termresponse
             "
             "for PuTTY answerback may be probably also used (based on ^E)
-            "
+            "  query terminal via: echo -n -e ""
+            "  PuTTY usually shows PuTTY as a result
+
+            
             "TODO: implement somehow :-)
 
             "old xterm/lxterminal F1-F4 (used only for no mod case - e.g. OP, ...)
@@ -146,11 +151,18 @@ if !has("gui_running")
             set <zHome>=[;*H
             set <zEnd>=[;*F
 
-        "			"old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
-        "			set <xF1>=O1;*P
-        "			set <xF2>=O1;*Q
-        "			set <xF3>=O1;*R
-        "			set <xF4>=O1;*S
+			"Xxx: this needs .term_detect script support in shell
+            let term_program=expand("$TERM_PROGRAM")
+            let term_version=expand("$TERM_VERSION")
+            "Todo: specify correct version for old/new xterm bindings (for now 278 - Ubuntu 13.04 timeframe is the limit)
+            if term_program == "lxterminal" || term_program == "gnome-terminal" || 
+                        \ term_program == "xterm" && term_version < "278"
+                "old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
+                set <xF1>=O1;*P
+                set <xF2>=O1;*Q
+                set <xF3>=O1;*R
+                set <xF4>=O1;*S
+            endif
 
             map <xF1> <F1>
             map! <xF1> <F1>
@@ -169,39 +181,6 @@ if !has("gui_running")
             map <zEnd> <End>
             map! <zEnd> <End>
 
-            "TODO: move before mapping of F1-F4 keys!!!!!!!!
-            "XXX: query terminal via: echo -n -e ""
-            " PuTTY usually shows PuTTY as a result
-
-
-        "            "enabling CTRL+cursor keys mappings (set above to cycle through windows)
-        "			map [A <C-Up>
-        "			"map! [A <C-Up>
-        "			map [B <C-Down>
-        "			"map! [B <C-Down>
-        "			map [C <C-Right>
-        "			"map! [C <C-Right>
-        "			map [D <C-Left>
-        "			"map! [D <C-Left>
-        "
-        "            "enabling ALT+cursor keys mappings (set above to move through wrapped lines)
-        "			map <Up> <A-Up>
-        "			"map! <Up> <A-Up>
-        "			map <Down> <A-Down>
-        "			"map! <Down> <A-Down>
-        "			map <Right> <A-Right>
-        "			"map! <Right> <A-Right>
-        "			map <Left> <A-Left>
-        "			"map! <Left> <A-Left>
-
-            "enabling ctrl+space mapping (otherwise C-Space does nothing)
-            map <C-@> <C-Space>
-            map! <C-@> <C-Space>
-
-            "ctrl+backspace mapping (otherwise C-BS does nothing)
-            map <C-H> <C-BS>
-            map! <C-H> <C-BS>
-
             "del is set without modifiers support (by default in Vim) => let's change that
             set <Del>=[3;*~
 
@@ -211,34 +190,62 @@ if !has("gui_running")
             set <S-Right>=
             set <S-End>=
 
-            "newer xterm can do also right winmenu key
-            "set <WMENU>=[29;*~
-
-
-            "sample of mappings for ALT=<Esc> modes (do not use!)
-            "map <Esc><Esc>[OA <A-Up>
-            "map! <Esc><Esc>[OA <A-Up>
-            "map <Esc><Esc>[OB <A-Down>
-            "map! <Esc><Esc>[OB <A-Down>
-            "map <Esc><Esc>[OC <A-Right>
-            "map! <Esc><Esc>[OC <A-Right>
-            "map <Esc><Esc>[OD <A-Left>
-            "map! <Esc><Esc>[OD <A-Left>
+			"newer xterm can do also right winmenu key (has no setting in Vim,
+			" however something nonexistant on typical keyboard can be used - F13 for example)
+			set <F13>=[29;*~
 
         elseif &term =~ "rxvt"
-            "rxvt (is well covered in default Vim mappings)
-        "           set <F1>=[11;*~
-        "           set <F2>=[12;*~
-        "           set <F3>=[13;*~
-        "           set <F4>=[14;*~
-        "			set <Home>=[7;*~
-        "			set <End>=[8;*~
+            "rxvt (basic Fn are well covered in default Vim mappings)
+            " first two are fixed in rxvt - S-F1 == F11 and S-F2 == F12
+            set <S-F3>=[25;*~
+            set <S-F4>=[26;*~
+            set <S-F5>=[28;*~
+            set <S-F6>=[29;*~
+            set <S-F7>=[31;*~
+            set <S-F8>=[32;*~
+            set <S-F9>=[33;*~
+            set <S-F10>=[34;*~
+            set <S-F11>=[23;*$
+            set <S-F12>=[24;*$
+			"right windows menu key is equal to S-F6 (but not shift version)
+			set <S-F13>=[29;*$
+
+            set <S-Insert>=[2$
+            set <S-Del>=[3$
+            set <S-Home>=[7$
+            set <S-End>=[8$
+            "set <S-PageUp>=[5$
+            "set <S-PageDown>=[6$
+			"set <C-Insert>=[2^
+			"set <C-Del>=[3^
+			set <C-Home>=[7^
+			set <C-End>=[8^
+			"set <C-PageUp>=[5^
+			"set <C-PageDown>=[6^
+            set <S-Up>=[a
+            set <S-Down>=[b
+            set <S-Left>=[d
+            set <S-Right>=[c
+			"set <C-Up>=Oa
+			"set <C-Down>=Ob
+			set <C-Left>=Od
+			set <C-Right>=Oc
+			"set <A-Up>=[A
+			"set <A-Down>=[B
+			"set <A-Left>=[D
+			"set <A-Right>=[C
         endif
 
         "common mappings
+		"enabling ctrl+space mapping (otherwise C-Space does nothing)
+		map <C-@> <C-Space>
+		map! <C-@> <C-Space>
 
-        "if &term == "xterm-256color-italic"
-        " TODO enable italic support in wombat256 colorscheme
+		"ctrl+backspace mapping (otherwise C-BS does nothing)
+		map <C-H> <C-BS>
+		map! <C-H> <C-BS>
+
+        "Todo: conditional italic support (it is already enabled in wombat256 colorscheme)
         if expand("$STY") != "$STY"
             let &t_ZH = "\eP\e[3m\e\\"
             let &t_ZR = "\eP\e[23m\e\\"
@@ -252,8 +259,7 @@ if !has("gui_running")
         let &t_EI .= "\e[?7727l"
         inoremap <special> <Esc>O[ <Esc>
 
-        ""if &term == "xterm-256color-italic"
-        "" TODO check somehow, whether terminal is capable of cursor shape changes
+        "Todo: check somehow, whether terminal is capable of cursor shape changes
         "" changing cursor shape (work in xterm and from screen inside of xterm)
         "if expand("$STY") != "$STY"
         "	let &t_SI .= "\eP\e[5 q\e\\"
@@ -1233,7 +1239,11 @@ if has("gui_running")
 		autocmd GUIEnter * simalt ~X
 	else
 		"colorscheme desert
-		let g:color_scheme = "wombat256mod"
+        if &t_Co == 256
+    		let g:color_scheme = "wombat256mod"
+        else
+            let g:color_scheme = "wombat"
+        endif
 	
 		silent! set guifont=Envy\ Code\ R\ 11
         if &guifont != 'Envy Code R 11'
@@ -1255,7 +1265,11 @@ else
 		"8-color terminal in windows only, zellner looks OK
 		let g:color_scheme = "zellner"
 	else
-        let g:color_scheme = "wombat256mod"
+        if &t_Co == 256
+    		let g:color_scheme = "wombat256mod"
+        else
+            let g:color_scheme = "wombat"
+        endif
 	endif
 endif
 
