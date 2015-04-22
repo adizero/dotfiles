@@ -1,0 +1,88 @@
+# terminfo and termcap for nice 256 color terminal
+# allow bold colors - necessary for some reason
+attrcolor b ".I"
+
+# tell screen how to set colors. AB = background, AF=foreground (does not work on Solaris)
+termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+#termcapinfo rxvt-unicode 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+#termcapinfo rxvt-unicode-256color 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+
+# erase background with current bg color
+defbce "on"
+
+# encoding
+encoding UTF-8
+
+# fix residual editor text (to not see residual stuff from vim/less/man after exiting from them)
+altscreen on
+
+# main options
+vbell off
+startup_message off
+defscrollback 20000
+bufferfile "$HOME/.screen/exchange"
+hardcopydir "$HOME/.screen/hardcopy"
+sorendition dY
+
+#hardstatus alwayslastline
+#hardstatus string '%{= dW}%-Lw%{= dY}%50> %n*%f %t%{= dW}%+Lw%< %{= dW}%-=%D %m/%d/%y %C %A %1`%{-}'
+
+# From Stephen Shirley
+# Don't block command output if the terminal stops responding
+# (like if the ssh connection times out for example).
+nonblock on
+
+#shelltitle ''  #this setting crashes screen, when setting screen name via -t command line switch
+
+# Bind F11 and F12 (NOT F1 and F2) to previous and next screen window
+#bindkey -k F1 prev		# prev screen
+#bindkey -k F2 next		# next screen
+
+# mouse scrollback support
+# Scroll up
+#bindkey -d "^[[5S" eval copy "stuff 5\025"
+#bindkey -m "^[[5S" stuff 5\025
+##
+## # Scroll down
+#bindkey -d "^[[5T" eval copy "stuff 5\004"
+#bindkey -m "^[[5T" stuff 5\004
+##
+## # Scroll up more
+#bindkey -d "^[[25S" eval copy "stuff \025"
+#bindkey -m "^[[25S" stuff \025
+##
+## # Scroll down more
+#bindkey -d "^[[25T" eval copy "stuff \004"
+#bindkey -m "^[[25T" stuff \004
+
+#this causes mouse scrollback to work (partially as more screens get mixed into common mouse scrollback buffer),
+#  but still it is usable
+#however this causes the content of screen to be displayed on terminal after screen exit (this is just another annoyance)
+#termcapinfo xterm* ti@:te@
+#looks like its better to use internal screen's scrollback mode via CTRL+A + ESC
+
+# Here comes the pain...
+#caption always "%{=b dw}:%{-b dw}:%{=b dk}[ %{-b dw}%{-b dg}$USER%{-b dw}@%{-b dg}%H %{=b dk}] [ %= %?%{-b dg}%-Lw%?%{+b dk}(%{+b dw}%n:%t%{+b dk})%?(%u)%?%{-b dw}%?%{-b dg}%+Lw%? %{=b dk}]%{-b dw}:%{+b dw}:"
+caption always "%{=b dw}:%{-b dw}:%{=b dk}[ %{-b dw}%{=b dk}%h %{=b dk}] [%{yk}%{-b dw}%2`%{=b dk}] [ %= %?%{-b dg}%-Lw%?%{+b dk}(%{+b dw}%n:%t%{+b dk})%?(%u)%?%{-b dw}%?%{-b dg}%+Lw%? %{=b dk}]%{-b dw}:%{+b dw}:"
+
+#Periodic action
+#e.g. call specified script each 30sec
+backtick 2 30 30 $HOME/.screenrc.bt.2
+#caption always "%{gk}plab001 %?%{wk}%-Lw%?%{yK}%n*%f %t%?(%u)%?%?%{wk}%+Lw%? %=%{yk}%2` %{gk}%c %{yk}%d/%M/%Y"
+#
+#another e.g. backtick 2 5 5 $HOME/scripts/meminfo
+
+
+# hardstatus alwayslastline "%{+b dw}:%{-b dw}:%{+b dk}[%{-b dg} %0C:%s%a %{=b dk}]-[   %{-b dw}Load%{+b dk}:%{-b dg}%l %{+b dk}] [%{-b dg}%2`%{+b dk}] %=[ %{-b dg}%1`%{=b dk} ]%{-b dw}:%{+b dw}:%<"
+#
+# sorendition "-b dw"
+#
+#
+
+#Enable updating of the window title
+termcapinfo screen*|xterm*|rxvt*|kterm*|Eterm* 'hs:ts=\E]0;:fs=\007:ds=\E]0;\007'
+
+#defhstatus "screen ^E (^Et) | $USER@^EH"
+#hardstatus off
+#hardstatus string "screen %n (%t)%? [%h]%?"
+hardstatus string "%h [screen %n%?: %t%?]" 
