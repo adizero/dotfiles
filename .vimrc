@@ -1,10 +1,23 @@
 set nocompatible
 
-"Todo: this is a hack for screen-bce/screen.rxvt to behave as xterm/rxvt in Vim
-if &term == "screen-bce" || &term == "screen"
-	let &term = "xterm"
-elseif &term == "screen.rxvt"
-	let &term = "rxvt"
+"Xxx: this needs .term_detect script support in shell
+let s:term_program=expand("$TERM_PROGRAM")
+let s:term_version=expand("$TERM_VERSION")
+if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" || 
+            \ s:term_program == "xterm" || s:term_program == "Konsole" ||
+            \ s:term_program == "PuTTY" || s:term_program == "Cygwin"
+    let &term = "xterm"
+elseif s:term_program == "rxvt" || s:term_program == "urxvt"
+    let &term = "rxvt"
+else
+    "Todo: this is a hack for screen-bce/screen.rxvt to behave as xterm/rxvt in Vim
+    if &term == "screen-bce" || &term == "screen"
+        let &term = "xterm"
+    elseif &term == "screen.rxvt"
+        let &term = "rxvt"
+    elseif &term =~ "rxvt"  "for urxvt and 256 color variants
+        let &term = "rxvt"
+    endif
 endif
 
 if has("win64") || has("win32") || has("win16")
@@ -158,19 +171,21 @@ if !has("gui_running")
             set <zHome>=[;*H
             set <zEnd>=[;*F
 
-			"Xxx: this needs .term_detect script support in shell
-            let term_program=expand("$TERM_PROGRAM")
-            let term_version=expand("$TERM_VERSION")
+            set <F17>=OE
+
             "Todo: specify correct version for old/new xterm bindings (for now 278 - Ubuntu 13.04 timeframe is the limit)
-            if term_program == "lxterminal" || term_program == "gnome-terminal" || 
-                        \ term_program == "xterm" && term_version < "278"
+            if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" || 
+                        \ s:term_program == "xterm" && s:term_version < "278"
                 "old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
                 set <xF1>=O1;*P
                 set <xF2>=O1;*Q
                 set <xF3>=O1;*R
                 set <xF4>=O1;*S
+            
+                set <F17>=[E
             endif
 
+            "Todo: is this necessary, or does Vim implicitely do this
             map <xF1> <F1>
             map! <xF1> <F1>
             map <xF2> <F2>
@@ -201,7 +216,23 @@ if !has("gui_running")
 			" however something nonexistant on typical keyboard can be used - F13 for example)
 			set <F13>=[29;*~
 
+            "fake key mappings to enable keypad key 5 (Clear) with all modifiers as <F19>
+            set <F18>=O*u
+            set <F19>=[1;*E
+
+            map <F17> <F19>
+            map! <F17> <F19>
+            map <S-F18> <S-F19>
+            map! <S-F18> <S-F19>
+            map <C-S-F18> <C-S-F19>
+            map! <C-S-F18> <C-S-F19>
+            map <M-S-F18> <M-S-F19>
+            map! <M-S-F18> <M-S-F19>
+            map <M-C-S-F18> <M-C-S-F19>
+            map! <M-C-S-F18> <M-C-S-F19>
+
         elseif &term =~ "rxvt"
+            set t_Co=256 "override terminfo setting to enable 256 colors
             "rxvt (basic Fn are well covered in default Vim mappings)
             " first two are fixed in rxvt - S-F1 == F11 and S-F2 == F12
             set <S-F3>=[25;*~
@@ -216,6 +247,18 @@ if !has("gui_running")
             set <S-F12>=[24;*$
 			"right windows menu key is equal to S-F6 (but not shift version)
 			set <S-F13>=[29;*$
+
+            set <F19>=Ou
+
+            set <kHome>=Ow
+            set <kEnd>=Oq
+
+            set <kInsert>=Op
+
+            set <xLeft>=Ot
+            set <xUp>=Ox
+            set <xRight>=Ov
+            set <xDown>=Or
 
             set <S-Insert>=[2$
             set <S-Del>=[3$
@@ -252,7 +295,7 @@ if !has("gui_running")
 		map <C-H> <C-BS>
 		map! <C-H> <C-BS>
 
-        "Todo: conditional italic support (it is already enabled in wombat256 colorscheme)
+        "Todo: conditional italics support (it is already enabled in wombat256 colorscheme)
         if expand("$STY") != "$STY"
             let &t_ZH = "\eP\e[3m\e\\"
             let &t_ZR = "\eP\e[23m\e\\"
@@ -261,10 +304,10 @@ if !has("gui_running")
             let &t_ZR = "\e[23m"
         endif
 
-        " delete wait time after ESC key is pushed in insert mode
-        let &t_SI .= "\e[?7727h"
-        let &t_EI .= "\e[?7727l"
-        inoremap <special> <Esc>O[ <Esc>
+        """ delete wait time after ESC key is pushed in insert mode
+        ""let &t_SI .= "\e[?7727h"
+        ""let &t_EI .= "\e[?7727l"
+        ""inoremap <special> <Esc>O[ <Esc>
 
         "Todo: check somehow, whether terminal is capable of cursor shape changes
         "" changing cursor shape (work in xterm and from screen inside of xterm)
@@ -275,6 +318,10 @@ if !has("gui_running")
         "    let &t_SI .= "\e[5 q"
         "    let &t_EI .= "\e[2 q"
         "endif
+        "
+        "Todo: cursor colors
+        "silent !echo -ne "\033]12;red\007"
+        "silent !echo -ne "\033]12;gray\007"
     endif
 endif
 
@@ -1702,13 +1749,21 @@ function! Wipeout()
     endfor
 
     for buf in buflist
-        call remove(l:buffers, index(l:buffers, buf))
+        let idx = index(l:buffers, buf)
+        if idx != -1
+            call remove(l:buffers, idx)
+        endif
     endfor
 
     try
         " if there are any buffers left, delete them
         if len(l:buffers)
-            execute 'bwipeout' join(l:buffers)
+            "echomsg "number:".len(l:buffers)
+            try
+                execute 'bwipeout' join(l:buffers)
+            catch /:E517:/
+                "nothing was wiped out
+            endtry
         endif
     finally
         " go back to our original tab page
