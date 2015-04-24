@@ -402,23 +402,6 @@ let &path=g:default_search_path
 
 "set suffixesadd=.h
 
-" =========================================
-" = Project/Versioning system integration =
-" =========================================
-"guess used versioning system based on environment variables
-let g:VCS_name=""
-let g:PROJECT_name=""
-if expand("$CLEARCASE_ROOT") != "$CLEARCASE_ROOT"
-    let g:VCS_name="clearcase"
-    let g:PROJECT_name="SGSN"
-elseif expand("$PANOS") != "$PANOS"
-    let g:VCS_name="cvs"
-    let g:PROJECT_name="SR"
-elseif expand("$LSF_BINDIR") != "$LSF_BINDIR"
-    let g:VCS_name="ecms"
-    let g:PROJECT_name="WMM"
-endif
-
 " ============================
 " =         Sessions         =
 " ============================
@@ -495,11 +478,6 @@ set display+=lastline
 
 if has("wildmenu")
     set wildmenu
-endif
-
-" tabs are forbidden in SR projects
-if g:PROJECT_name == "SR"
-	set expandtab
 endif
 
 set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
@@ -826,21 +804,6 @@ nmap <C-]> :call SophTag("")<Enter>
 imap <C-]> <C-o>:call SophTag("")<Enter>
 vmap <C-]> y<Esc>:call SophTag("<C-r>0")<Enter>gv
 
-" F1 to display help
-if g:PROJECT_name == "SR"
-	nmap <F1> :execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>
-	imap <F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:cs reset<CR> <C-o>:<CR>
-	vmap <F1> <Esc>:execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>gv
-
-    nmap <S-F1> :execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>
-    imap <S-F1> <C-o>:execute "!sr_cscope.sh mibupdate"<CR> <C-o>:let &l:enc=&l:enc<CR>
-    vmap <S-F1> <Esc>:execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>gv
-else
-	nmap <F1> :call SophHelp()<Enter>
-	imap <F1> <C-o>:call SophHelp()<Enter>
-	vmap <F1> <Esc>:call SophHelp()<Enter>gv
-endif
-
 "if exists("loaded_gundo") -- loads only after .vimrc
 if v:version >= 703
 	nmap <S-F7> :GundoToggle<Enter>
@@ -914,46 +877,6 @@ nmap <F4> :call Fxxd()<Enter>
 imap <F4> <C-o>:call Fxxd()<Enter>
 vmap <F4> <Esc>:call Fxxd()<Enter>gv
 
-function! DiffOrig()
-	if &diff
-		diffoff!
-		wincmd o
-	else
-		let ftype = &filetype
-		let actualfilename=expand('%:p')
-		vert new
-		setlocal bt=nofile
-		r #
-		let &titlestring = "saved copy" . " <-> " . actualfilename
-		0d_
-		exe "setlocal filetype=" . ftype
-		diffthis | wincmd p | diffthis
-	endif
-endfunction
-
-function! DiffCCPred()
-	if &diff
-		diffoff!
-		wincmd o
-	else
-		let ftype = &filetype
-		let predfile=tempname().".vimtmp"
-		silent! exe "!echo " . expand('%:p') . "> " . predfile		
-		silent! exe "!cleartool desc -short -predecessor " . expand('%:p') . ">> " . predfile
-  		silent! exec 'split '.predfile
-		let predfilename=getline(1)."@@".getline(2)
-		bwipeout
-		let actualfilename=expand('%:p')
-		vert new
-		setlocal bt=nofile
-		exe "r !cleartool shell " . g:OS_cat_command. " " . predfilename
-		let &titlestring = predfilename . " <-> " . actualfilename
-		0d_
-		exe "setlocal filetype=" . ftype		
-		diffthis | wincmd p | diffthis
-	endif
-endfunction
-
 function! MyDiff()
 	let opt = ""
 	if &diffopt =~ "icase"
@@ -1019,61 +942,6 @@ nmap <S-F10> :qa<Enter>
 imap <S-F10> <C-o>:qa<Enter>
 vmap <S-F10> <Esc>:qa<Enter>gv
 
-"TODO show SCCS + show featured
-
-if g:VCS_name == "cvs"
-    nmap <F5> :VCSVimDiff<Enter>
-    imap <F5> <C-o>:VCSVimDiff<Enter>
-    vmap <F5> <Esc>:VCSVimDiff<Enter>gv
-
-    nmap <F6> :VCSVimDiff BRANCH<Enter>
-    imap <F6> <C-o>:VCSVimDiff BRANCH<Enter>
-    vmap <F6> <Esc>:VCSVimDiff BRANCH<Enter>gv
-
-    nmap <F9> :VCSBlame!<Enter>
-    imap <F9> <C-o>:VCSBlame!<Enter>
-    vmap <F9> <Esc>:VCSBlame!<Enter>gv
-    
-    nmap <S-F9> :VCSLog<Enter>
-    imap <S-F9> <C-o>:VCSLog<Enter>
-    vmap <S-F9> <Esc>:VCSLog<Enter>gv
-
-elseif g:VCS_name == "clearcase"
-    nmap <F5> :call DiffOrig()<Enter>
-    imap <F5> <C-o>:call DiffOrig()<Enter>
-    vmap <F5> <Esc>:call DiffOrig()<Enter>gv
-
-    nmap <F6> :call DiffCCPred()<Enter>
-    imap <F6> <C-o>:call DiffCCPred()<Enter>
-    vmap <F6> <Esc>:call DiffCCPred()<Enter>gv
-
-    nmap <F9> :Ctxlsv<Enter>
-    imap <F9> <C-o>:Ctxlsv<Enter>
-    vmap <F9> <Esc>:Ctxlsv<Enter>gv
-
-elseif g:VCS_name == "ecms"
-	nmap <F5> :call MyEcmsGetCmd("vdload")<Enter>
-	imap <F5> <C-o>:call MyEcmsGetCmd("vdload")<Enter>
-	vmap <F5> <Esc>:call MyEcmsGetCmd("vdload")<Enter>gv
-
-	nmap <F6> :call MyEcmsGetCmd("vdlatest")<Enter>
-	imap <F6> <C-o>:call MyEcmsGetCmd("vdlatest")<Enter>
-	vmap <F6> <Esc>:call MyEcmsGetCmd("vdlatest")<Enter>gv
-
-	nmap <F9> :call MyEcmsGetCmd("mdesc", "-e")<Enter>
-	imap <F9> <C-o>:call MyEcmsGetCmd("mdesc", "-e")<Enter>
-	vmap <F9> <Esc>:call MyEcmsGetCmd("mdesc", "-e")<Enter>gv
-	
-	nmap <S-F9> :call MyEcmsGetCmd("mdesc", "-v")<Enter>
-	imap <S-F9> <C-o>:call MyEcmsGetCmd("mdesc", "-v")<Enter>
-	vmap <S-F9> <Esc>:call MyEcmsGetCmd("mdesc", "-v")<Enter>gv
-
-else "no versioning system
-	nmap <F5> :call DiffOrig()<Enter>
-	imap <F5> <C-o>:call DiffOrig()<Enter>
-	vmap <F5> <Esc>:call DiffOrig()<Enter>gv
-endif
-
 "comm! -nargs=? -bang A call AlternateFile("n<bang>", <f-args>)
 "abbreviate/iabbrev/cabbrev
 
@@ -1119,97 +987,6 @@ map <Leader>h :set hls!<CR>
 map <Leader>H :nohlsearch<CR>
 map <Leader>f :set foldenable!<CR>
 map <Leader>w :set wrap!<CR>
-
-"map <Leader>t :set tags=tags<CR>
-"map <Leader>f :echo line(".")<CR>
-function! ShowFeatureInfo(line_number)
-    if (t:stored_line != a:line_number)
-        let t:stored_line = a:line_number
-     
-        "echomsg "mode " . mode()
-        let reselect = 0
-        if mode() == "v" || mode() == ""
-            let reselect = 1
-        endif
-
-        wincmd t
-
-        silent! normal! gg
-        silent! normal! "_dG
-
-        "silent! execute "read !/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts
-
-        let [save_g_reg, save_g_regtype] = [getreg('g'), getregtype('g')]
-        "call setreg('g', formatted, 'V')
-        let @g=system("/usr/local/timostools/setup_cli_find.pl -line " . a:line_number . " " . t:featureinfo_opts)
-        silent put! g
-        call setreg('g', save_g_reg, save_g_regtype)
-
-        wincmd p
-
-        if reselect > 0
-            "echomsg "reselect " . reselect
-            normal! gv
-        endif
-
-    endif
-endfunction
-
-function! ToggleFeatureInfoWindow(options)
-    if !exists("t:featureinfowindow")
-        let t:featureinfowindow = 0 
-        let t:featureinfowindow_teardown = 0 
-    endif
-    if t:featureinfowindow == 1
-        "remove window
-        "let l:tpn = tabpagenr()
-        "if l:tpn > 0
-        "    let l:tpn = l:tpn - 2
-        "endif
-        "exe "tabmove " . l:tpn
-        "tabclose
-        autocmd! FeatureInfo
-        bwipeout featureinfo
-        "autocmd! FocusGained * :echo system("/usr/local/timostools/setup_cli_find.pl -line " . line("."))
-        let t:featureinfowindow = 0
-    else
-        let t:featureinfo_opts = ""
-        let l:path = resolve(expand("%:t"))
-        if ((l:path == "setup_cli.cfg") || (l:path == "teardown_cli.cfg"))
-            if (l:path == "teardown_cli.cfg")
-                let t:featureinfo_opts = "-teardown"
-            endif
-        else
-            return
-        endif
-
-        "create window
-        "autocmd FocusGained * :call Highlight_cursor()
-        augroup FeatureInfo
-            autocmd!
-            autocmd CursorMoved <buffer> :call ShowFeatureInfo(line("."))
-        augroup END
-        "autocmd FocusGained * :echo system("/usr/local/timostools/setup_cli_find.pl -line " . line("."))
-       
-        let t:stored_line = -1
-        "exe "8new"
-        "wincmd K
-        topleft 8new
-        setlocal buftype=nofile
-        setlocal bufhidden=hide
-        setlocal noswapfile
-        setlocal noscrollbind
-        file featureinfo 
-        exe "1000000"
-        exe "set nonu"
-        exe "set ro"
-        wincmd p
-        doautocmd FeatureInfo CursorMoved <buffer>
-        let t:featureinfowindow = 1
-    endif
-endfunction
-
-map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
 
 map <Leader>p :set paste!<CR>
 " mouse integration switching
@@ -1720,20 +1497,20 @@ endif
 
 " clipoard copy and paste functions
 "Todo: only when xsel is installed (perhaps distribute with vi ?)
-:command! -range Cz :silent :<line1>,<line2>w !xsel -i -b
-:command! -range Cx :silent :<line1>,<line2>w !xsel -i -p
-:command! -range Cv :silent :<line1>,<line2>w !xsel -i -s
-:cabbrev cv Cv
-:cabbrev cz Cz
-:cabbrev cx Cx
+command! -range Cz :silent :<line1>,<line2>w !xsel -i -b
+command! -range Cx :silent :<line1>,<line2>w !xsel -i -p
+command! -range Cv :silent :<line1>,<line2>w !xsel -i -s
+cabbrev cv Cv
+cabbrev cz Cz
+cabbrev cx Cx
 
-:command! -range Pz :silent :r !xsel -o -b
-:command! -range Px :silent :r !xsel -o -p
-:command! -range Pv :silent :r !xsel -o -s
+command! -range Pz :silent :r !xsel -o -b
+command! -range Px :silent :r !xsel -o -p
+command! -range Pv :silent :r !xsel -o -s
 
-:cabbrev pz Pz
-:cabbrev px Px
-:cabbrev pv Pv
+cabbrev pz Pz
+cabbrev px Px
+cabbrev pv Pv
 
 "function to clean all non-visible buffers
 function! Wipeout()
@@ -1773,3 +1550,104 @@ endfunction
 
 command! Wipeout :call Wipeout()
 cabbrev wipeout Wipeout
+
+" =========================================
+" = Project/Versioning system integration =
+" =========================================
+" guess used versioning system and project based on environment
+"  variables/directories
+let g:VCS_name=""
+let g:PROJECT_name=""
+if expand("$CLEARCASE_ROOT") != "$CLEARCASE_ROOT"
+    let g:VCS_name="clearcase"
+    let g:PROJECT_name="SGSN"
+elseif expand("$PANOS") != "$PANOS"
+    let g:VCS_name="cvs"
+    let g:PROJECT_name="SR"
+elseif expand("$LSF_BINDIR") != "$LSF_BINDIR"
+    let g:VCS_name="ecms"
+    let g:PROJECT_name="WMM"
+endif
+
+if g:PROJECT_name == "SR"
+    " tabs are forbidden in SR projects
+    set expandtab
+
+    " ,f to show current line nested feature info for setup_cli.cfg/teardown_cli.cfg updates
+    map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
+
+    nmap <F1> :execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>
+    imap <F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:cs reset<CR> <C-o>:<CR>
+    vmap <F1> <Esc>:execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>gv
+
+    nmap <S-F1> :execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>
+    imap <S-F1> <C-o>:execute "!sr_cscope.sh mibupdate"<CR> <C-o>:let &l:enc=&l:enc<CR>
+    vmap <S-F1> <Esc>:execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>gv
+else "other projects
+    " F1 to display help
+    nmap <F1> :call SophHelp()<Enter>
+    imap <F1> <C-o>:call SophHelp()<Enter>
+    vmap <F1> <Esc>:call SophHelp()<Enter>gv
+endif
+
+let g:loaded_ccase = 1
+
+if !has("gui_running")
+    let g:loaded_zoom = 1
+endif
+
+if g:VCS_name == "cvs"
+    nmap <F5> :VCSVimDiff<Enter>
+    imap <F5> <C-o>:VCSVimDiff<Enter>
+    vmap <F5> <Esc>:VCSVimDiff<Enter>gv
+
+    nmap <F6> :VCSVimDiff BRANCH<Enter>
+    imap <F6> <C-o>:VCSVimDiff BRANCH<Enter>
+    vmap <F6> <Esc>:VCSVimDiff BRANCH<Enter>gv
+
+    nmap <F9> :VCSBlame!<Enter>
+    imap <F9> <C-o>:VCSBlame!<Enter>
+    vmap <F9> <Esc>:VCSBlame!<Enter>gv
+    
+    nmap <S-F9> :VCSLog<Enter>
+    imap <S-F9> <C-o>:VCSLog<Enter>
+    vmap <S-F9> <Esc>:VCSLog<Enter>gv
+
+elseif g:VCS_name == "clearcase"
+    let g:loaded_ccase = 0
+
+    nmap <F5> :call DiffOrig()<Enter>
+    imap <F5> <C-o>:call DiffOrig()<Enter>
+    vmap <F5> <Esc>:call DiffOrig()<Enter>gv
+
+    nmap <F6> :call DiffCCPred()<Enter>
+    imap <F6> <C-o>:call DiffCCPred()<Enter>
+    vmap <F6> <Esc>:call DiffCCPred()<Enter>gv
+
+    nmap <F9> :Ctxlsv<Enter>
+    imap <F9> <C-o>:Ctxlsv<Enter>
+    vmap <F9> <Esc>:Ctxlsv<Enter>gv
+
+elseif g:VCS_name == "ecms"
+    nmap <F5> :call MyEcmsGetCmd("vdload")<Enter>
+    imap <F5> <C-o>:call MyEcmsGetCmd("vdload")<Enter>
+    vmap <F5> <Esc>:call MyEcmsGetCmd("vdload")<Enter>gv
+
+    nmap <F6> :call MyEcmsGetCmd("vdlatest")<Enter>
+    imap <F6> <C-o>:call MyEcmsGetCmd("vdlatest")<Enter>
+    vmap <F6> <Esc>:call MyEcmsGetCmd("vdlatest")<Enter>gv
+
+    nmap <F9> :call MyEcmsGetCmd("mdesc", "-e")<Enter>
+    imap <F9> <C-o>:call MyEcmsGetCmd("mdesc", "-e")<Enter>
+    vmap <F9> <Esc>:call MyEcmsGetCmd("mdesc", "-e")<Enter>gv
+    
+    nmap <S-F9> :call MyEcmsGetCmd("mdesc", "-v")<Enter>
+    imap <S-F9> <C-o>:call MyEcmsGetCmd("mdesc", "-v")<Enter>
+    vmap <S-F9> <Esc>:call MyEcmsGetCmd("mdesc", "-v")<Enter>gv
+
+else "no versioning system
+    nmap <F5> :call DiffOrig()<Enter>
+    imap <F5> <C-o>:call DiffOrig()<Enter>
+    vmap <F5> <Esc>:call DiffOrig()<Enter>gv
+endif
+
