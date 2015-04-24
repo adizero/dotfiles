@@ -80,7 +80,7 @@ termInitialDetection()
             TERM_PROGRAM="Konsole"
         elif [ "$term_type" == "[>0" -a "$term_version" == "136" ]; then
             TERM_PROGRAM="PuTTY"  #this is just a guess (PuTTY 0.62 sends 136 as version), will be confirmed via answerback)
-        elif [ "$term_type" == "[>0" -o "$term_type" == "41" ]; then
+        elif [ "$term_type" == "[>0" -o "$term_type" == "[>41" ]; then
             TERM_PROGRAM="xterm"
             TERM_VERSION="$term_version"
         elif [ "$term_type" == "[>1" ]; then
@@ -97,17 +97,17 @@ termInitialDetection()
             TERM_PROGRAM="rxvt"
         fi
 
-        if [ "$TERM_PROGRAM" != "rxvt" -a "$TERM_PROGRAM" != "urxvt" ]; then
+        if [ "$TERM_PROGRAM" != "rxvt" -a "$TERM_PROGRAM" != "urxvt" -a -z "$TERM_ANSWERBACK" ]; then
             wrap_escape_sequence '\005\033[>c' 
             echo -ne $esc_seq
             read -r -t 0.5 -d $'\033' answerback
             read -r -t 0.1 -d $'c' termresponse 
-            export TERM_ANSWERBACK="${answerback:0}"
+            export TERM_ANSWERBACK="${answerback:0}$"
             unset answerback
             unset termresponse
         fi
 
-        if [ "$TERM_ANSWERBACK" == "PuTTY" ]; then
+        if [ "$TERM_ANSWERBACK" == "PuTTY$" ]; then
             TERM_PROGRAM="PuTTY"
         fi
     fi
