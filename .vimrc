@@ -604,7 +604,12 @@ endif
 " ============================
 " =       Window title       =
 " ============================
-"TODO: setting of windows title based on environment / file edited / edit status ?
+"Xxx: this sets screen tab's caption
+"set t_ts=k
+"set t_fs=\
+"don't reset screen tab's caption to flying...
+"auto VimLeave * :set t_ts=k\
+
 set title
 
 ":auto BufEnter * let &titlestring= expand("%:t") . " (" . expand($REL) . "-" . expand($RELP) . " " . expand($VPLOAD) . expand($HOST_TAG) . " " . expand($SS) . " | " . expand($ROOT) . ")"
