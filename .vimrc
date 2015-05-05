@@ -343,6 +343,10 @@ if filereadable(vundle_readme)
     Plugin 'terryma/vim-multiple-cursors'
 
     Plugin 'adizero/vim-togglecursor'
+
+    Plugin 'vim-scripts/diffchar.vim'
+    Plugin 'AndrewRadev/linediff.vim'
+
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
     filetype plugin indent on    " required
@@ -495,8 +499,12 @@ vnoremap < <gv
 vnoremap > >gv
 " make Y behave like other capitals 
 map Y y$
-" force saving files that require root permission 
+" force saving files that require root permission
+"Todo: improve - slows down entering of w character in command mode
 cmap w!! %!sudo tee > /dev/null %
+
+" do not move cursor during yank in visual mode
+vmap y ygv<Esc>
 
 "better jumping to function beginning/end (does not require {,} to be in the
 "first column of the file
@@ -674,7 +682,7 @@ if v:version > 700
 	imap <C-S-Left> <C-o>:tabprev<Enter>
 	vmap <C-S-Right> <Esc>:tabnext<Enter>gv
 	vmap <C-S-Left> <Esc>:tabprev<Enter>gv
-	 
+
     " simplified movement through windows
     nmap <C-Up> <C-S-Up>
     nmap <C-Down> <C-S-Down>
@@ -1307,6 +1315,17 @@ let g:clang_format#auto_formatexpr=1
 let did_UltiSnips_plugin="defined"
 let did_UltiSnips_after="defined"
 
+" === diffchar.vim ===
+"Todo: enable diffchar.vim
+" first fix bug:
+" Error detected while processing function <SNR>41_UpdateDiffChar..<SNR>41_ResetDiffChar..<SNR>41_ResetDiffCharPair:
+" line    2:
+" E803: ID not found: 142
+let g:loaded_diffchar = "defined"
+let g:DiffUpdate = 1
+nmap <silent> <Leader>dc <Plug>ToggleDiffCharAllLines
+nmap <silent> <Leader>dC <Plug>ToggleDiffCharCurrentLine
+
 " ==========================
 " = Miscellaneous functions=
 " ==========================
@@ -1555,6 +1574,23 @@ endfunction
 
 command! Wipeout :call Wipeout()
 cabbrev wipeout Wipeout
+
+function! DiffOrig()
+	if &diff
+		diffoff!
+		wincmd o
+	else
+		let ftype = &filetype
+		let actualfilename=expand('%:p')
+		vert new
+		setlocal bt=nofile
+		r #
+		let &titlestring = "saved copy" . " <-> " . actualfilename
+		0d_
+		exe "setlocal filetype=" . ftype
+		diffthis | wincmd p | diffthis
+	endif
+endfunction
 
 " =========================================
 " = Project/Versioning system integration =
