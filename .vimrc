@@ -373,9 +373,31 @@ if filereadable(vundle_readme)
     Plugin 'terryma/vim-multiple-cursors'
 
     Plugin 'adizero/vim-togglecursor'
+    Plugin 'adizero/vim-clang-format'
+    Plugin 'adizero/cscope_maps.vim'
 
     Plugin 'vim-scripts/diffchar.vim'
     Plugin 'AndrewRadev/linediff.vim'
+
+    "Plugin 'tpope/vim-commentary'
+    Plugin 'tpope/vim-surround'
+    Plugin 'wilywampa/vim-commentary'
+
+    "Plugin 't9md/vim-textmanip'
+    Plugin 'stefandtw/quickfix-reflector.vim'
+
+    Plugin 'majutsushi/tagbar'
+    Plugin 'mbbill/code_complete'
+    Plugin 'mbbill/undotree'
+
+    Plugin 'rking/ag.vim'
+    Plugin 'yegappan/mru'
+
+    Plugin 'uguu-org/vim-matrix-screensaver'
+    Plugin 'thinca/vim-fontzoom'
+
+    Plugin 'godlygeek/csapprox'
+	Plugin 'hari-rangarajan/CCTree'
 
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
@@ -860,9 +882,9 @@ vmap <C-]> y<Esc>:call SophTag("<C-r>0")<Enter>gv
 
 "if exists("loaded_gundo") -- loads only after .vimrc
 if v:version >= 703
-	nmap <S-F7> :GundoToggle<Enter>
-	imap <S-F7> <C-o>:GundoToggle<Enter>
-	vmap <S-F7> <Esc>:GundoToggle<Enter>gv
+	nmap <S-F7> :UndotreeToggle<Enter>
+	imap <S-F7> <C-o>:UndotreeToggle<Enter>
+	vmap <S-F7> <Esc>:UndotreeToggle<Enter>gv
 else
 	nmap <S-F7> :call SophHelp()<Enter>
 	imap <S-F7> <C-o>:call SophHelp()<Enter>
@@ -1282,6 +1304,8 @@ endif
 " =      Tagbar plug-in      =
 " ============================
 let g:tagbar_ctags_bin = g:OS_ctags_command
+let g:tagbar_left = 1
+let g:tagbar_autofocus = 1
 
 " ============================
 " =      TagList plug-in     =
@@ -1315,9 +1339,9 @@ let c_no_comment_fold=1
 " autoselects based on clang_format#code_style \ "BasedOnStyle" : "Google",
 "Todo: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
 let g:clang_format#code_style = "Google"
-let g:clang_format#style_options = {
-            \ "BreakBeforeBraces" : "Allman"}
-let g:clang_format#auto_formatexpr=1
+let g:clang_format#style_options = { "BreakBeforeBraces" : "Allman" }
+let g:clang_format#auto_formatexpr = 1
+let g:clang_format#no_operator = 1
 
 " ============================
 " =        UltiSnips         =
@@ -1336,6 +1360,44 @@ let g:loaded_diffchar = "defined"
 let g:DiffUpdate = 1
 nmap <silent> <Leader>dc <Plug>ToggleDiffCharAllLines
 nmap <silent> <Leader>dC <Plug>ToggleDiffCharCurrentLine
+
+" === vim-commentary ===
+"Xxx: insert mode mapping does not work
+"Xxx: <C-/> is the same key as <C-_> in terminals
+"Todo: solve readonly file warning, when commenting in RO file (first change)
+
+nmap <C-_> gc
+"does not work in column one, when trying to comment a line
+nmap <C-_><C-_> gcgc
+"not really useful
+"nmap <C-_><C-_><C-_> :set commentstring=/*%s*/<CR>gcgc
+
+"does not work properly
+""imap <C-_> <C-o>gc<Right>
+
+"reselects after commenting, beware of uppercasing with keypress `u` in visual mode
+vmap <C-_> gcgv
+"switch to // comments in c/ccp files
+autocmd FileType c set commentstring=//%s
+autocmd FileType cpp set commentstring=//%s
+
+" === quickfix-reflector
+let g:qf_join_changes = 1
+let g:qf_write_changes = 0
+
+" === MRU ===
+"let g:MRU_Open_File_Use_Tabs = 1 "does not work as it should (use t from MRU window)
+
+" === vim-surround ===
+let g:surround_no_insert_mappings = 1 "disable insert mode mappings (unnecessary ?)
+
+" === CSApprox ===
+let g:CSApprox_loaded = 1  "use only for schemes conversion (:CSApproxSnapshout <exported filename> from gVim)
+
+" === CCTree ===
+"let g:CCTreeCscopeDb = "/akocis/0.0_opt/cscope/Linux.64bit.0.0_opt.cscope.out.part00"
+"let g:CCTreeCscopeDb = "cscope.out"  "does not work with huge tag files !!!!
+let g:loaded_cctree = 1  "good idea, but lacks jumps to reverse callers' call line directly (only jumps to tag)
 
 " ==========================
 " = Miscellaneous functions=
@@ -1643,10 +1705,6 @@ else "other projects
 endif
 
 let g:loaded_ccase = 1
-
-if !has("gui_running")
-    let g:loaded_zoom = 1
-endif
 
 if g:VCS_name == "cvs"
     nmap <F5> :VCSVimDiff<Enter>
