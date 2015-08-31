@@ -565,12 +565,26 @@ vnoremap < <gv
 vnoremap > >gv
 " make Y behave like other capitals 
 map Y y$
+" map u/U in visual mode to undo (instead of to lowercase/to uppercase)
+vnoremap u <Esc>u
+vnoremap U <Esc>U
+
+"Todo: map <C-S> and <C-Q> to something interesting (first need to claim them from terminal)
+noremap <C-S> <nop>
+noremap! <C-S> <nop>
+noremap <C-Q> <nop>
+noremap! <C-Q> <nop>
+
 " force saving files that require root permission
 "Todo: improve - slows down entering of w character in command mode
 cmap w!! %!sudo tee > /dev/null %
 
 " do not move cursor during yank in visual mode
 vmap y ygv<Esc>
+
+" search for visually selected text
+vnoremap // y/<C-R>"<CR>
+vnoremap ?? y?<C-R>"<CR>
 
 "better jumping to function beginning/end (does not require {,} to be in the
 "first column of the file
@@ -801,6 +815,18 @@ vmap <S-End> <C-S-End>
 " indentation with Tab/S-Tab on selected blocks
 vnoremap <Tab> >gv
 vnoremap <S-Tab> <LT>gv
+
+" indentation by one space with Space/Backspace on selected blocks
+vnoremap <Backspace> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv<<Esc>:let&sw=origsw<CR>gv
+vnoremap <Space> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv><Esc>:let&sw=origsw<CR>gv
+
+" move selected lines
+vnoremap <C-j> :m '>+1<CR>gv=gv
+vnoremap <C-k> :m '<-2<CR>gv=gv
+vnoremap <C-S-j> :m '>+1<CR>gv
+vnoremap <C-S-k> :m '<-2<CR>gv
+" duplicate (above) selected lines
+vnoremap <C-d> :t .-1<CR>gv
 
 " half page down/up selection (gVim)
 nmap <S-PageDown> v<End><C-d><End>
