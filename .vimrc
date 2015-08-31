@@ -411,14 +411,18 @@ endif
 let g:EclimDisabled = "defined"
 
 "Todo: enable YouCompleteMe (by removing following line)
-let g:loaded_youcompleteme = "defined"
+"let g:loaded_youcompleteme = "defined"
 
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 "Do not ask when starting vim
 let g:ycm_confirm_extra_conf = 0
 "set tags += $HOME/tmp/ycm.tags
 function! YCM_tagfiles()
-    return [expand("$HOME") . '/tmp/ycm.tags']
+    if expand("$CSCOPE_FILES_DIR") != "$CSCOPE_FILES_DIR"
+        return [expand("$CSCOPE_FILES_DIR") . '/ycm.tags']
+    else
+        return [expand("$HOME") . '/tmp/ycm.tags']
+    endif
 endfunction
 let g:ycm_collect_identifiers_from_tags_files = 1
 
