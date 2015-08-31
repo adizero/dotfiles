@@ -878,36 +878,60 @@ function! SophTag(str)
 		"for a in args
 		"	echo a
 		"endfor
-		if a:str != ""
+		for i in [0,1]
+			if &csto == i
+				let search_cmd="cscope find g "
+			else
+				let search_cmd="tag "
+			endif
+
+			if a:str != ""
+				try
+					"echo search_cmd.a:str
+					exec search_cmd.a:str
+					return 0  " search no more, result found
+				catch /:E325:/
+					" ATTENTION when opening file
+                    return 0
+				catch /:E562:\|:E257:\|:E259:/
+					" we will continue with cWORD and cword searches
+				endtry
+			endif
 			try
-				exec "cstag ".a:str
+				let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
+				"echo search_cmd.l:cww
+				exec search_cmd.l:cww
 				return 0  " search no more, result found
-			catch /:E562:\|:E257:/
-				" we will continue with cWORD and cword searches
+            catch /:E325:/
+                " ATTENTION when opening file
+                return 0
+			catch /:E562:\|:E257:\|:E259:/
+				" E562 bad usage for cstag - obviously cWORD contains special characters
+				" E257 cstag tag not found
+				try
+					"echo search_cmd.expand("<cword>")
+					exec search_cmd.expand("<cword>")
+					return 0  " search no more, result found
+				catch /:E325:/
+					" ATTENTION when opening file
+                    return 0
+				catch /:E562:\|:E257:\|:E259:/
+					" not found
+				endtry
 			endtry
+		endfor
+		echohl WarningMsg
+		if a:str != ""
+			echo "Sorry, no tag generated for ".a:str." or ".expand("<cWORD>")." or ".expand("<cword>")
+		else
+			echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
 		endif
-		try
-			let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
-			"echo l:cww
-			exec "cstag ".l:cww
-		catch /:E562:\|:E257:/
-			" E562 bad usage for cstag - obviously cWORD contains special characters
-			" E257 cstag tag not found
-			try
-				exec "cstag ".expand("<cword>")
-			catch /:E562:\|:E257:/
-				echohl WarningMsg
-				if a:str != ""
-					echo "Sorry, no tag generated for ".a:str." or ".expand("<cWORD>")." or ".expand("<cword>")
-				else
-					echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
-				endif
-			endtry
-		endtry
+		echohl None
 endfunction
 
 nmap <C-]> :call SophTag("")<Enter>
 imap <C-]> <C-o>:call SophTag("")<Enter>
+"Todo: improve this (it messes last yank buffer 0)
 vmap <C-]> y<Esc>:call SophTag("<C-r>0")<Enter>gv
 
 "if exists("loaded_gundo") -- loads only after .vimrc
@@ -1612,6 +1636,37 @@ else
 	"if we have old vim or vim without mouse_sgr compiled, its better to not touch ttymouse setting
 	"set ttymouse=xterm2
 end
+
+function! CscopeCtagsSearch(word)
+	let csto_saved=&csto
+	let &csto=0
+	"echomsg a:word
+	"exe "cstag " . a:word 
+    try
+        call SophTag("")
+    finally
+        let &csto=csto_saved
+        unlet csto_saved
+    endtry
+endfunction
+
+nnoremap g<LeftMouse> <LeftMouse>:call CscopeCtagsSearch(expand("<cword>"))<CR>
+nnoremap g<RightMouse> <C-T>
+nmap <C-LeftMouse> g<LeftMouse>
+nmap <C-RightMouse> g<RightMouse>
+
+nnoremap z<LeftMouse> <LeftMouse>:exe "cs f s " . expand("<cword>")<CR>
+nnoremap z<RightMouse> <LeftMouse>:exe "cs f c " . expand("<cword>")<CR>
+nmap <A-LeftMouse> z<LeftMouse>
+nmap <A-RightMouse> z<RightMouse>
+
+nnoremap <X1Mouse> <C-O>
+nnoremap <X2Mouse> <C-I>
+nmap <RightMouse><LeftMouse> <X1Mouse>
+"nmap <LeftMouse><RightMouse> <X2Mouse> "causes delay, when selecting text by dragging with LeftMouse pressed
+
+"automatic copy after left button release (not sure about usefulness)
+"vnoremap <LeftRelease> <LeftRelease>y
 
 " when .vimrc is edited, reload it
 if has('autocmd')
