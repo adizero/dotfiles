@@ -3,7 +3,7 @@ set nocompatible
 "Xxx: this needs .term_detect script support in shell
 let s:term_program=expand("$TERM_PROGRAM")
 let s:term_version=expand("$TERM_VERSION")
-if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" || 
+if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" ||
             \ s:term_program == "xterm" || s:term_program == "Konsole" ||
             \ s:term_program == "PuTTY" || s:term_program == "Cygwin"
     let &term = "xterm"
@@ -174,7 +174,7 @@ if !has("gui_running")
             set <F17>=OE
 
             "Todo: specify correct version for old/new xterm bindings (for now 278 - Ubuntu 13.04 timeframe is the limit)
-            if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" || 
+            if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" ||
                         \ s:term_program == "xterm" && s:term_version < "278"
                 "old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
                 set <xF1>=O1;*P
@@ -324,6 +324,36 @@ if !has("gui_running")
         "silent !echo -ne "\033]12;gray\007"
     endif
 endif
+
+let g:color_scheme = ""
+if has("gui_running")
+	if g:OS_name == "windows"
+		"colorscheme zenburn
+		let g:molokai_original = 1
+		let g:color_scheme = "molokai"
+	else
+		"colorscheme desert
+        if &t_Co == 256
+    		let g:color_scheme = "wombat256mod"
+        else
+            let g:color_scheme = "wombat"
+        endif
+    endif
+else
+	"no GUI - console mode
+	if g:OS_name == "windows"
+		"8-color terminal in windows only, zellner looks OK
+		let g:color_scheme = "zellner"
+	else
+        if &t_Co == 256
+    		let g:color_scheme = "wombat256mod"
+        else
+            let g:color_scheme = "wombat"
+        endif
+	endif
+endif
+set background=dark
+hi clear
 
 "check vundle installation, if installed, then make use of it
 let vundle_readme=expand('~/.vim/bundle/Vundle.vim/README.md')
@@ -484,7 +514,17 @@ if has("wildmenu")
     set wildmenu
 endif
 
-set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
+"needs to be after syn on (syntax on)
+let g:colors_name = g:color_scheme
+try
+    exec "colorscheme " . g:color_scheme
+catch /:E185:/
+    " E185 colorscheme not found
+    " just ignore
+endtry
+let g:color_scheme_loaded = 1
+
+set cscopequickfix=s-,c-,d-,i-,t-,e-,a-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
 
 imap jk <Esc> 
 
@@ -696,7 +736,7 @@ endif
 " =Movement with CTRL,SHIFT and ARROWS=
 " =====================================
 if v:version > 700
-	" (CTRL+SHIFT+UP/DOWN works only in graphical modes
+	" CTRL+SHIFT+UP/DOWN works only in graphical modes
 	nmap <C-S-Up> <C-w>W
 	nmap <C-S-Down> <C-w>w
 	imap <C-S-Up> <C-o><C-w>W
@@ -773,6 +813,7 @@ function! SophHelp()
             catch /:E149:\|:E661:/
                 echohl WarningMsg
                 echo "Sorry, no help for ".expand("<cWORD>")." or ".expand("<cword>")
+                echohl None
             endtry
         endtry
     endif
@@ -967,6 +1008,7 @@ nmap <F11> :cprev<Enter>
 imap <F11> <C-o>:cprev<Enter>
 vmap <F11> <Esc>:cprev<Enter>v
 
+"E553
 nmap <F12> :cnext<Enter>
 imap <F12> <C-o>:cnext<Enter>
 vmap <F12> <Esc>:cnext<Enter>v
@@ -1015,8 +1057,6 @@ map <Leader>m :call SwitchMouse()<CR>
 
 " path leader mappings
 map <Leader>0 :let &path=g:default_search_path<CR>
-
-let g:color_scheme = ""
 
 " ============================
 " =        GUI options       =
@@ -1067,10 +1107,6 @@ if has("gui_running")
 	endif
 
 	if g:OS_name == "windows"
-		"colorscheme zenburn
-		let g:molokai_original = 1
-		let g:color_scheme = "molokai"
-
 		"set guifont=Lucida_Console:h8:cEASTEUROPE
 		"set guifont=Dina:h8:cANSI
 		silent! set guifont=Envy\ Code\ R:h11:cEASTEUROPE
@@ -1082,13 +1118,6 @@ if has("gui_running")
 		" maximize window on start
 		autocmd GUIEnter * simalt ~X
 	else
-		"colorscheme desert
-        if &t_Co == 256
-    		let g:color_scheme = "wombat256mod"
-        else
-            let g:color_scheme = "wombat"
-        endif
-	
 		silent! set guifont=Envy\ Code\ R\ 11
         if &guifont != 'Envy Code R 11'
             silent! set guifont=Dejavu\ Sans\ Mono\ 11
@@ -1103,26 +1132,8 @@ if has("gui_running")
 	
 		set lines=50 columns=210
 	endif
-else
-	"no GUI - console mode
-	if g:OS_name == "windows"
-		"8-color terminal in windows only, zellner looks OK
-		let g:color_scheme = "zellner"
-	else
-        if &t_Co == 256
-    		let g:color_scheme = "wombat256mod"
-        else
-            let g:color_scheme = "wombat"
-        endif
-	endif
 endif
 
-try
-    exec "colorscheme " . g:color_scheme
-catch /:E185:/
-    " E185 colorscheme not found
-    " just ignore
-endtry
 
 " simple code completion - works correctly only in graphical modes (gVim) - XXX collides with cscope special stuff - CTRL+SPACE
 "imap <C-Space> <C-n><C-p><Down>
@@ -1691,4 +1702,3 @@ else "no versioning system
     imap <F5> <C-o>:call DiffOrig()<Enter>
     vmap <F5> <Esc>:call DiffOrig()<Enter>gv
 endif
-
