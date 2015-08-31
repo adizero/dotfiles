@@ -934,7 +934,6 @@ imap <C-]> <C-o>:call SophTag("")<Enter>
 "Todo: improve this (it messes last yank buffer 0)
 vmap <C-]> y<Esc>:call SophTag("<C-r>0")<Enter>gv
 
-"if exists("loaded_gundo") -- loads only after .vimrc
 if v:version >= 703
 	nmap <S-F7> :UndotreeToggle<Enter>
 	imap <S-F7> <C-o>:UndotreeToggle<Enter>
