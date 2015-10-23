@@ -57,6 +57,39 @@ COLOR_CYAN='\033[0;36m'
 COLOR_LIGHTCYAN='\033[1;36m'
 COLOR_DEFAULT='\033[0m'
 
+function function_exists () {
+    FUNCTION_NAME=$1
+
+    [ -z "$FUNCTION_NAME" ] && return 1
+
+    declare -F "$FUNCTION_NAME" > /dev/null 2>&1
+
+    return $?
+}
+
+function __git_prompt_function () {
+	if function_exists __git_ps1; then
+		git_ps1=$(__git_ps1)
+		if [ "$git_ps1" != "" ]; then
+			if [ "$REL" != "" -a "$ROOT" != "" ]; then
+				printf "\033]0;$REL $git_ps1 | $ROOT\007" &
+			else
+				printf "\033]0;$git_ps1\007" &
+			fi
+			## jobs > /tmp/jobs
+			#prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+			##  prompts=$(cat /tmp/jobs | grep __git_ps1)
+			##  echo "prompts: $prompts"
+			#disown "%$prompts"
+			## disown -r
+		else
+			printf "$1"
+		fi
+	else
+    	printf "$1"
+	fi
+}
+
 # Function to set prompt_command to.
 function promptcmd () {
     history -a 
@@ -91,10 +124,40 @@ function promptcmd () {
                     #printf "\033]0;$REL $VPLOAD | SS=$SS root=`basename $ROOT 2>/dev/null`\007"
                     local TITLEBAR=''
                 else
-                    printf "\033]0;$REL $CURRENT_LOCATION | $ROOT\007"
+###                    if function_exists __git_ps1; then
+###                        #git_ps1=`__git_ps1`
+###						printf "\033]0;$REL $(__git_ps1) | $ROOT\007" &
+###                        # jobs > /tmp/jobs
+###                        prompts=$(jobs | grep __git_ps1 | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+###                        #  prompts=$(cat /tmp/jobs | grep __git_ps1)
+###                        #  echo "prompts: $prompts"
+###                        disown "%$prompts"
+###                        # disown -r
+###                    else
+###                        printf "\033]0;$REL $CURRENT_LOCATION | $ROOT\007"
+###                    fi
+					__git_prompt_function "\033]0;$REL $CURRENT_LOCATION | $ROOT\007" &
+					prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+					disown "%$prompts"
+				    local TITLEBAR=''
                 fi
 			else
-				local TITLEBAR='\[\033]0;\u@\h: { \w }  \007\]'
+###				if function_exists __git_ps1; then
+###                    #git_ps1=`__git_ps1`
+###					printf "\033]0; $(__git_ps1) \007" &
+###                    # jobs > /tmp/jobs
+###                    prompts=$(jobs | grep __git_ps1 | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+###                    #  prompts=$(cat /tmp/jobs | grep __git_ps1)
+###                    #  echo "prompts: $prompts"
+###                    disown "%$prompts"
+###                    # disown -r
+###				else
+###					local TITLEBAR='\[\033]0;\u@\h: { \w }  \007\]'
+###				fi
+				__git_prompt_function "\033]0;$USER@$HOSTNAME: { $PWD }  \007" &
+				prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+				disown "%$prompts"
+				local TITLEBAR=''
 			fi
             ;;
         *       )  
