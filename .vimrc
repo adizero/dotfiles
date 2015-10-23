@@ -399,6 +399,8 @@ if filereadable(vundle_readme)
     Plugin 'godlygeek/csapprox'
 	Plugin 'hari-rangarajan/CCTree'
 
+    Plugin 'vim-scripts/SpellCheck'
+
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
     filetype plugin indent on    " required
@@ -410,8 +412,12 @@ endif
 "Todo: enable Eclim (by removing following line)
 let g:EclimDisabled = "defined"
 
-"Todo: enable YouCompleteMe (by removing following line)
-"let g:loaded_youcompleteme = "defined"
+if v:version >= 704
+    "Todo: enable YouCompleteMe (by commenting/removing following line)
+    "let g:loaded_youcompleteme = "defined"
+else
+    let g:loaded_youcompleteme = "defined" "too old Vim => disable YouCompleteMe
+endif
 
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 "Do not ask when starting vim
@@ -550,7 +556,10 @@ catch /:E185:/
 endtry
 let g:color_scheme_loaded = 1
 
-set cscopequickfix=s-,c-,d-,i-,t-,e-,a-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
+set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
+if v:version >= 704
+    set cscopequickfix+=a-
+endif
 
 imap jk <Esc> 
 
@@ -755,14 +764,6 @@ if v:version > 700
 	vmap <C-Tab> <Esc>:tabnext<Enter>gv
 	vmap <C-S-Tab> <Esc>:tabprev<Enter>gv
 
-	" this works also in console
-	nmap <C-S-Right> :tabnext<Enter>
-	nmap <C-S-Left> :tabprev<Enter>
-	imap <C-S-Right> <C-o>:tabnext<Enter>
-	imap <C-S-Left> <C-o>:tabprev<Enter>
-	vmap <C-S-Right> <Esc>:tabnext<Enter>gv
-	vmap <C-S-Left> <Esc>:tabprev<Enter>gv
-
     " simplified movement through windows
     nmap <C-Up> <C-S-Up>
     nmap <C-Down> <C-S-Down>
@@ -840,7 +841,6 @@ vmap <S-PageUp> <Home><C-u>
 imap <C-BS> <C-w>
 "imap <C-Del> _<Esc>mzew<BS>i<Del><Esc>v`z"_c
 imap <C-Del> <C-o>de
-
 
 " ============================
 " =        Fx commands       =
@@ -1392,7 +1392,7 @@ let c_no_comment_fold=1
 " autoselects based on clang_format#code_style \ "BasedOnStyle" : "Google",
 "Todo: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
 let g:clang_format#code_style = "Google"
-let g:clang_format#style_options = { "BreakBeforeBraces" : "Allman" }
+let g:clang_format#style_options = { "BreakBeforeBraces" : "Allman" , "ColumnLimit" : "120"}
 let g:clang_format#auto_formatexpr = 1
 let g:clang_format#no_operator = 1
 
@@ -1642,14 +1642,14 @@ function! CscopeCtagsSearch(word)
 	"echomsg a:word
 	"exe "cstag " . a:word 
     try
-        call SophTag("")
+        call SophTag(a:word)
     finally
         let &csto=csto_saved
         unlet csto_saved
     endtry
 endfunction
 
-nnoremap g<LeftMouse> <LeftMouse>:call CscopeCtagsSearch(expand("<cword>"))<CR>
+nnoremap g<LeftMouse> <LeftMouse>:call CscopeCtagsSearch("")<CR>
 nnoremap g<RightMouse> <C-T>
 nmap <C-LeftMouse> g<LeftMouse>
 nmap <C-RightMouse> g<RightMouse>
@@ -1666,6 +1666,15 @@ nmap <RightMouse><LeftMouse> <X1Mouse>
 
 "automatic copy after left button release (not sure about usefulness)
 "vnoremap <LeftRelease> <LeftRelease>y
+
+" moving through cscope/ctags
+nmap <C-S-Right> :call CscopeCtagsSearch(expand("<cword>"))<Enter>
+nmap <C-S-Left> <C-T>
+imap <C-S-Right> <C-o>:call CscopeCtagsSearch(expand("<cword>"))<Enter>
+imap <C-S-Left> <C-o><C-T>
+vmap <C-S-Right> y:call CscopeCtagsSearch("<C-R>"")<Enter>
+vmap <C-S-Left> <Esc><C-T><Enter>
+
 
 " when .vimrc is edited, reload it
 if has('autocmd')
