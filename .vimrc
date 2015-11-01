@@ -381,6 +381,7 @@ if filereadable(vundle_readme)
 
     "Plugin 'tpope/vim-commentary'
     Plugin 'tpope/vim-surround'
+    Plugin 'tpope/vim-fugitive'
     Plugin 'wilywampa/vim-commentary'
 
     "Plugin 't9md/vim-textmanip'
@@ -1800,13 +1801,16 @@ endif
 let g:loaded_ccase = 1
 
 if g:VCS_name == "cvs"
-    nmap <F5> :VCSVimDiff<Enter>
-    imap <F5> <C-o>:VCSVimDiff<Enter>
-    vmap <F5> <Esc>:VCSVimDiff<Enter>gv
+	" ===VCSCommand plugin===
+	let g:VCSCommandVCSTypePreference = "git"
 
-    nmap <F6> :VCSVimDiff BRANCH<Enter>
-    imap <F6> <C-o>:VCSVimDiff BRANCH<Enter>
-    vmap <F6> <Esc>:VCSVimDiff BRANCH<Enter>gv
+    nmap <silent><F5> :VCSVimDiff<Enter>
+    imap <silent><F5> <C-o>:VCSVimDiff<Enter>
+    vmap <silent><F5> <Esc>:VCSVimDiff<Enter>gv
+
+    nmap <silent><F6> :VCSVimDiff BRANCH<Enter>
+    imap <silent><F6> <C-o>:VCSVimDiff BRANCH<Enter>
+    vmap <silent><F6> <Esc>:VCSVimDiff BRANCH<Enter>gv
 
     nmap <F9> :VCSBlame!<Enter>
     imap <F9> <C-o>:VCSBlame!<Enter>
