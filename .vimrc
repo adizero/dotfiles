@@ -558,7 +558,7 @@ endtry
 let g:color_scheme_loaded = 1
 
 set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
-if v:version >= 704
+if v:version >= 704 && has('patch827')
     set cscopequickfix+=a-
 endif
 
