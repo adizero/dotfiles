@@ -1,3 +1,4 @@
+#term xterm-256color
 # terminfo and termcap for nice 256 color terminal
 # allow bold colors - necessary for some reason
 attrcolor b ".I"
@@ -11,7 +12,9 @@ termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
 defbce "on"
 
 # encoding
+defencoding UTF-8
 encoding UTF-8
+
 
 # fix residual editor text (to not see residual stuff from vim/less/man after exiting from them)
 altscreen on

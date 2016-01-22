@@ -1,5 +1,6 @@
 if [ "$CURRENT_OS" = "SunOS" ]; then
 	vmstat | tail -n 1 | awk '{print int($5 / 1024) "MB"}'
 else
+    show_screen_terminal_display.sh > ~/.screen_display
 	free -m | xargs | awk '{print $17 "MB"}'
 fi
