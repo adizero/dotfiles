@@ -110,6 +110,7 @@ set imap_check_subscribed
 # Display download progress every 5K
 set net_inc=5
 
+
 # Sending Mails ---------------------------
 #direct sending of emails from Mutt (SMTP needs to be enabled during compilation),
 # but from devpc it is not possible to reach smtp server directly
@@ -120,8 +121,9 @@ set sendmail="sendmail -oi -oem"  #this is the default, not necessary to set
 
 set text_flowed=yes #send text emails in format=flowed (shortened f=f) mode allowing MUAs capable of doing so to reformat the mails
 
+
 # Pager View Options ---------------------------------
-set pager_index_lines = 10 # number of index lines to show (mini-index on paget top)
+set pager_index_lines = 6  # number of index lines to show (mini-index on paget top)
 set pager_context = 3      # number of context lines to show (page to page context)
 set pager_stop             # don't go to next message automatically
 set menu_scroll            # scroll in menus
@@ -194,7 +196,6 @@ macro index \Cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "ma
 macro index C "<copy-message>?<toggle-mailboxes>" "copy a message to a mailbox"
 macro index M "<save-message>?<toggle-mailboxes>" "move a message to a mailbox"
 
-
 bind index N search-opposite
 #bind index Z toggle-new
 #bind index <f10> sidebar-prev  #also binding of F-x keys is possible
@@ -202,11 +203,10 @@ bind index N search-opposite
 macro index a "<limit>all\n" "show all messages (undo limit)"
 #macro index c "<change-folder>?<change-dir><home>^K=<enter>" "contextual folder change"
 
-#set status_chars  = " *%A"
-#set status_format = "───[ Folder: %f ]─%V──[%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]───%>─%?p?( %p postponed )?─── %l|%L"
+
 # Status Bar -----------------------------------------
 set status_chars  = " *%A"
-set status_format = "---[ Folder: %f ]---[%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]---%>-%?p?( %p postponed )?---"
+set status_format = "---[ Folder: %f ]---[%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]---[%s/%S]---%>-%?p?( %p postponed )?---%?V?{%V %M msgs %L}---?%l"
 
 #custom script on new mail ???
 #set status_format="/some/script.sh '%r %f (%L) |"
@@ -229,12 +229,11 @@ set attribution = "On %d, %n wrote:" # format of quoting header
 set include                          # include message in replies
 set forward_quote                    # include message in forwards
 
-set editor="vim -X"
+set editor="vim -X -c 'normal O' -c 'startinsert'"
 
 
 # Attach Key Bindings ---------------------------
-# View attachments properly.
-# bind attach <return> view-mailcap
+# bind attach <return> view-mailcap # View attachments properly.
 
 #create folder ~/.cache/mutt in filesystem (or pick another folder for temporary html attachment storage)
 macro attach 'V' "<pipe-entry>cat >~/.cache/mutt/mail.html && $BROWSER ~/.cache/mutt/mail.html && rm ~/.cache/mutt/mail.html<enter>"
@@ -253,11 +252,8 @@ set reverse_alias=yes
 source $alias_file
 
 #macro index A "!$EDITOR ~/.mutt/aliases\n:source ~/.mutt/aliases\n" "Edit aliases file and reload it"
-#macro pager A "!$EDITOR ~/.mutt/aliases\n:source ~/.mutt/aliases\n" "Edit aliases file and reload it"
 macro index A ":source $alias_file\n" "Reload aliases file"
 macro pager A ":source $alias_file\n" "Reload aliases file"
-#macro index A ":source ~/.mutt/aliases\n" "Reload aliases file"
-#macro pager A ":source ~/.mutt/aliases\n" "Reload aliases file"
 
 
 # LDAP Queries ----------------------------------
@@ -269,24 +265,20 @@ set query_command="~/install/mutt-ldap/mutt_ldap.py '%s'"
 set display_filter="~/.mutt/extract_from_mailbox_files.py -"  #parses mail addresses from every displayed email and adds them to aliases file
 
 
-
+# Miscellaneous macros and shortcuts ------------------------
 macro pager \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
 macro index \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
 
 
 # Mailboxes ----------------------------------------
 # which mailboxes to list in mutt (and in sidebar)
-#mailboxes `echo -n "+ "; find ~/Mail/Maildir -maxdepth 2 -type d -name "*" -printf "+'%f' "`
-#mailboxes +'.inbox' +'.sent' +'.inbox/Archive Inbox 2007'
-#mailboxes `find $HOME/Mail/Maildir -maxdepth 2 -type d -name "*" -print | sed "s#$HOME/Mail/Maildir/\(.*\)#\"+\1\"#g" | grep -v -e "$HOME/Mail/Maildir" -e "+alu" | tr '\n' ' '`
-
-#offlineimap mailboxes
+#offlineimap generated mailboxes based on two-way sync with IMAP folder structure
 source ~/.mutt/mailboxes
 #archive mailboxes
 mailboxes `find $HOME/Mail/Maildir -maxdepth 4 -type d -name "*" -print | grep ".*/cur" | sed "s#$HOME/Mail/Maildir/\(.*\)#\"+\1\"#g" | grep -v -e "$HOME/Mail/Maildir" -e "+alu" | sed "s#/cur##" | sort | tr '\n' ' '`
 
 
-# Sidebar options ------------------------------------
+# Mutt+sidebar patch or Mutt-kz: Sidebar options ------------------------------------
 # set up the sidebar, default not visible
 set sidebar_width=40
 set sidebar_visible=yes
@@ -301,14 +293,9 @@ color sidebar color136 color234
 #color progress default magenta
 #color sidebar green default
 
-#### ctrl-n, ctrl-p to select next, prev folder
-#### ctrl-o to open selected folder
-bind index \CP sidebar-prev
-bind index \CN sidebar-next
-bind index \CO sidebar-open
-###bind pager \CP sidebar-prev
-###bind pager \CN sidebar-next
-###bind pager \CO sidebar-open
+bind index \CP sidebar-prev # ctrl-p to select prev sidebar folder
+bind index \CN sidebar-next # ctrl-n to select next sidebar folder
+bind index \CO sidebar-open # ctrl-o to open selected sidebar folder
 
 bind index <left> sidebar-prev
 bind index <right> sidebar-next
@@ -321,8 +308,7 @@ bind index <space> sidebar-open
 # Remap bounce-message function to "B"
 bind index B bounce-message
 
-# Mario Holbe suggests:
-# b toggles sidebar visibility
+# Mario Holbe suggests: b toggles sidebar visibility
 macro index b '<enter-command>toggle sidebar_visible<enter><refresh>'
 macro pager b '<enter-command>toggle sidebar_visible<enter><redraw-screen>'
 
