@@ -1,0 +1,381 @@
+#create folders mkdir -p ~/.cache/mutt/headers|bodies|...
+# Folders -----------------------
+
+#
+set realname="Adrian Kocis"
+set from="adrian.kocis@nokia.com"
+
+alternates adrian.kocis@alcatel-lucent.com adrian.kocis@exchange.alcatel-lucent.com akocis@exchange.alcatel-lucent.com adrian.kocis@gmail.com adrian.kocis@alcatel-lucent.sk
+
+set editor="vim -X"
+
+#type few characters and hit CTRL+T to trigger ldap query from to/cc/bcc fields
+# or type Q for query interface
+set query_command="~/install/mutt-ldap/mutt_ldap.py '%s'"
+#set display_filter="~/.mutt/extract_email_addresses_into_alias_file.sh"
+set display_filter="~/.mutt/extract_from_mailbox_files.py -"
+
+bind index N search-opposite
+bind pager N search-opposite
+#bind index Z toggle-new
+#bind pager Z mark-as-new
+#bind index <f10>        sidebar-prev  #also binding of F-x keys is possible
+
+macro index a "<limit>all\n" "show all messages (undo limit)"
+
+#contextual folder change
+macro index 'c' '<change-folder>?<change-dir><home>^K=<enter>'
+
+#set timeout=30 #if no keyboard activity, then check mailboxes again every 30s
+
+#send text emails in format=flowed (shortened f=f) mode allowing MUAs capable of doing so to reformat the mails
+set text_flowed=yes
+
+set tmpdir="/tmp"
+set mbox_type=Maildir
+
+set mailcap_path="~/.mutt/mailcap"
+
+set query_format="%t %-25.24n %a %e"
+
+set smart_wrap # Nice Word Wrapping
+
+##### Automatically log in to this mailbox at startup
+####set spoolfile="imaps://akocis:`cat ~/.emea_password`@mail.eu.alcatel-lucent.com/"
+##### Define the = shortcut, and the entry point for the folder browser (c?)
+####set folder="imaps://mail.eu.alcatel-lucent.com/"
+####set record="=Sent"
+####set postponed="=Drafts"
+
+#old offline mails
+set folder="~/Mail/Maildir"
+set spoolfile="~/Mail/Maildir/alu/INBOX"
+set postponed="~/Mail/Maildir/alu/Drafts"
+set record="~/Mail/Maildir/alu/Sent Items"
+
+#work online IMAP mails
+###set imap_user=user@gmail.com
+###set imap_pass=****
+###set folder = imaps://user@imap.gmail.com/
+###set spoolfile = +INBOX
+###set postponed = +Drafts
+###set record = +Sent
+set imap_user=akocis
+set imap_pass=`cat ~/.emea_password`
+##set folder = imaps://mail.eu.alcatel-lucent.com/
+##set spoolfile = +INBOX
+##set postponed = +Drafts
+##set record = +Sent
+
+ # activate TLS if available on the server
+ set ssl_starttls=yes
+ # always use SSL when connecting to a server
+ set ssl_force_tls=yes
+ # Don't wait to enter mailbox manually 
+ unset imap_passive        
+ # Automatically poll subscribed mailboxes for new mail (new in 1.5.11)
+ set imap_check_subscribed
+ # Reduce polling frequency to a sane level
+ set mail_check=60
+ # And poll the current mailbox more often (not needed with IDLE in post 1.5.11)
+ set timeout=10
+ # Display download progress every 5K
+ set net_inc=5
+
+# pager settings
+#set     ascii_chars                             # ascii chars in threadmarks
+set     beep_new                                # beep when mail arrives
+#set     delete=yes                              # delete flagged when exiting
+set     fast_reply                              # don't ask questions
+set     markers=no                              # wrap without plus signs
+set     pager_context=3                         # page to page line context
+# format string for pager - nice
+############set     pager_format="[%4C/%4m] (%S%Z) %%=%N >> %g %> [%lL]"
+set     pager_index_lines=6                     # mini-index on pager top
+set     pager_stop                              # don't auto-go to next msg
+set     menu_scroll            # scroll in menus
+set     sort=threads                            # default sort order
+#set     sort_aux=reverse-score                  # also sort by score
+set     sort_aux=last-date-received             # sort threads by date of last received message
+set     tilde                                   # pad empty lines like vi
+
+# Pager View Options ---------------------------------
+# set pager_index_lines = 10 # number of index lines to show
+# set pager_context = 3      # number of context lines to show
+# set pager_stop             # don't go to next message automatically
+# set menu_scroll            # scroll in menus
+# set tilde                  # show tildes like in vim
+# unset markers              # no ugly plus signs
+#
+set quote_regexp = "^( {0,4}[>|:#%]| {0,4}[a-z0-9]+[>|]+)+"
+# alternative_order text/plain text/enriched text/html
+
+# Pager Key Bindings ---------------------------------
+# bind pager k  previous-line
+# bind pager j  next-line
+ bind pager gg top
+ bind pager G  bottom
+#
+ bind pager R  group-reply
+
+# Attach Key Bindings
+# View attachments properly.
+# bind attach <return> view-mailcap
+
+# Index View Options ---------------------------------
+set date_format = "%Y %b %e"
+set index_format = "[%Z]  %D  (%4c) %?X?[%X]&   ? %-20.20F  %s"
+#set index_format = "[%Z]  %D  %-20.20F  %s  (%4c) %?X?[%X]&   ?"
+#set index_format="%4N %Z %2M %{%d %b %y} %-28.28a (%4l) %?X?[%X]&   ? %s"
+##set index_format="$HOME/.mutt/mutt-fmt-date.py %[%s] |"
+#set index_format='$HOME/.mutt/a.out "%[%d.%m.%y]" "%8[%e. %b]" "%8[%H:%m]" "%Z %%s %-20.20L %?y?[%-5.5y]&       ? %?M?+& ?%s%%" "%[%s]" |'
+###set index_format='%4C %?X?%2X& ? %Z %?[1y?%\?[1d\?%[%H:%M] \&%[%d %b] \?&%[%d/%m/%Y]? %-30.30L %s'
+##set index_format = "[%Z]  %<[2w?%[%a %d]&%[%b %d]>  (%4c) %?X?[%X]&   ? %-20.20F  %s"
+
+set sort = threads                         # like gmail
+set sort_aux = reverse-last-date-received  # like gmail
+set uncollapse_jump                        # don't collapse on an unread message
+set sort_re                                # thread based on regex
+set reply_regexp = "^(([Rr][Ee]?(\[[0-9]+\])?: *)?(\[[^]]+\] *)?)*"
+
+set wait_key=no  #removes press any key prompt, when shell/pipe command exited with success
+
+set sleep_time=0  #removes delay when switching mailboxes
+
+#direct sending of emails from Mutt (SMTP needs to be enabled during compilation),
+# but from devpc it is not possible to reach smtp server directly
+#set smtp_url="smtp://akocis@mail.eu.alcatel-lucent.com:587/"
+#set smtp_pass="`cat ~/.emea_password`"
+#set sendmail="sendmail -oi -oem"  #this is the default, not necessary to set
+
+set header_cache="~/.cache/mutt/headers"
+set message_cachedir="~/.cache/mutt/bodies"
+set certificate_file="~/.mutt/certificates"
+
+###macro index ",i"  "c=INBOX\nOd="    # reverse-sort by date
+###macro index ",o"  "c=INBOX\noc="    # sort by scoremime_lookup application/octet-stream
+
+bind index gg       first-entry
+bind index G        last-entry
+
+bind index R        group-reply
+
+#Ctrl-R to mark all as read
+macro index \Cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "mark all messages as read"
+
+# Saner copy/move dialogs
+macro index C "<copy-message>?<toggle-mailboxes>" "copy a message to a mailbox"
+macro index M "<save-message>?<toggle-mailboxes>" "move a message to a mailbox"
+
+#set status_chars  = " *%A"
+#set status_format = "───[ Folder: %f ]─%V──[%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]───%>─%?p?( %p postponed )?─── %l|%L"
+# Status Bar -----------------------------------------
+set status_chars  = " *%A"
+set status_format = "---[ Folder: %f ]---[%r%m messages%?n? (%n new)?%?d? (%d to delete)?%?t? (%t tagged)? ]---%>-%?p?( %p postponed )?---"
+
+#TODO AKO - enable some of following compose options
+# Compose View Options -------------------------------
+# set realname = "Steve Losh"          # who am i?
+# set envelope_from                    # which from?
+# set sig_dashes                       # dashes before sig
+# set edit_headers                     # show headers when composing
+# set fast_reply                       # skip to compose when replying
+# set askcc                            # ask for CC:
+# set fcc_attach                       # save attachments with the body
+# unset mime_forward                   # forward attachments as part of body
+# set forward_format = "Fwd: %s"       # format of subject when forwarding
+# set forward_decode                   # decode when forwarding
+# set attribution = "On %d, %n wrote:" # format of quoting header
+# set reply_to                         # reply to Reply to: field
+# set reverse_name                     # reply as whomever it was to
+# set include                          # include message in replies
+# set forward_quote                    # include message in forwards
+
+#set signature="fortune pathtofortunefile|"  #random signature
+
+#set print_command="~/.mutt/macosx_mutt_print.sh"            # MACOSX use a wrapper script for printing (opens in Preview to print)
+#set print_command="/usr/bin/muttprint %s -p {PrinterName}"
+
+#custom script on new mail ???
+#set status_format="/some/script.sh '%r %f (%L) |"
+# the %b variable in the status_format did the thing.
+
+# Header Options -------------------------------------
+ignore *                                # ignore all headers
+unignore from: to: cc: date: subject:   # show only these
+unhdr_order *                           # some distros order things by default
+hdr_order from: to: cc: date: subject:  # and in this order
+
+# Pager Autoview Options -------------------------------------
+auto_view text/html                                      # view html automatically
+
+auto_view text/calendar                                      # view calendar automatically
+
+auto_view application/x-gzip
+auto_view application/x-gunzip
+auto_view application/x-tar-gz
+auto_view application/x-rar-compressed
+
+alternative_order text/calendar text/plain text/enriched text/html     # save html for last
+
+# Colors --------------------------------
+#source ~/.mutt/mutt-solarized-dark-256.muttrc
+source ~/.mutt/mutt-colors-solarized-dark-256.muttrc 
+#source ~/.mutt/mutt-colors-solarized-dark-16.muttrc 
+
+# Aliases -------------------------------
+#type few characters and hit <Tab> to trigger alias completion
+set alias_file = "~/.mutt/aliases"
+set sort_alias=alias
+set reverse_alias=yes
+source $alias_file
+
+#macro index A "!$EDITOR ~/.mutt/aliases\n:source ~/.mutt/aliases\n" "Edit aliases file and reload it"
+#macro pager A "!$EDITOR ~/.mutt/aliases\n:source ~/.mutt/aliases\n" "Edit aliases file and reload it"
+macro index A ":source $alias_file\n" "Reload aliases file"
+macro pager A ":source $alias_file\n" "Reload aliases file"
+#macro index A ":source ~/.mutt/aliases\n" "Reload aliases file"
+#macro pager A ":source ~/.mutt/aliases\n" "Reload aliases file"
+
+#set charset = "en_ca.UTF-8"
+set charset="utf-8"
+set send_charset="us-ascii:utf-8"  #send charset list ordered by priorities (mutt uses first possible)
+
+#bind generic,alias,attach,browser,editor,index,compose,pager,pgp,postpone ':' noop (increase security - disallow unbound commands to be entered from command mode :)
+
+#create folder ~/.cache/mutt in filesystem (or pick another folder for temporary html attachment storage)
+macro attach 'V' "<pipe-entry>cat >~/.cache/mutt/mail.html && $BROWSER ~/.cache/mutt/mail.html && rm ~/.cache/mutt/mail.html<enter>"
+
+macro pager \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
+macro index \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
+
+# which mailboxes to list in mutt (and in sidebar)
+#mailboxes `echo -n "+ "; find ~/Mail/Maildir -maxdepth 2 -type d -name "*" -printf "+'%f' "`
+#mailboxes +'.inbox' +'.sent' +'.inbox/Archive Inbox 2007'
+#mailboxes `find $HOME/Mail/Maildir -maxdepth 2 -type d -name "*" -print | sed "s#$HOME/Mail/Maildir/\(.*\)#\"+\1\"#g" | grep -v -e "$HOME/Mail/Maildir" -e "+alu" | tr '\n' ' '`
+
+#offlineimap mailboxes
+source ~/.mutt/mailboxes
+#archive mailboxes
+mailboxes `find $HOME/Mail/Maildir -maxdepth 4 -type d -name "*" -print | grep ".*/cur" | sed "s#$HOME/Mail/Maildir/\(.*\)#\"+\1\"#g" | grep -v -e "$HOME/Mail/Maildir" -e "+alu" | sed "s#/cur##" | sort | tr '\n' ' '`
+
+# Sidebar options ------------------------------------
+# set up the sidebar, default not visible
+set sidebar_width=40
+set sidebar_visible=yes
+set sidebar_delim='|'
+
+# color of folders with new mail
+#color sidebar_new yellow default
+color sidebar_new yellow color234
+color sidebar_flagged white color234
+color sidebar green color234
+color sidebar color136 color234
+#color progress default magenta
+#color sidebar green default
+
+#### ctrl-n, ctrl-p to select next, prev folder
+#### ctrl-o to open selected folder
+bind index \CP sidebar-prev
+bind index \CN sidebar-next
+bind index \CO sidebar-open
+###bind pager \CP sidebar-prev
+###bind pager \CN sidebar-next
+###bind pager \CO sidebar-open
+
+bind index <left> sidebar-prev
+bind index <right> sidebar-next
+bind index <space> sidebar-open
+
+# I don't need these. just for documentation purposes. See below.
+# sidebar-scroll-up
+# sidebar-scroll-down
+
+# Remap bounce-message function to "B"
+bind index B bounce-message
+
+# Mario Holbe suggests:
+# b toggles sidebar visibility
+macro index b '<enter-command>toggle sidebar_visible<enter><refresh>'
+macro pager b '<enter-command>toggle sidebar_visible<enter><redraw-screen>'
+
+
+source ~/.mutt/scoring
+
+subscribe sr-dev-bra sr-devtest-bra sr-filter sw-timetra DL_SK_PUB_magnetova
+lists sr-test-bra mg-dev-bra mg-test-bra bra-lab-support build-timetra DL_SK_PUB build-timetra sros-antwerp 7450-antwerp 7450-weekly 9471-wmm-interest WMM-All cSGSN-Dev
+
+#mutt with sidebar patch specifics (does not work with mutt-kz)
+#set sidebar_sort=yes
+#set sidebar_shortpath=yes		# abbreviate folder names
+
+#mutt-kz specifics (nested conditions patch needed - see mutt-dtg)
+#set index_format = "[%Z]  %<[1y?%<[2w?%<[1d?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%y%m%d]>  (%4c) %?X?[%X]&   ? %-20.20F  %s"
+#set index_format = "[%Z]  %<[365d?%<[7d?%<[24H?%[ %H:%M]&%[%a %d]>&%[%b %d]>&%[%y%m%d]>  (%4c) %?X?[%X]&   ? %-20.20F  %s"
+set index_format = "[%Z]  %<[365d?%<[7d?%<[24H?%[ %H:%M]&%[%a:%H]>&%[%b %d]>&%[%y%m%d]>  (%4c) %?X?[%X]&   ? %-20.20F  %s"
+#set sort_sidebar = unsorted
+#set sidebar_delim="|"
+#
+#is next line needed ? (or .notmuch-config is enough ?)
+set nm_default_uri="notmuch:///home/akocis/Mail/Maildir" # path to the maildir
+#set virtual_spoolfile=yes                          # enable virtual folder as spoolfile (opened at mutt start)
+
+virtual-mailboxes \
+    "laura"                "notmuch://?query=from:laura.bartova" \
+    "filters"               "notmuch://?query=filter OR acl" \
+#    "INBOX"                "notmuch://?query=tag:inbox and NOT tag:archive" \
+
+bind index \Cb sidebar-toggle
+bind pager \Cb sidebar-toggle
+
+
+#############unattachments   +A */.*
+#############attachments   -A text/x-vcard application/pgp.*
+#############attachments   -A application/x-pkcs7-.*
+
+### Removing a pattern from a list removes that pattern literally. It
+### does not remove any type matching the pattern.
+###
+###  attachments   +A */.*
+###  attachments   +A image/jpeg
+###  unattachments +A */.*
+###
+### This leaves "attached" image/jpeg files on the allowed attachments
+### list. It does not remove all items, as you might expect, because the
+### second */.* is not a matching expression at this time.
+###
+### Remember: "unattachments" only undoes what "attachments" has done!
+### It does not trigger any matching on actual messages.
+#
+#
+### Qualify any MIME part with an "attachment" disposition, EXCEPT for
+### text/x-vcard and application/pgp parts. (PGP parts are already known
+### to mutt, and can be searched for with ~g, ~G, and ~k.)
+###
+### I've added x-pkcs7 to this, since it functions (for S/MIME)
+### analogously to PGP signature attachments. S/MIME isn't supported
+### in a stock mutt build, but we can still treat it specially here.
+###
+#attachments   +A */.*
+#attachments   -A text/x-vcard application/pgp.*
+#attachments   -A application/x-pkcs7-.*
+#
+### Discount all MIME parts with an "inline" disposition, unless they're
+### text/plain. (Why inline a text/plain part unless it's external to the
+### message flow?)
+###
+#attachments   +I text/plain
+#
+### These two lines make Mutt qualify MIME containers.  (So, for example,
+### a message/rfc822 forward will count as an attachment.)  The first
+### line is unnecessary if you already have "attach-allow */.*", of
+### course.  These are off by default!  The MIME elements contained
+### within a message/* or multipart/* are still examined, even if the
+### containers themseves don't qualify.
+###
+##attachments  +A message/.* multipart/.*
+##attachments  +I message/.* multipart/.*
+#
+### You probably don't really care to know about deleted attachments.
+#attachments   -A message/external-body
+#attachments   -I message/external-body
