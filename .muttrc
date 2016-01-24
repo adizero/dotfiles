@@ -39,7 +39,7 @@ set mail_check = 5       # minimum time between scans
 # unset move               # gmail does that
 # set delete               # don't ask, just do
 # unset confirmappend      # don't ask, just do!
-# set quit                 # don't ask, just do!!
+set quit = ask-yes         # ask whether to quit (defaults to yes)
 # unset mark_old           # read/new is good enough for me
 set beep_new             # bell on new mails
 # set pipe_decode          # strip headers and eval mimes when piping
@@ -51,7 +51,7 @@ set charset="utf-8"  #full charset format looks like this: "en_ca.UTF-8"
 set send_charset="us-ascii:utf-8"  #send charset list ordered by priorities (mutt uses first possible)
 
 #bind generic,alias,attach,browser,editor,index,compose,pager,pgp,postpone ':' noop #increase security - disallow unbound commands to be entered from command mode
-
+set prompt_after=no  #never show "Press any key to continue..."
 
 # Scoring -----------------------------------------------------
 source ~/.mutt/scoring
@@ -229,7 +229,8 @@ set attribution = "On %d, %n wrote:" # format of quoting header
 set include                          # include message in replies
 set forward_quote                    # include message in forwards
 
-set editor="vim -X -c 'normal O' -c 'startinsert'"
+#set editor = "vim -X +0/^$ -c 'startinsert'"  #go to first empty line (after headers, when edit_headers is set)
+set editor = "vim -X -c 'normal gg' -c 'if nextnonblank(1) == 1 | normal O' -c 'startinsert'" #add empty line at the top if needed and switch to insert mode
 
 
 # Attach Key Bindings ---------------------------
