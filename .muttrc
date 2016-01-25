@@ -21,13 +21,16 @@ set my_print_file="~/.mutt/muttprint.pdf"
 set print_split
 
 #by default mutt uses lpr to print (default printer should be set via LPDEST or PRINTER environment variable)
-set print_command="lpr"
+#set print_command="lpr"  #does not work well for printing more than one line of text (don't know why)
 
 #nicer printouts (also to the file can be done using next commands)
 #set print_command="~/.mutt/macosx_mutt_print.sh"            # MACOSX use a wrapper script using enscript for printing (opens in Preview to print)
 #set print_command="iconv --unicode-subst="_" -f utf-8 -t iso-8859-1 | enscript -P $PRINTER"  #not tested yet
 #set print_command="~/.mutt/prettymuttprint2.sh"  #print via enscript
 #set print_command="muttprint %s -p - | ps2pdf - $my_print_file"  #print via Perl with iconv (print name after muttprint -p option, `-p -` means stdout)
+
+#using muttprint to print on (configure via ~/.muttprintrc, for inspiration see ~/.mutt/.muttprintrc.sample)
+set print_command="muttprint %s -p $PRINTER"  #print via Perl with iconv (print name after muttprint -p option, `-p -` means stdout)
 
 
 # Basic Options --------------------------------------
@@ -154,10 +157,9 @@ alternative_order text/calendar text/plain text/enriched text/html     # save ht
 # Pager Key Bindings ---------------------------------
 # bind pager k  previous-line
 # bind pager j  next-line
- bind pager gg top
- bind pager G  bottom
-#
- bind pager R  group-reply
+bind pager gg top
+bind pager G  bottom
+bind pager R group-reply
 
 bind pager N search-opposite
 #bind pager Z mark-as-new
@@ -184,10 +186,10 @@ set reply_regexp = "^(([Rr][Ee]?(\[[0-9]+\])?: *)?(\[[^]]+\] *)?)*"
 #macro index ",o"  "c=INBOX\noc="    # jump to INBOX and sort by score
 #mime_lookup application/octet-stream
 
-bind index gg       first-entry
-bind index G        last-entry
+bind index gg first-entry
+bind index G last-entry
 
-bind index R        group-reply
+bind index R group-reply
 
 #Ctrl-R to mark all as read
 macro index \Cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "mark all messages as read"
@@ -203,6 +205,11 @@ bind index N search-opposite
 macro index a "<limit>all\n" "show all messages (undo limit)"
 #macro index c "<change-folder>?<change-dir><home>^K=<enter>" "contextual folder change"
 
+macro index gi "<change-folder>=alu/INBOX<enter>" "go to INBOX"
+macro index gs "<change-folder>=alu/Sent<quote-char><space>Items<enter>" "go to Sent Items"
+macro index gt "<change-folder>=alu/Antwerp/SW-TIMETRA<enter>" "go to SW-TIMETRA"
+macro index gr "<change-folder>=alu/Antwerp/REGRESS<enter>" "go to REGRESS"
+macro index ge "<change-folder>=alu/Antwerp/SR<quote-char><space>environment<enter>" "go to SR environment"
 
 # Status Bar -----------------------------------------
 set status_chars  = " *%A"
@@ -277,6 +284,14 @@ macro index \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
 source ~/.mutt/mailboxes
 #archive mailboxes
 mailboxes `find $HOME/Mail/Maildir -maxdepth 4 -type d -name "*" -print | grep ".*/cur" | sed "s#$HOME/Mail/Maildir/\(.*\)#\"+\1\"#g" | grep -v -e "$HOME/Mail/Maildir" -e "+alu" | sed "s#/cur##" | sort | tr '\n' ' '`
+
+# Terminal compatibility (XTerm through screen home & end keys) ---------------------------
+bind pager "\e[1~" top
+bind pager "\e[4~" bottom
+bind index "\e[1~" first-entry
+bind index "\e[4~" last-entry
+bind attach "\e[1~" first-entry
+bind attach "\e[4~" last-entry
 
 
 # Mutt+sidebar patch or Mutt-kz: Sidebar options ------------------------------------
