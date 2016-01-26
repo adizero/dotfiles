@@ -192,7 +192,7 @@ bind index G last-entry
 bind index R group-reply
 
 #Ctrl-R to mark all as read
-macro index \Cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "mark all messages as read"
+macro index \cr "T~U<enter><tag-prefix><clear-flag>N<untag-pattern>.<enter>" "mark all messages as read"
 
 # Saner copy/move dialogs
 macro index C "<copy-message>?<toggle-mailboxes>" "copy a message to a mailbox"
@@ -210,6 +210,7 @@ macro index gs "<change-folder>=alu/Sent<quote-char><space>Items<enter>" "go to 
 macro index gt "<change-folder>=alu/Antwerp/SW-TIMETRA<enter>" "go to SW-TIMETRA"
 macro index gr "<change-folder>=alu/Antwerp/REGRESS<enter>" "go to REGRESS"
 macro index ge "<change-folder>=alu/Antwerp/SR<quote-char><space>environment<enter>" "go to SR environment"
+
 
 # Status Bar -----------------------------------------
 set status_chars  = " *%A"
@@ -260,8 +261,7 @@ set reverse_alias=yes
 source $alias_file
 
 #macro index A "!$EDITOR ~/.mutt/aliases\n:source ~/.mutt/aliases\n" "Edit aliases file and reload it"
-macro index A ":source $alias_file\n" "Reload aliases file"
-macro pager A ":source $alias_file\n" "Reload aliases file"
+macro index,pager A ":source $alias_file\n" "Reload aliases file"
 
 
 # LDAP Queries ----------------------------------
@@ -274,8 +274,8 @@ set display_filter="~/.mutt/extract_from_mailbox_files.py -"  #parses mail addre
 
 
 # Miscellaneous macros and shortcuts ------------------------
-macro pager \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
-macro index \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
+macro index,pager \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
+macro index,pager \cx "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/remind.sh<enter><enter-command>set wait_key<enter>" "Show calendar (remind)"
 
 
 # Mailboxes ----------------------------------------
@@ -309,9 +309,9 @@ color sidebar color136 color234
 #color progress default magenta
 #color sidebar green default
 
-bind index \CP sidebar-prev # ctrl-p to select prev sidebar folder
-bind index \CN sidebar-next # ctrl-n to select next sidebar folder
-bind index \CO sidebar-open # ctrl-o to open selected sidebar folder
+bind index \cp sidebar-prev # ctrl-p to select prev sidebar folder
+bind index \cn sidebar-next # ctrl-n to select next sidebar folder
+bind index \co sidebar-open # ctrl-o to open selected sidebar folder
 
 bind index <left> sidebar-prev
 bind index <right> sidebar-next
@@ -351,9 +351,9 @@ virtual-mailboxes \
     "filters"               "notmuch://?query=filter OR acl" \
 #    "INBOX"                "notmuch://?query=tag:inbox and NOT tag:archive" \
 
-bind index \Cb sidebar-toggle
-bind pager \Cb sidebar-toggle
+bind index,pager \cb sidebar-toggle
 
+bind index,pager \cq vfolder-from-query
 
 #--------------------------------------------------------------------
 
