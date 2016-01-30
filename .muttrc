@@ -205,7 +205,7 @@ bind index N search-opposite
 macro index a "<limit>all\n" "show all messages (undo limit)"
 #macro index c "<change-folder>?<change-dir><home>^K=<enter>" "contextual folder change"
 
-macro index ",c" "<pipe-message>~/.mutt/parse_remind.pl<enter>"  "parse currect mail for appointments (calender events)"
+#macro index ",c" "<pipe-message>~/.mutt/parse_remind.pl<enter>"  "parse currect mail for appointments (calendar events)"
 
 macro index gi "<change-folder>=alu/INBOX<enter>" "go to INBOX"
 macro index gs "<change-folder>=alu/Sent<quote-char><space>Items<enter>" "go to Sent Items"
@@ -214,6 +214,7 @@ macro index gr "<change-folder>=alu/Antwerp/REGRESS<enter>" "go to REGRESS"
 macro index ge "<change-folder>=alu/Antwerp/SR<quote-char><space>environment<enter>" "go to SR environment"
 macro index g7 "<change-folder>=alu/Antwerp/7750.Interest<enter>" "go to 7750.Interest"
 macro index gI "<change-folder>=alu/Interview<enter>" "go to 7750.Interest"
+macro index ga "<change-folder>=archive/Antwerp<enter>" "go to first archive folder"
 
 
 # Status Bar -----------------------------------------
@@ -280,6 +281,7 @@ set display_filter="~/.mutt/extract_from_mailbox_files.py -"  #parses mail addre
 # Miscellaneous macros and shortcuts ------------------------
 macro index,pager \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
 macro index,pager \cx "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/remind.sh<enter><enter-command>set wait_key<enter>" "Show calendar (remind)"
+macro index,pager \cw "<enter-command>unset wait_key<enter><shell-escape>wyrd ~/.mutt/reminders-wyrd.rem<enter><enter-command>set wait_key<enter>" "Show calendar (wyrd)"
 
 
 # Mailboxes ----------------------------------------
