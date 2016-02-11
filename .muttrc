@@ -213,7 +213,7 @@ macro index gt "<change-folder>=alu/Antwerp/SW-TIMETRA<enter>" "go to SW-TIMETRA
 macro index gr "<change-folder>=alu/Antwerp/REGRESS<enter>" "go to REGRESS"
 macro index ge "<change-folder>=alu/Antwerp/SR<quote-char><space>environment<enter>" "go to SR environment"
 macro index g7 "<change-folder>=alu/Antwerp/7750.Interest<enter>" "go to 7750.Interest"
-macro index gI "<change-folder>=alu/Interview<enter>" "go to 7750.Interest"
+macro index gI "<change-folder>=alu/Interview<enter>" "go to Interview"
 macro index ga "<change-folder>=archive/Antwerp<enter>" "go to first archive folder"
 
 
@@ -279,9 +279,11 @@ set display_filter="~/.mutt/extract_from_mailbox_files.py -"  #parses mail addre
 
 
 # Miscellaneous macros and shortcuts ------------------------
-macro index,pager \cv <pipe-entry>'urlview'<enter> 'Follow links with urlview'
+macro index,pager \cv <pipe-entry>'~/.mutt/viewurl.sh'<enter> 'Follow links with urlview'
+#macro index,pager \cv "<enter-command>set pipe_decode<enter><pipe-entry>~/.mutt/viewurl.sh<enter><enter-command>unset pipe_decode<enter>" "Follow links with urlview"
 macro index,pager \cx "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/remind.sh<enter><enter-command>set wait_key<enter>" "Show calendar (remind)"
-macro index,pager \cw "<enter-command>unset wait_key<enter><shell-escape>wyrd ~/.mutt/reminders-wyrd.rem<enter><enter-command>set wait_key<enter>" "Show calendar (wyrd)"
+#macro index,pager \cw "<enter-command>unset wait_key<enter><shell-escape>wyrd ~/.mutt/reminders-wyrd.rem<enter><enter-command>set wait_key<enter>" "Show calendar (wyrd)"
+macro index,pager \cw "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/remind-wyrd.sh<enter><enter-command>set wait_key<enter>" "Show calendar (wyrd)"
 
 
 # Mailboxes ----------------------------------------
