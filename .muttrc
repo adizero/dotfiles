@@ -151,6 +151,9 @@ auto_view application/x-gzip
 auto_view application/x-gunzip
 auto_view application/x-tar-gz
 auto_view application/x-rar-compressed
+auto_view application/x-compressed
+auto_view application/x-zip-compressed
+auto_view application/zip
 
 alternative_order text/calendar text/plain text/enriched text/html     # save html for last
 
@@ -184,7 +187,7 @@ set reply_regexp = "^(([Rr][Ee]?(\[[0-9]+\])?: *)?(\[[^]]+\] *)?)*"
 
 #macro index ",i"  "c=INBOX\nOd="    # jump to INBOX and reverse-sort by date
 #macro index ",o"  "c=INBOX\noc="    # jump to INBOX and sort by score
-#mime_lookup application/octet-stream
+mime_lookup application/octet-stream text/plain
 
 bind index gg first-entry
 bind index G last-entry
@@ -281,9 +284,10 @@ set display_filter="~/.mutt/extract_from_mailbox_files.py -"  #parses mail addre
 # Miscellaneous macros and shortcuts ------------------------
 macro index,pager \cv <pipe-entry>'~/.mutt/viewurl.sh'<enter> 'Follow links with urlview'
 #macro index,pager \cv "<enter-command>set pipe_decode<enter><pipe-entry>~/.mutt/viewurl.sh<enter><enter-command>unset pipe_decode<enter>" "Follow links with urlview"
+
 macro index,pager \cx "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/remind.sh<enter><enter-command>set wait_key<enter>" "Show calendar (remind)"
-#macro index,pager \cw "<enter-command>unset wait_key<enter><shell-escape>wyrd ~/.mutt/reminders-wyrd.rem<enter><enter-command>set wait_key<enter>" "Show calendar (wyrd)"
-macro index,pager \cw "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/remind-wyrd.sh<enter><enter-command>set wait_key<enter>" "Show calendar (wyrd)"
+macro index,pager \cy "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/remind-wyrd.sh<enter><enter-command>set wait_key<enter>" "Show calendar (wyrd)"
+macro index,pager \cw "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/wego.sh<enter><enter-command>set wait_key<enter>" "Show weather forecast (wego)"
 
 
 # Mailboxes ----------------------------------------
