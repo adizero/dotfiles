@@ -18,6 +18,7 @@
 #Screen          4.01.00devel (GNU) 2-May-06         ^[[>83;40100;0c
 #Gnome-terminal  GNOME Terminal 3.6.2                ^[[>1;3409;0c
 #Konsole         2.13.2                              ^[[>0;115;0c
+#iTerm2          2.9.20 (any version ?)              ^[[>0;95;0c
 
 esc_seq=
 
@@ -58,19 +59,20 @@ termInitialDetection()
     TERM_PROGRAM=
     TERM_VERSION=
 
+    export TERM_NO_X_FORWARDING=
+
     #screen is tmux's default, we expect xterm-like terminal underneath (can be wrong assumption),
     # when using rxvt-like, then change default TERM variable in tmux for new terminals to screen.rxvt for example
     if [[ "$TERM" =~ "xterm" || "$TERM" =~ "rxvt" || "$TERM" =~ "screen-bce" || "$TERM" =~ "screen" ]]; then
         if [ -z "$TERM_RESPONSE" ]; then
             wrap_escape_sequence '\033[>c'
             echo -ne $esc_seq
-            read -r -t 0.5 -d $'c' termresponse 
+            read -r -t 0.5 -d $'c' termresponse
             #we need to strip the first escape character from response
             # and replace is by something harmless (its text representation)
             export TERM_RESPONSE="^[${termresponse:1}c"
             unset termresponse
         fi
-
         response="${TERM_RESPONSE:2}"
         response="${response%;*}"
         term_type="${response%;*}"
@@ -83,6 +85,10 @@ termInitialDetection()
         elif [ "$term_type" == "[>0" -o "$term_type" == "[>41" ]; then
             TERM_PROGRAM="xterm"
             TERM_VERSION="$term_version"
+            if [ "$term_version" == "95" ]; then
+                #when connecting from Mac OSX (iTerm2), then do not do X forwarding in Vim (XQuartz server is too buggy)
+                export TERM_NO_X_FORWARDING="-X"
+            fi
         elif [ "$term_type" == "[>1" ]; then
             if [ "$term_version" == "2802" ]; then
                 TERM_PROGRAM="lxterminal"  #exception
@@ -98,10 +104,10 @@ termInitialDetection()
         fi
 
         if [ "$TERM_PROGRAM" != "rxvt" -a "$TERM_PROGRAM" != "urxvt" -a -z "$TERM_ANSWERBACK" ]; then
-            wrap_escape_sequence '\005\033[>c' 
+            wrap_escape_sequence '\005\033[>c'
             echo -ne $esc_seq
             read -r -t 0.5 -d $'\033' answerback
-            read -r -t 0.1 -d $'c' termresponse 
+            read -r -t 0.1 -d $'c' termresponse
             export TERM_ANSWERBACK="${answerback:0}$"
             unset answerback
             unset termresponse
