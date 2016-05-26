@@ -547,6 +547,8 @@ if has("wildmenu")
     set wildmenu
 endif
 
+set tabpagemax=25
+
 "needs to be after syn on (syntax on)
 let g:colors_name = g:color_scheme
 try
@@ -1571,6 +1573,32 @@ command! -range=% FormatXML <line1>,<line2>call DoFormatXML()
 "nmap <silent> <leader>x :%FormatXML<CR>
 "vmap <silent> <leader>x :FormatXML<CR>
 
+function! ShowSpaces(...)
+    let @/='\v(\s+$)|( +\ze\t)'
+    let oldhlsearch=&hlsearch
+    if !a:0
+        let &hlsearch=!&hlsearch
+    else
+        let &hlsearch=a:1
+    end
+    return oldhlsearch
+endfunction
+
+function! TrimSpaces(confirm) range
+    let oldlist=&list
+    set list
+    let oldhlsearch=ShowSpaces(1)
+    execute a:firstline.",".a:lastline."substitute ///ge" . a:confirm
+    let &hlsearch=oldhlsearch
+    let &list=oldlist
+endfunction
+
+"command! -bar -nargs=0 -range=% TrimSpaces <line1>,<line2>call TrimSpaces()
+command! -range=% TrimSpaces <line1>,<line2>call TrimSpaces("")
+command! -range=% TrimSpacesConfirm <line1>,<line2>call TrimSpaces("c")
+nnoremap <Leader><Space> :%TrimSpacesConfirm<CR>
+vnoremap <Leader><Space> :TrimSpaces<CR>
+
 " ================
 " = Experimental =
 " ================
@@ -1857,3 +1885,4 @@ else "no versioning system
     imap <F5> <C-o>:call DiffOrig()<Enter>
     vmap <F5> <Esc>:call DiffOrig()<Enter>gv
 endif
+
