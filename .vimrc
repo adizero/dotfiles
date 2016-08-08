@@ -20,6 +20,10 @@ else
     endif
 endif
 
+command! -nargs=1 Silent
+            \ | execute ':silent !'.<q-args>
+            \ | execute ':redraw!'
+
 if has("win64") || has("win32") || has("win16")
     let g:OS_name="windows"
 
@@ -37,7 +41,7 @@ if has("win64") || has("win32") || has("win16")
     "but only the first and last component
     let &runtimepath=substitute(&runtimepath, '\(^[^,]*\)vimfiles', '\1.vim', '') "replace first occurrence
     let &runtimepath=substitute(&runtimepath, '\(,[^,]*\)vimfiles\([^,]*\)$', '\1.vim\2', '') "replace last occurrence
-    
+
     "behave mswin
     "source $VIMRUNTIME/mswin.vim
 
@@ -49,7 +53,7 @@ else
     "set shell=/bin/sh
 
     let g:OS_name=system('uname -s')
-    
+
     let g:OS_dir_separator = '/'
     let g:OS_cat_command = 'cat'
     let g:OS_mkdir_command = 'mkdir -p'
@@ -143,7 +147,7 @@ if !has("gui_running")
             "  query terminal via: echo -n -e ""
             "  PuTTY usually shows PuTTY as a result
 
-            
+
             "TODO: implement somehow :-)
 
             "old xterm/lxterminal F1-F4 (used only for no mod case - e.g. OP, ...)
@@ -181,7 +185,7 @@ if !has("gui_running")
                 set <xF2>=O1;*Q
                 set <xF3>=O1;*R
                 set <xF4>=O1;*S
-            
+
                 set <F17>=[E
             endif
 
@@ -212,9 +216,9 @@ if !has("gui_running")
             set <S-Right>=
             set <S-End>=
 
-			"newer xterm can do also right winmenu key (has no setting in Vim,
-			" however something nonexistant on typical keyboard can be used - F13 for example)
-			set <F13>=[29;*~
+            "newer xterm can do also right winmenu key (has no setting in Vim,
+            " however something nonexistant on typical keyboard can be used - F13 for example)
+            set <F13>=[29;*~
 
             "fake key mappings to enable keypad key 5 (Clear) with all modifiers as <F19>
             set <F18>=O*u
@@ -245,8 +249,8 @@ if !has("gui_running")
             set <S-F10>=[34;*~
             set <S-F11>=[23;*$
             set <S-F12>=[24;*$
-			"right windows menu key is equal to S-F6 (but not shift version)
-			set <S-F13>=[29;*$
+            "right windows menu key is equal to S-F6 (but not shift version)
+            set <S-F13>=[29;*$
 
             set <F19>=Ou
 
@@ -266,36 +270,64 @@ if !has("gui_running")
             set <S-End>=[8$
             "set <S-PageUp>=[5$
             "set <S-PageDown>=[6$
-			"set <C-Insert>=[2^
-			"set <C-Del>=[3^
-			set <C-Home>=[7^
-			set <C-End>=[8^
-			"set <C-PageUp>=[5^
-			"set <C-PageDown>=[6^
+            "set <C-Insert>=[2^
+            "set <C-Del>=[3^
+            set <C-Home>=[7^
+            set <C-End>=[8^
+            "set <C-PageUp>=[5^
+            "set <C-PageDown>=[6^
             set <S-Up>=[a
             set <S-Down>=[b
             set <S-Left>=[d
             set <S-Right>=[c
-			"set <C-Up>=Oa
-			"set <C-Down>=Ob
-			set <C-Left>=Od
-			set <C-Right>=Oc
-			"set <A-Up>=[A
-			"set <A-Down>=[B
-			"set <A-Left>=[D
-			"set <A-Right>=[C
+            "set <C-Up>=Oa
+            "set <C-Down>=Ob
+            set <C-Left>=Od
+            set <C-Right>=Oc
+            "set <A-Up>=[A
+            "set <A-Down>=[B
+            "set <A-Left>=[D
+            "set <A-Right>=[C
         endif
 
         "common mappings
-		"enabling ctrl+space mapping (otherwise C-Space does nothing)
-		map <C-@> <C-Space>
-		map! <C-@> <C-Space>
+        "enabling ctrl+space mapping (otherwise C-Space does nothing)
+        map <C-@> <C-Space>
+        map! <C-@> <C-Space>
 
-		"ctrl+backspace mapping (otherwise C-BS does nothing)
-		map <C-H> <C-BS>
-		map! <C-H> <C-BS>
+        "ctrl+backspace mapping (otherwise C-BS does nothing)
+        map <C-H> <C-BS>
+        map! <C-H> <C-BS>
 
-        "Todo: conditional italics support (it is already enabled in wombat256 colorscheme)
+        "supported formating options for terminal are:
+        " *bold* *underline* *undercurl*
+        " *reverse*/*inverse* *italic* *standout*
+
+        "bold should work by default (see your terminal emulator setting for "picking drawing bold as a color/bold as a font or both)
+        "works seamlessly from inside screen
+        "let &t_md = "\e[1m"
+        "let &t_me = "\e[m"
+
+        "underline should work by default
+        "works seamlessly from inside screen
+        "let &t_us = "\e[4m"
+        "let &t_ue = "\e[m"
+
+        "undercurl as strikethrough (needs terminal support - no KiTTY/PuTTY does strikethrough):
+        if expand("$STY") != "$STY"
+            let &t_Cs = "\eP\e[9m\e\\"
+            let &t_Ce = "\eP\e[29m\e\\"
+        else
+            let &t_Cs = "\e[9m"
+            let &t_Ce = "\e[29m"
+        endif
+
+        "reverse/inverse should work by default
+        "works seamlessly from inside screen
+        "let &t_mr = "\e[7m"
+
+        "italic (italics is already enabled in wombat256 colorscheme)
+        "needs escaping from screen
         if expand("$STY") != "$STY"
             let &t_ZH = "\eP\e[3m\e\\"
             let &t_ZR = "\eP\e[23m\e\\"
@@ -303,6 +335,11 @@ if !has("gui_running")
             let &t_ZH = "\e[3m"
             let &t_ZR = "\e[23m"
         endif
+
+        "standout should work by default
+        "works seamlessly from inside screen
+        "let &t_so = "\e[7m"
+        "let &t_se = "\e[27m"
 
         """ delete wait time after ESC key is pushed in insert mode
         ""let &t_SI .= "\e[?7727h"
@@ -312,7 +349,7 @@ if !has("gui_running")
         "Todo: check somehow, whether terminal is capable of cursor shape changes
         "" changing cursor shape (work in xterm and from screen inside of xterm)
         "if expand("$STY") != "$STY"
-        "	let &t_SI .= "\eP\e[5 q\e\\"
+        "   let &t_SI .= "\eP\e[5 q\e\\"
         "    let &t_EI .= "\eP\e[2 q\e\\"
         "else
         "    let &t_SI .= "\e[5 q"
@@ -327,30 +364,34 @@ endif
 
 let g:color_scheme = ""
 if has("gui_running")
-	if g:OS_name == "windows"
-		"colorscheme zenburn
-		let g:molokai_original = 1
-		let g:color_scheme = "molokai"
-	else
-		"colorscheme desert
+    if g:OS_name == "windows"
+        "colorscheme zenburn
+        let g:molokai_original = 1
+        let g:color_scheme = "molokai"
+        let g:airline_theme = "molokai"
+    else
+        "colorscheme desert
         if &t_Co == 256
-    		let g:color_scheme = "wombat256mod"
+            let g:color_scheme = "wombat256mod"
         else
             let g:color_scheme = "wombat"
         endif
+        let g:airline_theme = "wombat"
     endif
 else
-	"no GUI - console mode
-	if g:OS_name == "windows"
-		"8-color terminal in windows only, zellner looks OK
-		let g:color_scheme = "zellner"
-	else
+    "no GUI - console mode
+    if g:OS_name == "windows"
+        "8-color terminal in windows only, zellner looks OK
+        let g:color_scheme = "zellner"
+        let g:airline_theme = "dark"
+    else
         if &t_Co == 256
-    		let g:color_scheme = "wombat256mod"
+            let g:color_scheme = "wombat256mod"
         else
             let g:color_scheme = "wombat"
         endif
-	endif
+        let g:airline_theme = "wombat"
+    endif
 endif
 set background=dark
 hi clear
@@ -369,38 +410,70 @@ if filereadable(vundle_readme)
     " let Vundle manage Vundle, required
     Plugin 'gmarik/Vundle.vim'
 
+    Plugin 'scrooloose/syntastic'
     Plugin 'Valloric/YouCompleteMe'
+    Plugin 'starcraftman/vim-eclim'
     Plugin 'terryma/vim-multiple-cursors'
+    Plugin 'easymotion/vim-easymotion'
+
+    Plugin 'ctrlpvim/ctrlp.vim'  "kien/ctrlp.vim is no longer maintained
+    Plugin 'nixprime/cpsm'  "very fast c based fuzzy matcher to replace ctrlp's slow default
 
     Plugin 'adizero/vim-togglecursor'
     Plugin 'adizero/vim-clang-format'
     Plugin 'adizero/cscope_maps.vim'
 
+    Plugin 'vim-scripts/vcscommand.vim'
+    Plugin 'mikeage/ccase.vim'
+
+    Plugin 'benjifisher/matchit.zip'
+    "Plugin 'Firef0x/matchit'
+
     Plugin 'vim-scripts/diffchar.vim'
     Plugin 'AndrewRadev/linediff.vim'
+    "Plugin 'AndrewRadev/splitjoin.vim'
 
-    "Plugin 'tpope/vim-commentary'
     Plugin 'tpope/vim-surround'
+    Plugin 'tpope/vim-abolish'
+    Plugin 'tpope/vim-repeat'
+    Plugin 'tpope/vim-unimpaired'
     Plugin 'tpope/vim-fugitive'
+    "Plugin 'tpope/vim-commentary'
     Plugin 'wilywampa/vim-commentary'
 
-    "Plugin 't9md/vim-textmanip'
-    Plugin 'stefandtw/quickfix-reflector.vim'
+    Plugin 'mhinz/vim-signify'
 
+    Plugin 'vim-airline/vim-airline'
+    Plugin 'vim-airline/vim-airline-themes'
+
+    "Plugin 'cohama/lexima.vim'
+    "Plugin 'rstacruz/vim-closer'
+
+    Plugin 'wellle/targets.vim'
+
+    "Plugin 't9md/vim-textmanip'
+    "Plugin 'stefandtw/quickfix-reflector.vim'
+
+    "Plugin 'vim-scripts/taglist.vim'
     Plugin 'majutsushi/tagbar'
+
     Plugin 'mbbill/code_complete'
     Plugin 'mbbill/undotree'
 
     Plugin 'rking/ag.vim'
-    Plugin 'yegappan/mru'
+    "Plugin 'yegappan/mru'
 
     Plugin 'uguu-org/vim-matrix-screensaver'
     Plugin 'thinca/vim-fontzoom'
 
     Plugin 'godlygeek/csapprox'
-	Plugin 'hari-rangarajan/CCTree'
+    "Plugin 'hari-rangarajan/CCTree'
 
     Plugin 'vim-scripts/SpellCheck'
+
+    "Plugin 'dbakker/vim-lint'
+    Plugin 'syngan/vim-vimlint'
+    Plugin 'ynkdir/vim-vimlparser'
 
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
@@ -413,11 +486,8 @@ endif
 "Todo: enable Eclim (by removing following line)
 let g:EclimDisabled = "defined"
 
-if v:version >= 704
-    "Todo: enable YouCompleteMe (by commenting/removing following line)
-    "let g:loaded_youcompleteme = "defined"
-else
-    let g:loaded_youcompleteme = "defined" "too old Vim => disable YouCompleteMe
+if v:version < 704
+    let g:loaded_youcompleteme = 1 "too old Vim => disable YouCompleteMe
 endif
 
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
@@ -433,7 +503,7 @@ function! YCM_tagfiles()
 endfunction
 let g:ycm_collect_identifiers_from_tags_files = 1
 
-"let g:ycm_add_preview_to_completeopt = 1
+let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_key_invoke_completion = '<C-Space>'
 let g:ycm_cache_omnifunc = 0  "takes simply too much memory in big projects (1GB of sources)
 
@@ -447,11 +517,36 @@ let g:ycm_disable_for_files_larger_than_kb = 7000
 function! Multiple_cursors_before()
     let g:ycm_auto_trigger = 0
 endfunction
- 
+
 function! Multiple_cursors_after()
     let g:ycm_auto_trigger = 1
 endfunction
 
+" make YCM completion via ycm_key_invoke_completion work only after . or ->
+" otherwise it is unusably slow (and breaks YCM altogether on huge source bases)
+function! YcmConditionalComplete()
+    "check if after . or ->, then allow, otherwise ignore
+    "check filetype (ft) to prevent for c,c++ only, otherwise allow everywhere
+    "(heavy search can be still cancelled by CTRL+C)
+    if &ft == "c" || &ft == "cpp"
+        let l:start = col('.')-3
+        if l:start < 0
+            let l:start = 0
+        endif
+        let l:part = strpart( getline('.'), l:start, col('.')-1 )
+        if l:part =~ '.\.$' || part =~ '->$' || part =~ '::$'
+            return "\<C-X>\<C-O>\<C-P>"
+        else
+            return ""
+        endif
+    else
+        return "\<C-X>\<C-O>\<C-P>"
+        "return ""
+    endif
+endfunction
+
+"inoremap g:ycm_key_invoke_completion <C-r>=YcmConditionalComplete()<CR>
+exe "inoremap ".g:ycm_key_invoke_completion." <C-r>=YcmConditionalComplete()<CR>"
 
 let s:home_base_path=$HOME
 
@@ -481,16 +576,16 @@ silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_sessions_home
 "autocmd VimEnter * call LoadSession()
 "autocmd VimLeave * call SaveSession()
 function! SaveSession()
-	execute 'mksession! ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
+    execute 'mksession! ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
 endfunction
 function! LoadSession()
-	"if argc() == 0
-		if v:version > 700
-			tabfirst
-			tabonly
-		endif
-		execute 'source ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
-	"endif
+    "if argc() == 0
+        if v:version > 700
+            tabfirst
+            tabonly
+        endif
+        execute 'source ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
+    "endif
 endfunction
 
 " open files with the cursor at the last remembered position
@@ -506,31 +601,31 @@ set langmenu=en
 " allow backspacing over everything in insert mode
 set backspace=indent,eol,start
 
-set nobackup		" DON'T keep a backup file
+set nobackup        " DON'T keep a backup file
 
-set history=400		" keep 400 lines of command line history
-set ruler			" show the cursor position all the time
-set showcmd			" display incomplete commands
-set incsearch		" do incremental searching
+set history=400     " keep 400 lines of command line history
+set ruler           " show the cursor position all the time
+set showcmd         " display incomplete commands
+set incsearch       " do incremental searching
 set tabstop=4
 
-set number				" line numbers
+set number              " line numbers
 if exists("+relativenumber")
     set relativenumber      " relative line numbers
 endif
 set cindent
 set autoindent
 if has("mouse")
-	set mouse=a				" use mouse in xterm to scroll
+    set mouse=a             " use mouse in xterm to scroll
 endif
-set scrolloff=5 		" 5 lines before and after the current line when scrolling
-set ignorecase			" ignore case
-set smartcase			" but don't ignore it, when search string contains uppercase letters
-set hid 				" allow switching buffers, which have unsaved changes
-set shiftwidth=4		" 4 characters for indenting
-set showmatch			" showmatch: Show the matching bracket for the last ')'?
+set scrolloff=5         " 5 lines before and after the current line when scrolling
+set ignorecase          " ignore case
+set smartcase           " but don't ignore it, when search string contains uppercase letters
+set hid                 " allow switching buffers, which have unsaved changes
+set shiftwidth=4        " 4 characters for indenting
+set showmatch           " showmatch: Show the matching bracket for the last ')'?
 
-set nowrap				" don't wrap by default
+set nowrap              " don't wrap by default
 syn on
 set confirm
 
@@ -559,12 +654,22 @@ catch /:E185:/
 endtry
 let g:color_scheme_loaded = 1
 
-set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0		" cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
-if v:version >= 704 && has('patch827')
-    set cscopequickfix+=a-
+"refresh airline after colorscheme load, if already loaded
+if exists("#airline")
+    call airline#load_theme()
+else
+    set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\[HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 endif
 
-imap jk <Esc> 
+if has("cscope")
+    set cscopetag
+    set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0      " cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
+    if v:version > 704 || (v:version == 704 && has('patch2033'))
+        set cscopequickfix+=a-
+    endif
+endif
+
+imap jk <Esc>
 
 " follow visual lines (instead of lines) - comes into play when line wrapping is on
 map <A-Down> gj
@@ -575,17 +680,17 @@ imap <A-Down> <C-o>gj
 "reselect visual selection after <,> movements
 vnoremap < <gv
 vnoremap > >gv
-" make Y behave like other capitals 
+" make Y behave like other capitals
 map Y y$
 " map u/U in visual mode to undo (instead of to lowercase/to uppercase)
 vnoremap u <Esc>u
 vnoremap U <Esc>U
 
 "Todo: map <C-S> and <C-Q> to something interesting (first need to claim them from terminal)
-noremap <C-S> <nop>
-noremap! <C-S> <nop>
-noremap <C-Q> <nop>
-noremap! <C-Q> <nop>
+noremap <C-S> :CtrlPTag<CR>
+"noremap! <C-S> <C-o>:CtrlPTag<CR>
+noremap <C-Q> :CtrlPBufTag<CR>
+"noremap! <C-Q> <C-o>:CtrlPBufTag<CR>
 
 " force saving files that require root permission
 "Todo: improve - slows down entering of w character in command mode
@@ -633,7 +738,7 @@ function! My_PreSection(count, bracket_to_find, search_flags, move_to_execute)
         endif
         let i = i - 1
     endwhile
-endfunction 
+endfunction
 
 function! My_SectionJump(count, n_move, last_move)
     let i = a:count
@@ -664,7 +769,7 @@ function! My_SectionJump(count, n_move, last_move)
     else
         call setpos('.', pos_save_orig)
     endif
-endfunction 
+endfunction
 
 "see :help map-operator
 "nnoremap [[ :set opfunc=My_PreSection<CR>g@
@@ -684,21 +789,20 @@ nnoremap [] :<C-U>call My_SectionJump(v:count1, "[[", "][")<CR>
 set errorformat^=%-GIn\ file\ included\ from\ %f:%l:%c:,%-GIn\ file\ included\ from\ %f:%l:%c\\,,%-GIn\ file\ included\ from\ %f:%l:%c,%-GIn\ file\ included\ from\ %f:%l,%-G%*[\ ]from\ %f:%l:%c
 set errorformat^=%-G%n:%l:%c%.%#\ Tar\'ing\ up\ changed\ files,%-GBuilding\ list\ of\ req'd\ files\ -\ starting\ at\ %s\ %n:%l:%c\ %.%#,%-GDone\ at\ %s\ %n:%l:%c\ %.%#,%-G%n:%l:%c\ %m\ Sending\ changed\ files\ to\ server,%-G%n:%l:%c\ %s\\,\ Remotely\ executing\ %.%#,%-G###\ %n:%l:%c%.%#\,\ Rsyncing\ files\ with\ \ server\ %.%#,%-G%.%#%n:%l:%c%.%#\,\ Remotely\ SSH\ executing\ %.%#
 
-set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\[HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 set laststatus=2
 
 if v:version >= 700
-	" set completion options
-	set completeopt=menu,longest ",longest,preview
+    " set completion options
+    set completeopt=menu,longest ",longest,preview
 
     " dictionary completion CTRL+X CTRL+K in insert mode
-	set dictionary=/usr/share/dict/words
+    set dictionary=/usr/share/dict/words
     " thesaurus synonyms completion CTRL+X CTRL+T in insert mode
-	"set thesaurus=/usr/share/????
+    "set thesaurus=/usr/share/????
     " spell checking (switchable by <Leader>s), CTRL+X CTRL+S in insert mode
-	set nospell
-	set spelllang=en
-	set spellsuggest=5
+    set nospell
+    set spelllang=en
+    set spellsuggest=5
 endif
 
 " ============================
@@ -714,7 +818,7 @@ set title
 
 ":auto BufEnter * let &titlestring= expand("%:t") . " (" . expand($REL) . "-" . expand($RELP) . " " . expand($VPLOAD) . expand($HOST_TAG) . " " . expand($SS) . " | " . expand($ROOT) . ")"
 if $REL == ""
-	:auto BufEnter * let &titlestring= "%m%r" . expand("%:t")
+    :auto BufEnter * let &titlestring= "%m%r" . expand("%:t")
 else
     if $VPLOAD != ""
         if $REL != $RELP
@@ -723,7 +827,7 @@ else
             :auto BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
         endif
     else
-        :auto BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $CURRENT_LOCATION . " | " . $ROOT . ")" 
+        :auto BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $CURRENT_LOCATION . " | " . $ROOT . ")"
     endif
 endif
 
@@ -739,33 +843,33 @@ endif
 " ============================
 if v:version > 600
     if has("folding")
-		set nofoldenable
-		" superslow method of folding from VIM 7.2.274a
-		if v:version < 702
-			set foldmethod=syntax
-		else
-		" another older version of folding (does not work with matching brackets in VIM7
-			"syn region myFold start="{" end="}" transparent fold
-			"syn sync fromstart
-			"set foldlevel=5
-		" older version of folding (only pure brackets)
-			set foldmarker={,}
-			set foldmethod=marker
-		endif
-	endif
+        set nofoldenable
+        " superslow method of folding from VIM 7.2.274a
+        if v:version < 702
+            set foldmethod=syntax
+        else
+        " another older version of folding (does not work with matching brackets in VIM7
+            "syn region myFold start="{" end="}" transparent fold
+            "syn sync fromstart
+            "set foldlevel=5
+        " older version of folding (only pure brackets)
+            set foldmarker={,}
+            set foldmethod=marker
+        endif
+    endif
 endif
 
 " ============================
 " =Working with multiple tabs=
 " ============================
 if v:version > 700
-	" navigating multiple tabs - works only in graphical modes (gVim)
-	nmap <C-Tab> :tabnext<Enter>
-	nmap <C-S-Tab> :tabprev<Enter>
-	imap <C-Tab> <C-o>:tabnext<Enter>
-	imap <C-S-Tab> <C-o>:tabprev<Enter>
-	vmap <C-Tab> <Esc>:tabnext<Enter>gv
-	vmap <C-S-Tab> <Esc>:tabprev<Enter>gv
+    " navigating multiple tabs - works only in graphical modes (gVim)
+    nmap <C-Tab> :tabnext<Enter>
+    nmap <C-S-Tab> :tabprev<Enter>
+    imap <C-Tab> <C-o>:tabnext<Enter>
+    imap <C-S-Tab> <C-o>:tabprev<Enter>
+    vmap <C-Tab> <Esc>:tabnext<Enter>gv
+    vmap <C-S-Tab> <Esc>:tabprev<Enter>gv
 
     " simplified movement through windows
     nmap <C-Up> <C-S-Up>
@@ -780,13 +884,13 @@ endif
 " =Movement with CTRL,SHIFT and ARROWS=
 " =====================================
 if v:version > 700
-	" CTRL+SHIFT+UP/DOWN works only in graphical modes
-	nmap <C-S-Up> <C-w>W
-	nmap <C-S-Down> <C-w>w
-	imap <C-S-Up> <C-o><C-w>W
-	imap <C-S-Down> <C-o><C-w>w
-	vmap <C-S-Up> <C-w>Wgv
-	vmap <C-S-Down> <C-w>wgv
+    " CTRL+SHIFT+UP/DOWN works only in graphical modes
+    nmap <C-S-Up> <C-w>W
+    nmap <C-S-Down> <C-w>w
+    imap <C-S-Up> <C-o><C-w>W
+    imap <C-S-Down> <C-o><C-w>w
+    vmap <C-S-Up> <C-w>Wgv
+    vmap <C-S-Down> <C-w>wgv
 endif
 
 " ======================================
@@ -854,15 +958,15 @@ function! SophHelp()
         bw
     else
         try
-			let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
-			"echo l:cww
-			exec "help ".l:cww
+            let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
+            "echo l:cww
+            exec "help ".l:cww
             "exec "help ".expand("<cWORD>")
         catch /:E149:\|:E661:/
             " E149 no help for <subject>
             " E661 no <language> help for <subject>
-			" E488 trailing characters
-			" E492 not a command word
+            " E488 trailing characters
+            " E492 not a command word
             try
                 exec "help ".expand("<cword>")
             catch /:E149:\|:E661:/
@@ -876,60 +980,63 @@ endfunction
 
 " resolves even with :: in the cWORD, but without following (), ->, ., , e.g. DbgwController::getPort vs. DbgwController::getPort()
 function! SophTag(str)
-		"SophTag(...)
-		"let args=a:000
-		"for a in args
-		"	echo a
-		"endfor
-		for i in [0,1]
-			if &csto == i
-				let search_cmd="cscope find g "
-			else
-				let search_cmd="tag "
-			endif
+        "SophTag(...)
+        "let args=a:000
+        "for a in args
+        "   echo a
+        "endfor
+        for i in [0,1]
+            if &csto == i
+                let search_cmd="cscope find g "
+            else
+                let search_cmd="tag "
+            endif
 
-			if a:str != ""
-				try
-					"echo search_cmd.a:str
-					exec search_cmd.a:str
-					return 0  " search no more, result found
-				catch /:E325:/
-					" ATTENTION when opening file
+            if a:str != ""
+                try
+                    "echo search_cmd.a:str
+                    exec search_cmd.a:str
+                    return 0  " search no more, result found
+                catch /:E325:/
+                    " ATTENTION when opening file
                     return 0
-				catch /:E562:\|:E257:\|:E259:/
-					" we will continue with cWORD and cword searches
-				endtry
-			endif
-			try
-				let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
-				"echo search_cmd.l:cww
-				exec search_cmd.l:cww
-				return 0  " search no more, result found
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E426:/
+                    " we will continue with cWORD and cword searches
+                endtry
+            endif
+            try
+                let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
+                "echo search_cmd.l:cww
+                exec search_cmd.l:cww
+                return 0  " search no more, result found
             catch /:E325:/
                 " ATTENTION when opening file
                 return 0
-			catch /:E562:\|:E257:\|:E259:/
-				" E562 bad usage for cstag - obviously cWORD contains special characters
-				" E257 cstag tag not found
-				try
-					"echo search_cmd.expand("<cword>")
-					exec search_cmd.expand("<cword>")
-					return 0  " search no more, result found
-				catch /:E325:/
-					" ATTENTION when opening file
+            catch /:E562:\|:E567:\|:E257:\|:E259:\|:E426:/
+                " E562 bad usage for cstag - obviously cWORD contains special characters
+                " E567 no cscope connections
+                " E257 cstag tag not found
+                " E259 no matches found for cscope query
+                " E426 tag not found
+                try
+                    "echo search_cmd.expand("<cword>")
+                    exec search_cmd.expand("<cword>")
+                    return 0  " search no more, result found
+                catch /:E325:/
+                    " ATTENTION when opening file
                     return 0
-				catch /:E562:\|:E257:\|:E259:/
-					" not found
-				endtry
-			endtry
-		endfor
-		echohl WarningMsg
-		if a:str != ""
-			echo "Sorry, no tag generated for ".a:str." or ".expand("<cWORD>")." or ".expand("<cword>")
-		else
-			echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
-		endif
-		echohl None
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E426:/
+                    " not found
+                endtry
+            endtry
+        endfor
+        echohl WarningMsg
+        if a:str != ""
+            echo "Sorry, no tag generated for ".a:str." or ".expand("<cWORD>")." or ".expand("<cword>")
+        else
+            echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
+        endif
+        echohl None
 endfunction
 
 nmap <C-]> :call SophTag("")<Enter>
@@ -938,13 +1045,13 @@ imap <C-]> <C-o>:call SophTag("")<Enter>
 vmap <C-]> y<Esc>:call SophTag("<C-r>0")<Enter>gv
 
 if v:version >= 703
-	nmap <S-F7> :UndotreeToggle<Enter>
-	imap <S-F7> <C-o>:UndotreeToggle<Enter>
-	vmap <S-F7> <Esc>:UndotreeToggle<Enter>gv
+    nmap <S-F7> :UndotreeToggle<Enter>
+    imap <S-F7> <C-o>:UndotreeToggle<Enter>
+    vmap <S-F7> <Esc>:UndotreeToggle<Enter>gv
 else
-	nmap <S-F7> :call SophHelp()<Enter>
-	imap <S-F7> <C-o>:call SophHelp()<Enter>
-	vmap <S-F7> <Esc>:call SophHelp()<Enter>gv
+    nmap <S-F7> :call SophHelp()<Enter>
+    imap <S-F7> <C-o>:call SophHelp()<Enter>
+    vmap <S-F7> <Esc>:call SophHelp()<Enter>gv
 endif
 
 " F2 to save
@@ -955,40 +1062,40 @@ vmap <F2> <Esc>:w<Enter>gv
 " F3 to toggle source/header
 " switch editing between .c* and .h* files
 function! Mosh_Flip_Ext()
-	" Since .h file can be in a different dir, calling find
-	let oldpath = &path
-	try
-		"file search path will be fixed
-		"set path=.,**,../include/**,../src/**
-		let &path = g:header_source_flip_search_path
-		if match(expand("%"),'\.c') > 0
-			"let s:flipname = substitute(expand("%"),'\.c\(.*\)','.h\1',"")
-			let s:flipname = expand("%:t:r")
-			try
-				exe ":find " . s:flipname . ".h"
-			catch /^Vim\%((\a\+)\)\=:E345/
-				try
-					exe ":find " . s:flipname . ".hh"
-				catch /^Vim\%((\a\+)\)\=:E345/
-					exe ":find " . s:flipname . ".hpp"
-				endtry
-			endtry	
-		elseif match(expand("%"),"\\.h") > 0
-			"let s:flipname = substitute(expand("%"),'\.h\(.*\)','.c\1',"")
-			let s:flipname = expand("%:t:r")
-			try
-				exe ":find " . s:flipname . ".cc"
-			catch /^Vim\%((\a\+)\)\=:E345/
-				try
-					exe ":find " . s:flipname . ".c"
-				catch /^Vim\%((\a\+)\)\=:E345/
-					exe ":find " . s:flipname . ".cpp"
-				endtry
-			endtry	
-		endif
-	finally
-		let &path = oldpath
-	endtry
+    " Since .h file can be in a different dir, calling find
+    let oldpath = &path
+    try
+        "file search path will be fixed
+        "set path=.,**,../include/**,../src/**
+        let &path = g:header_source_flip_search_path
+        if match(expand("%"),'\.c') > 0
+            "let s:flipname = substitute(expand("%"),'\.c\(.*\)','.h\1',"")
+            let s:flipname = expand("%:t:r")
+            try
+                exe ":find " . s:flipname . ".h"
+            catch /^Vim\%((\a\+)\)\=:E345/
+                try
+                    exe ":find " . s:flipname . ".hh"
+                catch /^Vim\%((\a\+)\)\=:E345/
+                    exe ":find " . s:flipname . ".hpp"
+                endtry
+            endtry
+        elseif match(expand("%"),"\\.h") > 0
+            "let s:flipname = substitute(expand("%"),'\.h\(.*\)','.c\1',"")
+            let s:flipname = expand("%:t:r")
+            try
+                exe ":find " . s:flipname . ".cc"
+            catch /^Vim\%((\a\+)\)\=:E345/
+                try
+                    exe ":find " . s:flipname . ".c"
+                catch /^Vim\%((\a\+)\)\=:E345/
+                    exe ":find " . s:flipname . ".cpp"
+                endtry
+            endtry
+        endif
+    finally
+        let &path = oldpath
+    endtry
 endfun
 
 map <F3> :call Mosh_Flip_Ext()<CR>
@@ -997,12 +1104,12 @@ vmap <F3> <Esc>:call Mosh_Flip_Ext()<CR>gv
 
 " F4 to switch between hex and ASCII editing
 function! Fxxd()
-	let c=getline(".")
-	if c =~ '^[0-9a-f]\{7}:'
-		:%!xxd -r
-	else
-		:%!xxd -g4
-	endif
+    let c=getline(".")
+    if c =~ '^[0-9a-f]\{7}:'
+        :%!xxd -r
+    else
+        :%!xxd -g4
+    endif
 endfunction
 
 nmap <F4> :call Fxxd()<Enter>
@@ -1010,20 +1117,20 @@ imap <F4> <C-o>:call Fxxd()<Enter>
 vmap <F4> <Esc>:call Fxxd()<Enter>gv
 
 function! MyDiff()
-	let opt = ""
-	if &diffopt =~ "icase"
-		let opt = opt . "-i "
-	endif
-	if &diffopt =~ "iwhite"
-		"let opt = opt . "-b "
-		let opt = opt . "-w "
-	endif
-	if exists("t:diffoptions")
-		let opt = opt . t:diffoptions
-	endif
-	silent execute "!diff -a --binary " . opt . " " . v:fname_in . " " . v:fname_new . " > " . v:fname_out
+    let opt = ""
+    if &diffopt =~ "icase"
+        let opt = opt . "-i "
+    endif
+    if &diffopt =~ "iwhite"
+        "let opt = opt . "-b "
+        let opt = opt . "-w "
+    endif
+    if exists("t:diffoptions")
+        let opt = opt . t:diffoptions
+    endif
+    silent execute "!diff -a --binary " . opt . " " . v:fname_in . " " . v:fname_new . " > " . v:fname_out
     "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
-    execute "redraw!" 
+    execute "redraw!"
 endfunction
 "ignore whitespace differences
 set diffopt=filler,context:6
@@ -1035,15 +1142,15 @@ set diffexpr=MyDiff()  "produces some artifacts on command line after execution
 " =========
 " not really used (could be used in future, with debugger integration)
 if has('signs')
-	"defines sign type information
-	sign define information text=!> texthl=Error linehl=Warning 
-	"places sign type information with ID 123 on current line
-	"exe ":sign place 123 line=" . line(".") . " name=information file=" . expand("%:p")
-	"remove sign with ID 123 from current file
-	"exe ":sign unplace 123 file=" . expand("%:p")
+    "defines sign type information
+    sign define information text=!> texthl=Error linehl=Warning
+    "places sign type information with ID 123 on current line
+    "exe ":sign place 123 line=" . line(".") . " name=information file=" . expand("%:p")
+    "remove sign with ID 123 from current file
+    "exe ":sign unplace 123 file=" . expand("%:p")
 
-	"nmap <F7> :exe ":sign place 123 line=" . line(".") . " name=information file=" . expand("%:p")<CR>
-	"nmap <S-F7> :exe ":sign unplace 123 file=" . expand("%:p")<CR>
+    "nmap <F7> :exe ":sign place 123 line=" . line(".") . " name=information file=" . expand("%:p")<CR>
+    "nmap <S-F7> :exe ":sign unplace 123 file=" . expand("%:p")<CR>
 endif
 
 set pastetoggle=<F7>
@@ -1052,9 +1159,9 @@ nmap <F8> :TagbarToggle<Enter>
 imap <F8> <C-o>:TagbarToggle<Enter>
 vmap <F8> <Esc>:TagbarToggle<Enter>gv
 
-nmap <S-F8> :TlistToggle<Enter>
-imap <S-F8> <C-o>:TlistToggle<Enter>
-vmap <S-F8> <Esc>:TlistToggle<Enter>gv
+"nmap <S-F8> :TlistToggle<Enter>
+"imap <S-F8> <C-o>:TlistToggle<Enter>
+"vmap <S-F8> <Esc>:TlistToggle<Enter>gv
 
 nmap <S-F6> :call LoadSession()<Enter>
 imap <S-F6> <C-o>:call LoadSession()<Enter>
@@ -1079,26 +1186,69 @@ vmap <S-F10> <Esc>:qa<Enter>gv
 
 " command mode abbreviation of tt as tabnew | tag <args>
 cabbrev tt TT
-comm! -nargs=1 -complete=tag TT tabnew | cstag <args> 
+comm! -nargs=1 -complete=tag TT tabnew | cstag <args>
+
+function! Quickfix_window_move(type, direction)
+    "ignore error E553: no more items and jump to first/last one
+    try
+        if a:type == "quickfix"
+            if a:direction == "prev"
+                try
+                    execute "cprev"
+                catch /:E553:/
+                    execute "cfirst"
+                endtry
+            else
+                try
+                    execute "cnext"
+                catch /:E553:/
+                    execute "clast"
+                endtry
+            endif
+        else
+            if a:direction == "prev"
+                try
+                    execute "lprev"
+                catch /:E553:/
+                    execute "lfirst"
+                endtry
+            else
+                try
+                    execute "lnext"
+                catch /:E553:/
+                    execute "llast"
+                endtry
+            endif
+        endif
+    catch
+        "silently discard other errors
+"        echohl WarningMsg
+"        if a:type == "quickfix"
+"            echo "No further move is possible in quickfix list"
+"        else
+"            echo "No further move is possible in location list"
+"        endif
+"        echohl None
+    endtry
+endfunction
 
 " Quickfix window - prev/next line jumps
-nmap <F11> :cprev<Enter>
-imap <F11> <C-o>:cprev<Enter>
-vmap <F11> <Esc>:cprev<Enter>v
+nmap <F11> :call Quickfix_window_move("quickfix", "prev")<Enter>
+imap <F11> <C-o>:call Quickfix_window_move("quickfix", "prev")<Enter>
+vmap <F11> <Esc>:call Quickfix_window_move("quickfix", "prev")<Enter>v
 
-"E553
-nmap <F12> :cnext<Enter>
-imap <F12> <C-o>:cnext<Enter>
-vmap <F12> <Esc>:cnext<Enter>v
+nmap <F12> :call Quickfix_window_move("quickfix", "next")<Enter>
+imap <F12> <C-o>:call Quickfix_window_move("quickfix", "next")<Enter>
+vmap <F12> <Esc>:call Quickfix_window_move("quickfix", "next")<Enter>v
 
-" LQuickfix window - prev/next line jumps
-nmap <S-F11> :lprev<Enter>
-imap <S-F11> <C-o>:lprev<Enter>
-vmap <S-F11> <Esc>:lprev<Enter>v
+" Location window - prev/next line jumps
+nmap <S-F11> :call Quickfix_window_move("location", "prev")<Enter>
+imap <S-F11> <C-o>:call Quickfix_window_move("location", "prev")<Enter>
+vmap <S-F11> <Esc>:call Quickfix_window_move("location", "prev")<Enter>v
 
-nmap <S-F12> :lnext<Enter>
-imap <S-F12> <C-o>:lnext<Enter>
-vmap <S-F12> <Esc>:lnext<Enter>v
+nmap <S-F12> :call Quickfix_window_move("location", "next")<Enter>
+imap <S-F12> <C-o>:call Quickfix_window_move("location", "next")<Enter>
+vmap <S-F12> <Esc>:call Quickfix_window_move("location", "next")<Enter>v
 
 " common leader mappings
 let mapleader = ','
@@ -1109,8 +1259,8 @@ map <Leader>I :set diffopt-=iwhite<CR>
 map <Leader>i :set diffopt+=iwhite<CR>
 
 function! LetDiffOptionsForTab(options)
-	let t:diffoptions=a:options
-	diffupdate
+    let t:diffoptions=a:options
+    diffupdate
 endfunction
 map <Leader>D :call LetDiffOptionsForTab("")<CR>
 map <Leader>d :call LetDiffOptionsForTab("-d")<CR>
@@ -1122,14 +1272,27 @@ map <Leader>f :set foldenable!<CR>
 map <Leader>w :set wrap!<CR>
 
 map <Leader>p :set paste!<CR>
+
+" YouCompleteMe automatic code completion toggle
+function! YcmAutoToggle()
+    if g:ycm_auto_trigger == 1
+        let g:ycm_auto_trigger = 0
+        echo "YouCompleteMe automatic completion is turned off"
+    else
+        let g:ycm_auto_trigger = 1
+        echo "YouCompleteMe automatic completion is turned on"
+    endif
+endfunction
+map <Leader>y :call YcmAutoToggle()<CR>
+
 " mouse integration switching
 function! SwitchMouse()
-	let opt = ""
-	if &mouse =~ "a"
-		set mouse=
-	else
-		set mouse=a
-	endif
+    let opt = ""
+    if &mouse =~ "a"
+        set mouse=
+    else
+        set mouse=a
+    endif
 endfunction
 map <Leader>m :call SwitchMouse()<CR>
 
@@ -1140,76 +1303,76 @@ map <Leader>0 :let &path=g:default_search_path<CR>
 " =        GUI options       =
 " ============================
 if has("gui_running")
-	if v:version > 700
-		function! FoldSpellBalloon()
-			let foldStart = foldclosed(v:beval_lnum )
-			let foldEnd = foldclosedend(v:beval_lnum)
-			let lines = []
-			" Detect if we are in a fold
-			if foldStart < 0
-				" Detect if we are on a misspelled word
-				let lines = spellsuggest( spellbadword(v:beval_text)[ 0 ], 5, 0 )
-			else
-				" we are in a fold
-				let numLines = foldEnd - foldStart + 1
-				" if we have too many lines in fold, show only the first 14
-				" and the last 14 lines
-				if ( numLines > 31 )
-					let lines = getline( foldStart, foldStart + 14 )
-					let lines += [ '-- Snipped ' . ( numLines - 30 ) . ' lines --' ]
-					let lines += getline( foldEnd - 14, foldEnd )
-				else
-					"less than 30 lines, lets show all of them
-					let lines = getline( foldStart, foldEnd )
-				endif
-			endif
-			return join( lines, has( "balloon_multiline" ) ? "\n" : " " )
-		endfunction
-		set balloonexpr=FoldSpellBalloon()
-		set ballooneval
+    if v:version > 700
+        function! FoldSpellBalloon()
+            let foldStart = foldclosed(v:beval_lnum )
+            let foldEnd = foldclosedend(v:beval_lnum)
+            let lines = []
+            " Detect if we are in a fold
+            if foldStart < 0
+                " Detect if we are on a misspelled word
+                let lines = spellsuggest( spellbadword(v:beval_text)[ 0 ], 5, 0 )
+            else
+                " we are in a fold
+                let numLines = foldEnd - foldStart + 1
+                " if we have too many lines in fold, show only the first 14
+                " and the last 14 lines
+                if ( numLines > 31 )
+                    let lines = getline( foldStart, foldStart + 14 )
+                    let lines += [ '-- Snipped ' . ( numLines - 30 ) . ' lines --' ]
+                    let lines += getline( foldEnd - 14, foldEnd )
+                else
+                    "less than 30 lines, lets show all of them
+                    let lines = getline( foldStart, foldEnd )
+                endif
+            endif
+            return join( lines, has( "balloon_multiline" ) ? "\n" : " " )
+        endfunction
+        set balloonexpr=FoldSpellBalloon()
+        set ballooneval
 
-		" contains for,endfor and hence it is not working in VIM6 at startup
-		function! InfoGuiTooltip()
-			"get window count
-			let wincount = tabpagewinnr(tabpagenr(),'$')
-			let bufferlist=''
-			"get name of active buffers in windows
+        " contains for,endfor and hence it is not working in VIM6 at startup
+        function! InfoGuiTooltip()
+            "get window count
+            let wincount = tabpagewinnr(tabpagenr(),'$')
+            let bufferlist=''
+            "get name of active buffers in windows
 
-			"for i in tabpagebuflist() - for is defined only in VIM7+, in VIM6
-			"this script causes error by start
-				let bufferlist .= '['.fnamemodify(bufname(i),':t').'] '
-			"endfor - defined only in VIM7+			
-			return bufname($).' windows: '.wincount.' '.bufferlist ' '
-		endfunction
-		set guitabtooltip=%!InfoGuiTooltip()
-	endif
+            "for i in tabpagebuflist() - for is defined only in VIM7+, in VIM6
+            "this script causes error by start
+                let bufferlist .= '['.fnamemodify(bufname(i),':t').'] '
+            "endfor - defined only in VIM7+
+            return bufname($).' windows: '.wincount.' '.bufferlist.' '
+        endfunction
+        set guitabtooltip=%!InfoGuiTooltip()
+    endif
 
-	if g:OS_name == "windows"
-		"set guifont=Lucida_Console:h8:cEASTEUROPE
-		"set guifont=Dina:h8:cANSI
-		silent! set guifont=Envy\ Code\ R:h11:cEASTEUROPE
+    if g:OS_name == "windows"
+        "set guifont=Lucida_Console:h8:cEASTEUROPE
+        "set guifont=Dina:h8:cANSI
+        silent! set guifont=Envy\ Code\ R:h11:cEASTEUROPE
         if &guifont != 'Envy Code R:h11:cEASTEUROPE'
             silent! set guifont=Lucida_Console:h11:cEASTEUROPE
         endif
-		set guioptions="aegmrLtT
-		
-		" maximize window on start
-		autocmd GUIEnter * simalt ~X
-	else
-		silent! set guifont=Envy\ Code\ R\ 11
+        set guioptions="aegmrLtT
+
+        " maximize window on start
+        autocmd GUIEnter * simalt ~X
+    else
+        silent! set guifont=Envy\ Code\ R\ 11
         if &guifont != 'Envy Code R 11'
             silent! set guifont=Dejavu\ Sans\ Mono\ 11
         endif
 
-		set guioptions="aegimrLtT
-	
-		" maximize window on start (still not good enough - it's not truly
-		" maxed)
-		set guiheadroom=0
-		"set lines=999 columns=999
-	
-		set lines=50 columns=210
-	endif
+        set guioptions="aegimrLtT
+
+        " maximize window on start (still not good enough - it's not truly
+        " maxed)
+        set guiheadroom=0
+        "set lines=999 columns=999
+
+        set lines=50 columns=210
+    endif
 endif
 
 
@@ -1225,15 +1388,15 @@ endif
 function! CleverTabCompletion()
    " do we have omni completion available
    if &omnifunc != ''
-	  "use omni-completion 1. priority
-	  return "\<C-X>\<C-O>"
+      "use omni-completion 1. priority
+      return "\<C-X>\<C-O>"
    elseif &dictionary != ''
-	  " no omni completion, try dictionary completion
-	  return "\<C-K>"
+      " no omni completion, try dictionary completion
+      return "\<C-K>"
    else
-	  "use omni completion or dictionary completion
-	  "use known-word completion
-	  return "\<C-N>"
+      "use omni completion or dictionary completion
+      "use known-word completion
+      return "\<C-N>"
   endif
 endfunction
 
@@ -1246,29 +1409,29 @@ function! TabCompletion()
 endfunction
 
 function! ShiftTabCompletion()
-	"check if at beginning of line or after a space
-	"let g:str = strpart( getline('.'), col('.'))
-	if strpart( getline('.'), 0, col('.')-1 ) =~ '\t\+\s*$'
-		execute "normal F\<C-I>"
-		normal x
-		return ""
-	elseif strpart( getline('.'), col('.')-1 ) =~ '^\s*\t\+'
-		normal m`
-		execute "normal f\<C-I>"
-		normal x
-		normal ``
-		return ""
-	elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
-		execute "normal \<LT>\<LT>"
-		return ""
-	else
-		"return CleverTabCompletion()
+    "check if at beginning of line or after a space
+    "let g:str = strpart( getline('.'), col('.'))
+    if strpart( getline('.'), 0, col('.')-1 ) =~ '\t\+\s*$'
+        execute "normal F\<C-I>"
+        normal x
+        return ""
+    elseif strpart( getline('.'), col('.')-1 ) =~ '^\s*\t\+'
+        normal m`
+        execute "normal f\<C-I>"
+        normal x
+        normal ``
+        return ""
+    elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+        execute "normal \<LT>\<LT>"
+        return ""
+    else
+        "return CleverTabCompletion()
         if pumvisible()
             return "\<C-P>"
         else
             return "\<S-Tab>"
         endif
-	endif
+    endif
 endfunction
 " bind function to the tab key
 imap <Tab> <C-r>=TabCompletion()<CR>
@@ -1284,9 +1447,9 @@ nmap \ :grep!<SPACE>
 " =        OS specific       =
 " ============================
 if g:OS_name == "windows"
-	set grepprg=findstr\ /R\ /S\ /N
+    set grepprg=findstr\ /R\ /S\ /N
 else
-	set grepprg=grep\ -nH\ $*\ /dev/null
+    set grepprg=grep\ -nH\ $*\ /dev/null
 
     " The Silver Searcher
     if executable('ag')
@@ -1295,18 +1458,11 @@ else
       "\ --column
       nmap <Leader>a :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
       nmap \ :Ag<SPACE>
-
-      " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
-      let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" -p ~/.agignore'
-      "--ignore *gen/work/ --ignore *gen/agent/ti-mibs/'
-
-      " ag is fast enough that CtrlP doesn't need to cache
-      let g:ctrlp_use_caching = 1
     endif
 
-	"set equalprg=indent\ -gnu
-	"set equalprg=indent\ -nbad\ -bap\ -nbc\ -bbo\ -bl\ -bli0\ -bls\ -ncdb\ -nce\ -cp1\ -cs\ -di16\ -ndj\ -nfc1\ -nfca\ -hnl\ -i4\ -ip5\ -lp\ -pcs\ -nprs\ -psl\ -saf\ -sai\ -saw\ -nsc\ -nsob\ -nut
-	"set formatprg=par\ -w78j
+    "set equalprg=indent\ -gnu
+    "set equalprg=indent\ -nbad\ -bap\ -nbc\ -bbo\ -bl\ -bli0\ -bls\ -ncdb\ -nce\ -cp1\ -cs\ -di16\ -ndj\ -nfc1\ -nfca\ -hnl\ -i4\ -ip5\ -lp\ -pcs\ -nprs\ -psl\ -saf\ -sai\ -saw\ -nsc\ -nsob\ -nut
+    "set formatprg=par\ -w78j
 endif
 
 " =================
@@ -1316,44 +1472,44 @@ endif
 " also from $CTAGS_PREFIX files
 set tags=
 if filereadable("tags")
-	set tags+=tags
+    set tags+=tags
 endif
 if $CTAGS_FILE != ""
-	"if &tags != ""
-	"	set tags+=,
-	"endif
-	set tags+=$CTAGS_FILE
+    "if &tags != ""
+    "   set tags+=,
+    "endif
+    set tags+=$CTAGS_FILE
 elseif $CTAGS_PREFIX != ""
-	"echo "tst"
-	let prefix = $CTAGS_PREFIX
-	let bre=0
-	for i in range(10)
-		for j in range(10)
-			let prefixnr = prefix.i.j
-			"echo prefixnr
-			if filereadable(prefixnr)
-				if &tags != ""
-					let &tags.=","
-				endif
-				let &tags.=prefixnr
-			else
-				"echo "file ".prefixnr." not found!"
-				let bre=1
-				break
-			endif
-		endfor
-		if bre == 1
-			break
-		endif
-	endfor
+    "echo "tst"
+    let prefix = $CTAGS_PREFIX
+    let bre=0
+    for i in range(10)
+        for j in range(10)
+            let prefixnr = prefix.i.j
+            "echo prefixnr
+            if filereadable(prefixnr)
+                if &tags != ""
+                    let &tags.=","
+                endif
+                let &tags.=prefixnr
+            else
+                "echo "file ".prefixnr." not found!"
+                let bre=1
+                break
+            endif
+        endfor
+        if bre == 1
+            break
+        endif
+    endfor
 
-	"if filereadable($CTAGS_PREFIX)
-	"	"comma separator is added automatically via += construct
-	"	"if &tags != ""
-	"	"	set tags+=,
-	"	"endif
-	"	set tags+=$CTAGS_PREFIX
-	"endif
+    "if filereadable($CTAGS_PREFIX)
+    "   "comma separator is added automatically via += construct
+    "   "if &tags != ""
+    "   "   set tags+=,
+    "   "endif
+    "   set tags+=$CTAGS_PREFIX
+    "endif
 endif
 
 " ============================
@@ -1406,13 +1562,54 @@ let g:clang_format#no_operator = 1
 let did_UltiSnips_plugin="defined"
 let did_UltiSnips_after="defined"
 
+" === CTRL-P ===
+"   if !isdirectory('.git')
+"       " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
+"       let g:ctrlp_user_command = 'ag %s -l --nocolor -g "" -p ~/.agignore'
+"       ""--ignore *gen/work/ --ignore *gen/agent/ti-mibs/'
+"       " ag is fast enough that CtrlP doesn't need to cache (better to cache anyhow)
+"       let g:ctrlp_use_caching = 1
+"   else
+"       " Even faster method, but only for git repositories - no caching needed
+"       let g:ctrlp_user_command = 'git ls-files --others --cached --exclude-standard -- %s'
+"       let g:ctrlp_use_caching = 0
+"   endif
+function! CTRLP_tagfiles()
+"   default tags  (almost 1G) - it is too big for fuzzy matching (10 sec load + 1 sec after keypress seaarch)
+"    let result = []
+"    call add(result , &tags)
+"    return result
+    if expand("$CSCOPE_FILES_DIR") != "$CSCOPE_FILES_DIR"
+        return [expand("$CSCOPE_FILES_DIR") . '/ctrlp.tags']
+    else
+        return [expand("$HOME") . '/tmp/ctrlp.tags']
+    endif
+endfunction
+
+let g:ctrlp_user_command = 'ctrlp_find.sh %s'
+let g:ctrlp_use_caching = 0
+
+let g:ctrlp_lazy_update = 0
+let g:ctrlp_open_multiple_files = 'tjr'  "potentially add r (to open first in multi-selection in current window/tab)
+
+"nmap <C-M> :CtrlPMRU<CR> "cannot be used, as <Enter> is <C-M>
+let g:ctrlp_mruf_max = 50
+command! MRU :CtrlPMRU<CR>
+cabbrev mru MRU
+
+let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
+
+let g:ctrlp_working_path_mode = 'ra'  "for SR projects it is overriden later
+
+"let g:ctrlp_types = ['fil', 'buf', 'mru', 'tag', 'bft']  "does not extend the three basic types
+
 " === diffchar.vim ===
 "Todo: enable diffchar.vim
 " first fix bug:
 " Error detected while processing function <SNR>41_UpdateDiffChar..<SNR>41_ResetDiffChar..<SNR>41_ResetDiffCharPair:
 " line    2:
 " E803: ID not found: 142
-let g:loaded_diffchar = "defined"
+"let g:loaded_diffchar = "defined"
 let g:DiffUpdate = 1
 nmap <silent> <Leader>dc <Plug>ToggleDiffCharAllLines
 nmap <silent> <Leader>dC <Plug>ToggleDiffCharCurrentLine
@@ -1455,6 +1652,62 @@ let g:CSApprox_loaded = 1  "use only for schemes conversion (:CSApproxSnapshout 
 "let g:CCTreeCscopeDb = "cscope.out"  "does not work with huge tag files !!!!
 let g:loaded_cctree = 1  "good idea, but lacks jumps to reverse callers' call line directly (only jumps to tag)
 
+" === EasyMotion ===
+let g:EasyMotion_do_mapping = 0 " Disable default mappings
+
+"Jump to anywhere you want with minimal keystrokes, with just one key
+"binding.
+"" `s{char}{label}`
+"nmap s <Plug>(easymotion-overwin-f)
+"" or
+"" `s{char}{char}{label}`
+"" Need one more keystroke, but on average, it may be more comfortable.
+nmap s <Plug>(easymotion-overwin-f2)
+xmap s <Plug>(easymotion-f2)
+omap s <Plug>(easymotion-f2)
+
+" Turn on case insensitive feature
+let g:EasyMotion_smartcase = 1
+
+"" JK motions: Line motions
+"map <Leader>j <Plug>(easymotion-j)
+"map <Leader>k <Plug>(easymotion-k)
+"hi link EasyMotionTarget ErrorMsg
+hi link EasyMotionTarget Type
+hi link EasyMotionShade  Comment
+
+hi link EasyMotionTarget2First MatchParen
+hi link EasyMotionTarget2Second MatchParen
+
+hi link EasyMotionMoveHL Search
+
+" === Syntastic ===
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 3  "value of 1 - autoclose and autoopen clashes with YCM
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+
+let g:syntastic_yang_pyang_args = "--ignore-error=LEAFREF_IDENTIFIER_BAD_NODE --ignore-error=UNUSED_IMPORT"
+" --ignore-error=LEAFREF_IDENTIFIER_NOT_FOUND --ignore-error=BAD_VALUE"  "only for pyang-1.7 and higher (does not work 100% even then)
+
+let g:syntastic_enable_perl_checker = 1  "Perl is a bit special (this can be dangerous: perl -c execing current file)
+let g:syntastic_perl_checkers = ["perl"]
+
+"let g:syntastic_debug_file = "~/syntastic.log"
+"let g:syntastic_debug = 33
+
+"following diffsplit override is needed to make Syntastic understand that
+"particular window is going to be diff windows and hence not extra Syntastic
+"window should be displayed
+command! -nargs=* -complete=file Diffsplit let &diff=1 | diffsplit <args>
+cabbrev diffsplit <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Diffsplit' : 'diffsplit')<CR>
+
+""" "TODO enable nagelfar, when source-ing of .tcl script is resolved (otherwise too many errors are shown)
+""" let g:syntastic_tcl_checkers = []
+""" "Pygments package not found
+""" let g:syntastic_rst_checkers = []
+let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ "sh", "python", "perl", "yang", "mib" ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
+
 " ==========================
 " = Miscellaneous functions=
 " ==========================
@@ -1466,10 +1719,10 @@ function! MyCTags(fdir)
     else
         let l:path = a:fdir
     endif
-    
+
     silent! execute "!" . g:OS_ctags_command . " --languages=C,C++ -R --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+fq --tag-relative=yes " . l:path
     "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
-    execute "redraw!" 
+    execute "redraw!"
 endfunction
 
 "comm! CtagsP call MyCTags('.. ' . g:OS_system_includes_dir)
@@ -1479,13 +1732,13 @@ endfunction
 " Generates ctags and cscope tags for current folder MyGenTagsCmd(gt), or $ROOT folder MyGenTagsCmd(rt)
 function! MyGenTagsCmd(gtcmd, ...)
     if (a:gtcmd == "gt")
-"		silent! execute "!" . "ctags --languages=C,C++ --fields=+ia --extra=+fq --tag-relative=yes -R -f tags --totals=yes ; cscope -b -q -u -R -f cscope.out"
-"		cs add cscope.out
-"		if &tags != ""
-"			let &tags="tags" . "," . &tags
-"		else
-"			let &tags.="tags"
-"		endif
+"       silent! execute "!" . "ctags --languages=C,C++ --fields=+ia --extra=+fq --tag-relative=yes -R -f tags --totals=yes ; cscope -b -q -u -R -f cscope.out"
+"       cs add cscope.out
+"       if &tags != ""
+"           let &tags="tags" . "," . &tags
+"       else
+"           let &tags.="tags"
+"       endif
         let l:path = system("pwd")
         let l:path = substitute(l:path,'\n','','')
     elseif (a:gtcmd == "rt")
@@ -1512,7 +1765,7 @@ function! MyGenTagsCmd(gtcmd, ...)
         " just ignore
     endtry
     "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
-    execute "redraw!" 
+    execute "redraw!"
 endfunction
 
 "com! -nargs=* Egt call MyGenTagsCmd("gt", <f-args>)
@@ -1550,7 +1803,7 @@ function! DoFormatXML() range
     " Recalculate first and last lines of the edited code
     let l:newFirstLine=search('<PrettyXML>')
     let l:newLastLine=search('</PrettyXML>')
-    
+
     " Get inner range
     let l:innerFirstLine=l:newFirstLine+1
     let l:innerLastLine=l:newLastLine-1
@@ -1602,7 +1855,7 @@ vnoremap <Leader><Space> :TrimSpaces<CR>
 " ================
 " = Experimental =
 " ================
-"backup to ~/.vim/ 
+"backup to ~/.vim/
 let g:user_backup_home = substitute(s:home_base_path, '[\/]$', '', '') . g:OS_dir_separator . '.vim' . g:OS_dir_separator . 'backup'
 if isdirectory(g:user_backup_home) == 0
     silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_backup_home
@@ -1615,8 +1868,8 @@ let g:user_undo_home = substitute(s:home_base_path, '[\/]$', '', '') . g:OS_dir_
 if isdirectory(g:user_undo_home) == 0
     silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_undo_home
 endif
-"set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp 
-"set backupskip=/tmp/*,/private/tmp/* 
+"set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+"set backupskip=/tmp/*,/private/tmp/*
 "set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
 "TODO: improve with noundofile for specific files (like /tmp/* files)
@@ -1627,7 +1880,7 @@ endif
 let &backupdir=g:user_backup_home . g:OS_dir_separator . g:OS_dir_separator
 
 let &directory=g:user_swap_home . g:OS_dir_separator . g:OS_dir_separator
-set backup 
+set backup
 set writebackup
 if has('persistent_undo')
     let &undodir=g:user_undo_home . g:OS_dir_separator . g:OS_dir_separator
@@ -1637,7 +1890,7 @@ endif
 
 if has('clipboard')
     if has('unnamedplus')
-		set clipboard=unnamed,unnamedplus
+        set clipboard=unnamed,unnamedplus
     else
         set clipboard=unnamed
     endif
@@ -1645,12 +1898,12 @@ if has('clipboard')
     "
     "If having problems in X11, than install autocutsel-0.10.0.tar.gz package to
     "sync X11 clipboards between each other
-	"
     "
-	"Todo: add exclude pattern, when running with X forwarding through slow
-	"connection
-	"e.g set clipboard=autoselect,exclude:cons\\\|linux\\\|screen
-	"    set clipboard=autoselect,exclude:.*
+    "
+    "Todo: add exclude pattern, when running with X forwarding through slow
+    "connection
+    "e.g set clipboard=autoselect,exclude:cons\\\|linux\\\|screen
+    "    set clipboard=autoselect,exclude:.*
     "Warning: following line causes big problems with syntax highlighting and even crashed Vim on opening of Perl files (*.pl)
     "Note: should disable X-clipboard on slow connections (because Vim can
     " otherwise delay start for few seconds, by contacting X-server first and
@@ -1659,17 +1912,17 @@ if has('clipboard')
 endif
 
 if has("mouse_sgr")
-	set ttymouse=sgr
+    set ttymouse=sgr
 else
-	"if we have old vim or vim without mouse_sgr compiled, its better to not touch ttymouse setting
-	"set ttymouse=xterm2
+    "if we have old vim or vim without mouse_sgr compiled, its better to not touch ttymouse setting
+    "set ttymouse=xterm2
 end
 
 function! CscopeCtagsSearch(word)
-	let csto_saved=&csto
-	let &csto=0
-	"echomsg a:word
-	"exe "cstag " . a:word 
+    let csto_saved=&csto
+    let &csto=0
+    "echomsg a:word
+    "exe "cstag " . a:word
     try
         call SophTag(a:word)
     finally
@@ -1771,21 +2024,30 @@ command! Wipeout :call Wipeout()
 cabbrev wipeout Wipeout
 
 function! DiffOrig()
-	if &diff
-		diffoff!
-		wincmd o
-	else
-		let ftype = &filetype
-		let actualfilename=expand('%:p')
-		vert new
-		setlocal bt=nofile
-		r #
-		let &titlestring = "saved copy" . " <-> " . actualfilename
-		0d_
-		exe "setlocal filetype=" . ftype
-		diffthis | wincmd p | diffthis
-	endif
+    if &diff
+        diffoff!
+        wincmd o
+    else
+        let ftype = &filetype
+        let actualfilename=expand('%:p')
+        vert new
+        setlocal bt=nofile
+        r #
+        let &titlestring = "saved copy" . " <-> " . actualfilename
+        0d_
+        exe "setlocal filetype=" . ftype
+        diffthis | wincmd p | diffthis
+    endif
 endfunction
+
+function! XReconnect()
+    let display_file = substitute(s:home_base_path, '[\/]$', '', '') . g:OS_dir_separator . '.display_variable'
+    let displist = readfile(display_file, '', 1)
+    exe "xrestore " . displist[0]
+endfunction
+
+command! XReconnect :call XReconnect()
+cabbrev xreconnect XReconnect
 
 " =========================================
 " = Project/Versioning system integration =
@@ -1800,6 +2062,7 @@ if expand("$CLEARCASE_ROOT") != "$CLEARCASE_ROOT"
 elseif expand("$PANOS") != "$PANOS"
     let g:VCS_name="cvs"
     let g:PROJECT_name="SR"
+    let g:ctrlp_working_path_mode = 'p'
 elseif expand("$LSF_BINDIR") != "$LSF_BINDIR"
     let g:VCS_name="ecms"
     let g:PROJECT_name="WMM"
@@ -1829,8 +2092,8 @@ endif
 let g:loaded_ccase = 1
 
 if g:VCS_name == "cvs"
-	" ===VCSCommand plugin===
-	let g:VCSCommandVCSTypePreference = "git"
+    " ===VCSCommand plugin===
+    let g:VCSCommandVCSTypePreference = "git"
 
     nmap <silent><F5> :VCSVimDiff<Enter>
     imap <silent><F5> <C-o>:VCSVimDiff<Enter>
@@ -1843,7 +2106,7 @@ if g:VCS_name == "cvs"
     nmap <F9> :VCSBlame!<Enter>
     imap <F9> <C-o>:VCSBlame!<Enter>
     vmap <F9> <Esc>:VCSBlame!<Enter>gv
-    
+
     nmap <S-F9> :VCSLog<Enter>
     imap <S-F9> <C-o>:VCSLog<Enter>
     vmap <S-F9> <Esc>:VCSLog<Enter>gv
@@ -1875,7 +2138,7 @@ elseif g:VCS_name == "ecms"
     nmap <F9> :call MyEcmsGetCmd("mdesc", "-e")<Enter>
     imap <F9> <C-o>:call MyEcmsGetCmd("mdesc", "-e")<Enter>
     vmap <F9> <Esc>:call MyEcmsGetCmd("mdesc", "-e")<Enter>gv
-    
+
     nmap <S-F9> :call MyEcmsGetCmd("mdesc", "-v")<Enter>
     imap <S-F9> <C-o>:call MyEcmsGetCmd("mdesc", "-v")<Enter>
     vmap <S-F9> <Esc>:call MyEcmsGetCmd("mdesc", "-v")<Enter>gv
@@ -1884,5 +2147,10 @@ else "no versioning system
     nmap <F5> :call DiffOrig()<Enter>
     imap <F5> <C-o>:call DiffOrig()<Enter>
     vmap <F5> <Esc>:call DiffOrig()<Enter>gv
+endif
+
+let s:localrc=expand("$HOME" . g:OS_dir_separator . ".vimrc_local")
+if filereadable(s:localrc)
+    execute "source " . s:localrc
 endif
 
