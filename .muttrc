@@ -154,6 +154,7 @@ auto_view application/x-rar-compressed
 auto_view application/x-compressed
 auto_view application/x-zip-compressed
 auto_view application/zip
+auto_view application/x-zip
 
 alternative_order text/calendar text/plain text/enriched text/html     # save html for last
 
@@ -253,7 +254,7 @@ set editor = "vim -X -c 'normal gg' -c 'if nextnonblank(1) == 1 | normal O' -c '
 # bind attach <return> view-mailcap # View attachments properly.
 
 #create folder ~/.cache/mutt in filesystem (or pick another folder for temporary html attachment storage)
-macro attach 'V' "<pipe-entry>cat >~/.cache/mutt/mail.html && $BROWSER ~/.cache/mutt/mail.html && rm ~/.cache/mutt/mail.html<enter>"
+macro attach 'V' "<pipe-entry>cat >~/.cache/mutt/mail.html && DISPLAY=`cat ~/.display_variable` $BROWSER ~/.cache/mutt/mail.html && rm ~/.cache/mutt/mail.html<enter>"
 
 
 # Colors --------------------------------
