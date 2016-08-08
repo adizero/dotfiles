@@ -13,12 +13,13 @@
 #Xterm           Xterm(317)                          ^[[>41;317;0c
 #Lxterminal      lxterminal (0.1.11-4ubuntu3)        ^[[>1;2802;0c
 #Cygwin                                              ^[[>77;10103;0c
-#PuTTY           0.62                                ^[[>0;136;0c
+#KiTTY/PuTTY     0.62+                               ^[[>0;136;0c
 #Screen          4.00.03 (FAU)                       ^[[>83;40003;0c
 #Screen          4.01.00devel (GNU) 2-May-06         ^[[>83;40100;0c
 #Gnome-terminal  GNOME Terminal 3.6.2                ^[[>1;3409;0c
 #Konsole         2.13.2                              ^[[>0;115;0c
 #iTerm2          2.9.20 (any version ?)              ^[[>0;95;0c
+#XQuartz(Xterm)  Xterm(314)                          ^[[>41;314;0c
 
 esc_seq=
 
@@ -81,12 +82,15 @@ termInitialDetection()
         if [ "$term_type" == "[>0" -a "$term_version" == "115" ]; then
             TERM_PROGRAM="Konsole"
         elif [ "$term_type" == "[>0" -a "$term_version" == "136" ]; then
-            TERM_PROGRAM="PuTTY"  #this is just a guess (PuTTY 0.62 sends 136 as version), will be confirmed via answerback)
+            TERM_PROGRAM="PuTTY"  #this is just a guess (KiTTY/PuTTY 0.62 sends 136 as version), will be confirmed via answerback)
         elif [ "$term_type" == "[>0" -o "$term_type" == "[>41" ]; then
             TERM_PROGRAM="xterm"
             TERM_VERSION="$term_version"
             if [ "$term_version" == "95" ]; then
                 #when connecting from Mac OSX (iTerm2), then do not do X forwarding in Vim (XQuartz server is too buggy)
+                export TERM_NO_X_FORWARDING="-X"
+            elif [ "$term_version" == "314" -a "$term_type" == "[>41" ]; then
+                #when connecting from Mac OSX (XQuartz's Xterm), then do not do X forwarding in Vim (XQuartz server is too buggy)
                 export TERM_NO_X_FORWARDING="-X"
             fi
         elif [ "$term_type" == "[>1" ]; then
@@ -113,7 +117,7 @@ termInitialDetection()
             unset termresponse
         fi
 
-        if [ "$TERM_ANSWERBACK" == "PuTTY$" ]; then
+        if [ "$TERM_ANSWERBACK" == "PuTTY$" -o  "$TERM_ANSWERBACK" == "KiTTY$" ]; then
             TERM_PROGRAM="PuTTY"
         fi
     fi
