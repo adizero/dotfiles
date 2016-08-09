@@ -1201,8 +1201,8 @@ vmap <S-F10> <Esc>:qa<Enter>gv
 "abbreviate/iabbrev/cabbrev
 
 " command mode abbreviation of tt as tabnew | tag <args>
-cabbrev tt TT
 comm! -nargs=1 -complete=tag TT tabnew | cstag <args>
+cabbrev tt <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'TT' : 'tt')<CR>
 
 function! Quickfix_window_move(type, direction)
     "ignore error E553: no more items and jump to first/last one
@@ -1610,8 +1610,9 @@ let g:ctrlp_open_multiple_files = 'tjr'  "potentially add r (to open first in mu
 
 "nmap <C-M> :CtrlPMRU<CR> "cannot be used, as <Enter> is <C-M>
 let g:ctrlp_mruf_max = 50
-command! MRU :CtrlPMRU<CR>
-cabbrev mru MRU
+command! Mru :CtrlPMRU<CR>
+cabbrev mru <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Mru' : 'mru')<CR>
+cabbrev MRU <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Mru' : 'MRU')<CR>
 
 let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
 
@@ -1991,17 +1992,16 @@ endif
 command! -range Cz :silent :<line1>,<line2>w !xsel -i -b
 command! -range Cx :silent :<line1>,<line2>w !xsel -i -p
 command! -range Cv :silent :<line1>,<line2>w !xsel -i -s
-cabbrev cv Cv
-cabbrev cz Cz
-cabbrev cx Cx
+cabbrev cz <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Cz' : 'cz')<CR>
+cabbrev cx <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Cx' : 'cx')<CR>
+cabbrev cv <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Cv' : 'cv')<CR>
 
 command! -range Pz :silent :r !xsel -o -b
 command! -range Px :silent :r !xsel -o -p
 command! -range Pv :silent :r !xsel -o -s
-
-cabbrev pz Pz
-cabbrev px Px
-cabbrev pv Pv
+cabbrev pz <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Pz' : 'pz')<CR>
+cabbrev px <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Px' : 'px')<CR>
+cabbrev pv <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Pv' : 'pv')<CR>
 
 "function to clean all non-visible buffers
 function! Wipeout()
@@ -2040,7 +2040,7 @@ function! Wipeout()
 endfunction
 
 command! Wipeout :call Wipeout()
-cabbrev wipeout Wipeout
+cabbrev wipeout <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Wipeout' : 'wipeout')<CR>
 
 function! DiffOrig()
     if &diff
@@ -2066,7 +2066,7 @@ function! XReconnect()
 endfunction
 
 command! XReconnect :call XReconnect()
-cabbrev xreconnect XReconnect
+cabbrev xreconnect <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'XReconnect' : 'xreconnect')<CR>
 
 " =========================================
 " = Project/Versioning system integration =
