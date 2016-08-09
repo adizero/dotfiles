@@ -12,6 +12,10 @@ elseif s:term_program == "rxvt" || s:term_program == "urxvt"
 else
     "Todo: this is a hack for screen-bce/screen.rxvt to behave as xterm/rxvt in Vim
     if &term == "screen-bce" || &term == "screen"
+        if expand("$STY") == "$STY"
+            "ssh to devpc from inside of a screen (let's fake STY)
+            let $STY = "0.dev"
+        endif
         let &term = "xterm"
     elseif &term == "screen.rxvt"
         let &term = "rxvt"
@@ -314,12 +318,14 @@ if !has("gui_running")
         "let &t_ue = "\e[m"
 
         "undercurl as strikethrough (needs terminal support - no KiTTY/PuTTY does strikethrough):
-        if expand("$STY") != "$STY"
-            let &t_Cs = "\eP\e[9m\e\\"
-            let &t_Ce = "\eP\e[29m\e\\"
-        else
-            let &t_Cs = "\e[9m"
-            let &t_Ce = "\e[29m"
+        if v:version >= 704 || (v:version == 704 && has('patch911'))
+            if expand("$STY") != "$STY"
+                let &t_Cs = "\eP\e[9m\e\\"
+                let &t_Ce = "\eP\e[29m\e\\"
+            else
+                let &t_Cs = "\e[9m"
+                let &t_Ce = "\e[29m"
+            endif
         endif
 
         "reverse/inverse should work by default
@@ -418,6 +424,7 @@ if filereadable(vundle_readme)
 
     Plugin 'ctrlpvim/ctrlp.vim'  "kien/ctrlp.vim is no longer maintained
     Plugin 'nixprime/cpsm'  "very fast c based fuzzy matcher to replace ctrlp's slow default
+    "Plugin 'ivan-cukic/vim-ctrlp-switcher'
 
     Plugin 'adizero/vim-togglecursor'
     Plugin 'adizero/vim-clang-format'
@@ -557,8 +564,6 @@ let s:home_base_path=$HOME
 let &runtimepath=substitute(&runtimepath, '[\/]', g:OS_dir_separator, 'g')
 
 let g:default_search_path = substitute('.,**,../include/**,../src/**,' . expand("$ROOT") . '/panos,' . g:OS_system_includes_dir, '[\/]', g:OS_dir_separator, 'g')
-let g:header_source_flip_search_path = substitute('.,**,../include/**,../src/**,' . expand("$ROOT") . '/panos,', '[\/]', g:OS_dir_separator, 'g')
-
 " set default path
 let &path=g:default_search_path
 
@@ -1060,6 +1065,7 @@ imap <F2> <C-o>:w<Enter>
 vmap <F2> <Esc>:w<Enter>gv
 
 " F3 to toggle source/header
+let g:header_source_flip_search_path = substitute('.,**,../include/**,../src/**,' . expand("$ROOT") . '/panos,', '[\/]', g:OS_dir_separator, 'g')
 " switch editing between .c* and .h* files
 function! Mosh_Flip_Ext()
     " Since .h file can be in a different dir, calling find
@@ -1098,14 +1104,24 @@ function! Mosh_Flip_Ext()
     endtry
 endfun
 
-map <F3> :call Mosh_Flip_Ext()<CR>
-imap <F3> <C-o>:call Mosh_Flip_Ext()<CR>
-vmap <F3> <Esc>:call Mosh_Flip_Ext()<CR>gv
+function! Header_switch()
+    if match(expand("%:e"),"^c") >= 0
+        exe "normal \<C-P>" . expand("%:t:r") . ".h"
+    elseif match(expand("%:e"),"^h") >= 0
+        exe "normal \<C-P>" . expand("%:t:r") . ".c"
+    else
+        exe "normal \<C-P>" . expand("%:t:r")
+    endif
+endfunction
+
+map <silent> <F3> :call Header_switch()<CR>
+"imap <F3> <C-o>:call Mosh_Flip_Ext()<CR>
+"vmap <F3> <Esc>:call Mosh_Flip_Ext()<CR>gv
 
 " F4 to switch between hex and ASCII editing
 function! Fxxd()
     let c=getline(".")
-    if c =~ '^[0-9a-f]\{7}:'
+    if c =~ '^[0-9a-f]\{8}:'
         :%!xxd -r
     else
         :%!xxd -g4
@@ -1297,7 +1313,7 @@ endfunction
 map <Leader>m :call SwitchMouse()<CR>
 
 " path leader mappings
-map <Leader>0 :let &path=g:default_search_path<CR>
+"map <Leader>0 :let &path=g:default_search_path<CR>
 
 " ============================
 " =        GUI options       =
@@ -1601,7 +1617,10 @@ let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
 
 let g:ctrlp_working_path_mode = 'ra'  "for SR projects it is overriden later
 
-"let g:ctrlp_types = ['fil', 'buf', 'mru', 'tag', 'bft']  "does not extend the three basic types
+"let g:ctrlp_types = ['fil', 'buf', 'mru']  "can only filter the three basic types
+"let g:ctrlpswitcher_mode = 1
+"let g:ctrlp_extensions = ['tag', 'buffertag', 'switcher']
+let g:ctrlp_extensions = ['tag', 'buffertag']
 
 " === diffchar.vim ===
 "Todo: enable diffchar.vim
@@ -2062,7 +2081,6 @@ if expand("$CLEARCASE_ROOT") != "$CLEARCASE_ROOT"
 elseif expand("$PANOS") != "$PANOS"
     let g:VCS_name="cvs"
     let g:PROJECT_name="SR"
-    let g:ctrlp_working_path_mode = 'p'
 elseif expand("$LSF_BINDIR") != "$LSF_BINDIR"
     let g:VCS_name="ecms"
     let g:PROJECT_name="WMM"
@@ -2071,6 +2089,9 @@ endif
 if g:PROJECT_name == "SR"
     " tabs are forbidden in SR projects
     set expandtab
+
+    " start in $PANOS folder in CtrlP file mode
+    let g:ctrlp_working_path_mode = 'p'
 
     " ,f to show current line nested feature info for setup_cli.cfg/teardown_cli.cfg updates
     map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
