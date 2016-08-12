@@ -519,14 +519,37 @@ let g:ycm_key_list_previous_completion = ['<Up>']
 
 let g:ycm_always_populate_location_list = 1
 
-let g:ycm_disable_for_files_larger_than_kb = 7000
+let g:ycm_disable_for_files_larger_than_kb = 5000
+
+  let g:ycm_filetype_blacklist = {
+        \ 'tagbar' : 1,
+        \ 'qf' : 1,
+        \ 'notes' : 1,
+        \ 'markdown' : 1,
+        \ 'unite' : 1,
+        \ 'text' : 1,
+        \ 'vimwiki' : 1,
+        \ 'pandoc' : 1,
+        \ 'infolog' : 1,
+        \ 'cfg' : 1,
+        \ 'mail' : 1
+        \}
 
 function! Multiple_cursors_before()
-    let g:ycm_auto_trigger = 0
+    "let g:ycm_auto_trigger = 0
+    if exists('b:ycm_largefile')
+        let b:old_ycm_status = 0
+    else
+        let b:old_ycm_status = 1
+        let b:ycm_largefile = 1
+    endif
 endfunction
 
 function! Multiple_cursors_after()
-    let g:ycm_auto_trigger = 1
+    "let g:ycm_auto_trigger = 1
+    if b:old_ycm_status == 1
+        unlet b:ycm_largefile
+    endif
 endfunction
 
 " make YCM completion via ycm_key_invoke_completion work only after . or ->
@@ -1289,17 +1312,33 @@ map <Leader>w :set wrap!<CR>
 
 map <Leader>p :set paste!<CR>
 
-" YouCompleteMe automatic code completion toggle
-function! YcmAutoToggle()
-    if g:ycm_auto_trigger == 1
-        let g:ycm_auto_trigger = 0
-        echo "YouCompleteMe automatic completion is turned off"
+" YouCompleteMe automatic code completion global toggle
+function! YcmGlobalToggle()
+    if !exists('g:ycm_largefile')
+        let g:ycm_largefile = 1
+        "let g:ycm_auto_trigger = 0 "use this to toggle automatic(as you type) completion and semantic triggers (., ::, ->) as well
+        "let g:ycm_min_num_of_chars_for_completion = 99 "use this instead to keep semantic triggers
+        echo "YouCompleteMe automatic completion is turned off globally"
     else
-        let g:ycm_auto_trigger = 1
-        echo "YouCompleteMe automatic completion is turned on"
+        unlet g:ycm_largefile
+        "let g:ycm_auto_trigger = 1 "use this to toggle automatic(as you type) completion and semantic triggers (., ::, ->) as well
+        "let g:ycm_min_num_of_chars_for_completion = 2 "use this instead to keep semantic triggers
+        echo "YouCompleteMe automatic completion is turned on globally"
     endif
 endfunction
-map <Leader>y :call YcmAutoToggle()<CR>
+map <Leader>Y :call YcmGlobalToggle()<CR>
+
+" YouCompleteMe automatic code completion buffer toggle
+function! YcmLocalToggle()
+    if !exists('b:ycm_largefile')
+        let b:ycm_largefile = 1
+        echo "YouCompleteMe automatic completion is turned off for current buffer"
+    else
+        unlet b:ycm_largefile
+        echo "YouCompleteMe automatic completion is turned on for current buffer"
+    endif
+endfunction
+map <Leader>y :call YcmLocalToggle()<CR>
 
 " mouse integration switching
 function! SwitchMouse()
@@ -1726,7 +1765,7 @@ cabbrev diffsplit <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Diffsplit' : 'di
 """ let g:syntastic_tcl_checkers = []
 """ "Pygments package not found
 """ let g:syntastic_rst_checkers = []
-let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ "sh", "python", "perl", "yang", "mib" ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
+let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ "sh", "python", "perl", "yang", "mib", "cfg" ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
 
 " ==========================
 " = Miscellaneous functions=
