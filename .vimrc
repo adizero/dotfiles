@@ -158,42 +158,42 @@ if !has("gui_running")
             "TODO: implement somehow :-)
 
             "old xterm/lxterminal F1-F4 (used only for no mod case - e.g. ^[OP, ...)
-            set <F1>=O;*P
-            set <F2>=O;*Q
-            set <F3>=O;*R
-            set <F4>=O;*S
-            set <Home>=O;*H
-            set <End>=O;*F
+            set <F1>=<Esc>O;*P
+            set <F2>=<Esc>O;*Q
+            set <F3>=<Esc>O;*R
+            set <F4>=<Esc>O;*S
+            set <Home>=<Esc>O;*H
+            set <End>=<Esc>O;*F
 
             "konsole (universal case covers also the above for no mod case)
-            set <F1>=O*P
-            set <F2>=O*Q
-            set <F3>=O*R
-            set <F4>=O*S
+            set <F1>=<Esc>O*P
+            set <F2>=<Esc>O*Q
+            set <F3>=<Esc>O*R
+            set <F4>=<Esc>O*S
 
             "new xterm (wildcard used to handle all alt,control,shift combinations)
-            set <xF1>=[1;*P
-            set <xF2>=[1;*Q
-            set <xF3>=[1;*R
-            set <xF4>=[1;*S
-            set <xHome>=[1;*H
-            set <xEnd>=[1;*F
+            set <xF1>=<Esc>[1;*P
+            set <xF2>=<Esc>[1;*Q
+            set <xF3>=<Esc>[1;*R
+            set <xF4>=<Esc>[1;*S
+            set <xHome>=<Esc>[1;*H
+            set <xEnd>=<Esc>[1;*F
 
-            set <zHome>=[;*H
-            set <zEnd>=[;*F
+            set <zHome>=<Esc>[;*H
+            set <zEnd>=<Esc>[;*F
 
-            set <F17>=OE
+            set <F17>=<Esc>OE
 
             "Todo: specify correct version for old/new xterm bindings (for now 278 - Ubuntu 13.04 timeframe is the limit)
             if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" ||
                         \ s:term_program == "xterm" && s:term_version < "278"
                 "old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
-                set <xF1>=O1;*P
-                set <xF2>=O1;*Q
-                set <xF3>=O1;*R
-                set <xF4>=O1;*S
+                set <xF1>=<Esc>O1;*P
+                set <xF2>=<Esc>O1;*Q
+                set <xF3>=<Esc>O1;*R
+                set <xF4>=<Esc>O1;*S
 
-                set <F17>=[E
+                set <F17>=<Esc>[E
             endif
 
             "Todo: is this necessary, or does Vim implicitely do this
@@ -215,7 +215,7 @@ if !has("gui_running")
             map! <zEnd> <End>
 
             "del is set without modifiers support (by default in Vim) => let's change that
-            set <Del>=[3;*~
+            set <Del>=<Esc>[3;*~
 
             "cleanup of Vim's internal duplicate bindings
             set <S-Home>=
@@ -225,11 +225,11 @@ if !has("gui_running")
 
             "newer xterm can do also right winmenu key (has no setting in Vim,
             " however something nonexistant on typical keyboard can be used - F13 for example)
-            set <F13>=[29;*~
+            set <F13>=<Esc>[29;*~
 
             "fake key mappings to enable keypad key 5 (Clear) with all modifiers as <F19>
-            set <F18>=O*u
-            set <F19>=[1;*E
+            set <F18>=<Esc>O*u
+            set <F19>=<Esc>[1;*E
 
             map <F17> <F19>
             map! <F17> <F19>
@@ -246,55 +246,55 @@ if !has("gui_running")
             set t_Co=256 "override terminfo setting to enable 256 colors
             "rxvt (basic Fn are well covered in default Vim mappings)
             " first two are fixed in rxvt - S-F1 == F11 and S-F2 == F12
-            set <S-F3>=[25;*~
-            set <S-F4>=[26;*~
-            set <S-F5>=[28;*~
-            set <S-F6>=[29;*~
-            set <S-F7>=[31;*~
-            set <S-F8>=[32;*~
-            set <S-F9>=[33;*~
-            set <S-F10>=[34;*~
-            set <S-F11>=[23;*$
-            set <S-F12>=[24;*$
+            set <S-F3>=<Esc>[25;*~
+            set <S-F4>=<Esc>[26;*~
+            set <S-F5>=<Esc>[28;*~
+            set <S-F6>=<Esc>[29;*~
+            set <S-F7>=<Esc>[31;*~
+            set <S-F8>=<Esc>[32;*~
+            set <S-F9>=<Esc>[33;*~
+            set <S-F10>=<Esc>[34;*~
+            set <S-F11>=<Esc>[23;*$
+            set <S-F12>=<Esc>[24;*$
             "right windows menu key is equal to S-F6 (but not shift version)
-            set <S-F13>=[29;*$
+            set <S-F13>=<Esc>[29;*$
 
-            set <F19>=Ou
+            set <F19>=<Esc>Ou
 
-            set <kHome>=Ow
-            set <kEnd>=Oq
+            set <kHome>=<Esc>Ow
+            set <kEnd>=<Esc>Oq
 
-            set <kInsert>=Op
+            set <kInsert>=<Esc>Op
 
-            set <xLeft>=Ot
-            set <xUp>=Ox
-            set <xRight>=Ov
-            set <xDown>=Or
+            set <xLeft>=<Esc>Ot
+            set <xUp>=<Esc>Ox
+            set <xRight>=<Esc>Ov
+            set <xDown>=<Esc>Or
 
-            set <S-Insert>=[2$
-            set <S-Del>=[3$
-            set <S-Home>=[7$
-            set <S-End>=[8$
-            "set <S-PageUp>=[5$
-            "set <S-PageDown>=[6$
-            "set <C-Insert>=[2^
-            "set <C-Del>=[3^
-            set <C-Home>=[7^
-            set <C-End>=[8^
-            "set <C-PageUp>=[5^
-            "set <C-PageDown>=[6^
-            set <S-Up>=[a
-            set <S-Down>=[b
-            set <S-Left>=[d
-            set <S-Right>=[c
-            "set <C-Up>=Oa
-            "set <C-Down>=Ob
-            set <C-Left>=Od
-            set <C-Right>=Oc
-            "set <A-Up>=[A
-            "set <A-Down>=[B
-            "set <A-Left>=[D
-            "set <A-Right>=[C
+            set <S-Insert>=<Esc>[2$
+            set <S-Del>=<Esc>[3$
+            set <S-Home>=<Esc>[7$
+            set <S-End>=<Esc>[8$
+            "set <S-PageUp>=<Esc>[5$
+            "set <S-PageDown>=<Esc>[6$
+            "set <C-Insert>=<Esc>[2^
+            "set <C-Del>=<Esc>[3^
+            set <C-Home>=<Esc>[7^
+            set <C-End>=<Esc>[8^
+            "set <C-PageUp>=<Esc>[5^
+            "set <C-PageDown>=<Esc>[6^
+            set <S-Up>=<Esc>[a
+            set <S-Down>=<Esc>[b
+            set <S-Left>=<Esc>[d
+            set <S-Right>=<Esc>[c
+            "set <C-Up>=<Esc>Oa
+            "set <C-Down>=<Esc>Ob
+            set <C-Left>=<Esc>Od
+            set <C-Right>=<Esc>Oc
+            "set <A-Up>=<Esc><Esc>[A
+            "set <A-Down>=<Esc><Esc>[B
+            "set <A-Left>=<Esc><Esc>[D
+            "set <A-Right>=<Esc><Esc>[C
         endif
 
         "common mappings
