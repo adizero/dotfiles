@@ -99,37 +99,39 @@ if !has("gui_running")
             "sets alternate screen mode
             let &t_ti="\e[?1049h"
 
-            set t_ts=]0;
+            let &t_ts="\e]0;"
             set t_fs=
 
             set t_Co=256 "override terminfo setting to enable 256 colors
-            "set t_AB='[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'
-            "set t_AF='[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m'
-            set t_AB=[4%p1%dm
-            set t_AF=[3%p1%dm
-            set t_mb=[5m
-            set t_nd=[C
-            set t_op=[39;49m
-            set t_se=[27m
-            set t_te=[?1049l
-            set t_vi=[?25l
-            set t_vs=[?12;25h
-            set t_vb=[?5h$<100/>[?5l
-            set t_ve=[?12l[?25h
-            set t_ti=[?1049h
+            "let &t_AB="'\e[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'"
+            "let &t_AF="'\e[%?%p1%{8}%<%t3%p1%d%e%p1%{16}%<%t9%p1%{8}%-%d%e38;5;%p1%d%;m'"
+            let &t_AB="\e[4%p1%dm"
+            let &t_AF="\e[3%p1%dm"
+            let &t_mb="\e[5m"
+            let &t_nd="\e[C"
+            let &t_op="\e[39;49m"
+            let &t_se="\e[27m"
+            let &t_te="\e[?1049l"
+            let &t_vi="\e[?25l"
+            let &t_vs="\e[?12;25h"
+            let &t_vb="\e[?5h$<100/>\e[?5l"
+            let &t_ve="\e[?12l\e[?25h"
+            let &t_ti="\e[?1049h"
 
             "not necessary, as t_AB,t_AF are used instead
-            set t_Sb=[4%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
-            set t_Sf=[3%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m
+            let &t_Sb="\e[4%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m"
+            let &t_Sf="\e[3%?%p1%{1}%=%t4%e%p1%{3}%=%t6%e%p1%{4}%=%t1%e%p1%{6}%=%t3%e%p1%d%;m"
 
             "see vim help -> :help xterm-function-keys
 
             set timeout timeoutlen=1000 ttimeoutlen=100
 
-            "terminal detection (based on ^[[>c), in screen surround query
-            "string with \eP...\e\\ (as always, when we want to talk to
-            "terminal underneath screen)
+            "terminal detection (based on ^[[>c or in better form "\e[>c"), in screen surround query
+            " string with \eP...\e\\ (as always, when we want to talk to terminal underneath screen)
             " the terminal's response is already stored in v:termresponse in Vim
+            "
+            "^[ is code for escape key (written as two character to not have 
+            " special keys directly in this .vimrc file)
 
             "Screen          "old versions???"                   (nothing)
             "Xterm           Xterm(278)                          ^[[>0;278;0c
@@ -148,13 +150,14 @@ if !has("gui_running")
             "echomsg "testing..." . v:termresponse
             "
             "for PuTTY answerback may be probably also used (based on ^E)
-            "  query terminal via: echo -n -e ""
+            "  query terminal via: echo -n -e "^E"
             "  PuTTY usually shows PuTTY as a result
+            " beware ^E is really one keycode entered by typing CTRL+V + CTRL+E in terminal
 
 
             "TODO: implement somehow :-)
 
-            "old xterm/lxterminal F1-F4 (used only for no mod case - e.g. OP, ...)
+            "old xterm/lxterminal F1-F4 (used only for no mod case - e.g. ^[OP, ...)
             set <F1>=O;*P
             set <F2>=O;*Q
             set <F3>=O;*R
@@ -837,10 +840,10 @@ endif
 " =       Window title       =
 " ============================
 "Xxx: this sets screen tab's caption
-"set t_ts=k
-"set t_fs=\
+"let &t_ts="\ek"
+"let &t_fs="\e\"
 "don't reset screen tab's caption to flying...
-"auto VimLeave * :set t_ts=k\
+"auto VimLeave * let &t_ts="\ek\e\"
 
 set title
 
