@@ -100,7 +100,7 @@ if !has("gui_running")
             let &t_ti="\e[?1049h"
 
             let &t_ts="\e]0;"
-            set t_fs=
+            let &t_fs="\007"
 
             set t_Co=256 "override terminfo setting to enable 256 colors
             "let &t_AB="'\e[%?%p1%{8}%<%t4%p1%d%e%p1%{16}%<%t10%p1%{8}%-%d%e48;5;%p1%d%;m'"
