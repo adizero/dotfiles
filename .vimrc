@@ -130,7 +130,7 @@ if !has("gui_running")
             " string with \eP...\e\\ (as always, when we want to talk to terminal underneath screen)
             " the terminal's response is already stored in v:termresponse in Vim
             "
-            "^[ is code for escape key (written as two character to not have 
+            "^[ is code for escape key (written as two character to not have
             " special keys directly in this .vimrc file)
 
             "Screen          "old versions???"                   (nothing)
@@ -816,7 +816,43 @@ nnoremap [[ :<C-U>call My_PreSection(v:count1, "{", "bW", "w99[{")<CR>
 nnoremap ][ :<C-U>call My_PreSection(v:count1, "}", "W", "b99]}")<CR>
 nnoremap ]] :<C-U>call My_SectionJump(v:count1, "][", "[[")<CR>
 nnoremap [] :<C-U>call My_SectionJump(v:count1, "[[", "][")<CR>
+"Todo: add visual mappings for custom section jumps (see MyParagraphJump as an example)
 
+function! MyParagraphJump(count, forward, ...)
+    let l:search_flags = "bW"
+    if a:forward == 1
+        let l:search_flags = "W"
+    endif
+
+    if a:0 > 0  "visual mode
+        execute "normal! gv"
+    endif
+
+    let p = getpos('v')
+    let p[2] = 0  "will jump to column 0
+    let l:i = a:count
+    while l:i > 0
+        let myline = search('^\s*$', l:search_flags)
+        if myline <= 0
+            if a:forward == 1
+                let myline = line('$')
+            endif
+            let p[1] = myline
+            call setpos('.', p)
+            return
+        else
+            let p[1] = myline
+            call setpos('.', p)
+        endif
+        let l:i = l:i - 1
+    endwhile
+endfunction
+
+nnoremap <silent> { :<C-U>call MyParagraphJump(v:count1, 0)<CR>
+nnoremap <silent> } :<C-U>call MyParagraphJump(v:count1, 1)<CR>
+
+vnoremap <silent> { :<C-U>call MyParagraphJump(v:count1, 0, visualmode())<CR>
+vnoremap <silent> } :<C-U>call MyParagraphJump(v:count1, 1, visualmode())<CR>
 
 set errorformat^=%-GIn\ file\ included\ from\ %f:%l:%c:,%-GIn\ file\ included\ from\ %f:%l:%c\\,,%-GIn\ file\ included\ from\ %f:%l:%c,%-GIn\ file\ included\ from\ %f:%l,%-G%*[\ ]from\ %f:%l:%c
 set errorformat^=%-G%n:%l:%c%.%#\ Tar\'ing\ up\ changed\ files,%-GBuilding\ list\ of\ req'd\ files\ -\ starting\ at\ %s\ %n:%l:%c\ %.%#,%-GDone\ at\ %s\ %n:%l:%c\ %.%#,%-G%n:%l:%c\ %m\ Sending\ changed\ files\ to\ server,%-G%n:%l:%c\ %s\\,\ Remotely\ executing\ %.%#,%-G###\ %n:%l:%c%.%#\,\ Rsyncing\ files\ with\ \ server\ %.%#,%-G%.%#%n:%l:%c%.%#\,\ Remotely\ SSH\ executing\ %.%#
