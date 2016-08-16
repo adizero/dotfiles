@@ -695,6 +695,8 @@ endif
 
 if has("cscope")
     set cscopetag
+    set csto=1
+    set cspc=0
     set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0      " cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
     if v:version > 704 || (v:version == 704 && has('patch2033'))
         set cscopequickfix+=a-
@@ -1082,7 +1084,7 @@ function! SophTag(str)
             endif
             try
                 let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
-                "echo search_cmd.l:cww
+                "echomsg search_cmd.l:cww
                 exec search_cmd.l:cww
                 return 0  " search no more, result found
             catch /:E325:/
@@ -1095,7 +1097,7 @@ function! SophTag(str)
                 " E259 no matches found for cscope query
                 " E426 tag not found
                 try
-                    "echo search_cmd.expand("<cword>")
+                    "echomsg search_cmd.expand("<cword>")
                     exec search_cmd.expand("<cword>")
                     return 0  " search no more, result found
                 catch /:E325:/
@@ -1615,6 +1617,12 @@ elseif $CTAGS_PREFIX != ""
     "endif
 endif
 
+"Note: This fixes strange behavior of jumping between Vim help tags (it simply does
+" not work, when tags is empty), adding fake . is enough to make it work
+if &tags==""
+    set tags=.
+endif
+
 " ============================
 " =      Tagbar plug-in      =
 " ============================
@@ -1814,6 +1822,9 @@ cabbrev diffsplit <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Diffsplit' : 'di
 """ "Pygments package not found
 """ let g:syntastic_rst_checkers = []
 let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ "sh", "python", "perl", "yang", "mib", "cfg" ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
+
+" === Airline ===
+let g:airline#extensions#whitespace#max_lines = 50000
 
 " ==========================
 " = Miscellaneous functions=
