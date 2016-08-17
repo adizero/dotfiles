@@ -2166,6 +2166,23 @@ endfunction
 command! XReconnect :call XReconnect()
 cabbrev xreconnect <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'XReconnect' : 'xreconnect')<CR>
 
+function! RefreshAll()
+    echomsg "Refresh of everything..."
+    "execute "sign unplace * file=" . expand('%:p')
+    execute "sign unplace * buffer=" . bufnr('%')
+    "call sy#util#refresh_windows()
+    execute "SignifyRefresh"
+    call SyntasticReset()
+    execute "YcmRestartServer"
+    call ToggleCursorRefresh()
+    "execute "redraw!"
+    execute "redrawstatus!"
+endfunction
+
+command! RefreshAll :call RefreshAll()
+cabbrev refreshall <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'RefreshAll' : 'refreshall')<CR>
+
+noremap <Leader><C-L> :call RefreshAll()<CR>
 " =========================================
 " = Project/Versioning system integration =
 " =========================================
@@ -2187,6 +2204,12 @@ endif
 if g:PROJECT_name == "SR"
     " tabs are forbidden in SR projects
     set expandtab
+
+    "per project .viminfo
+    let g:viminfo_project_dir = expand("$PANOS") . g:OS_dir_separator . ".." . g:OS_dir_separator . "conf" . g:OS_dir_separator
+    if isdirectory(g:viminfo_project_dir)
+        execute "set viminfo+=n" . g:viminfo_project_dir . ".viminfo"
+    endif
 
     " start in $PANOS folder in CtrlP file mode
     let g:ctrlp_working_path_mode = 'p'
