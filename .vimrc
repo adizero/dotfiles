@@ -158,42 +158,42 @@ if !has("gui_running")
             "TODO: implement somehow :-)
 
             "old xterm/lxterminal F1-F4 (used only for no mod case - e.g. ^[OP, ...)
-            set <F1>=O;*P
-            set <F2>=O;*Q
-            set <F3>=O;*R
-            set <F4>=O;*S
-            set <Home>=O;*H
-            set <End>=O;*F
+            execute "set <F1>=\eO;*P"
+            execute "set <F2>=\eO;*Q"
+            execute "set <F3>=\eO;*R"
+            execute "set <F4>=\eO;*S"
+            execute "set <Home>=\eO;*H"
+            execute "set <End>=\eO;*F"
 
             "konsole (universal case covers also the above for no mod case)
-            set <F1>=O*P
-            set <F2>=O*Q
-            set <F3>=O*R
-            set <F4>=O*S
+            execute "set <F1>=\eO*P"
+            execute "set <F2>=\eO*Q"
+            execute "set <F3>=\eO*R"
+            execute "set <F4>=\eO*S"
 
             "new xterm (wildcard used to handle all alt,control,shift combinations)
-            set <xF1>=[1;*P
-            set <xF2>=[1;*Q
-            set <xF3>=[1;*R
-            set <xF4>=[1;*S
-            set <xHome>=[1;*H
-            set <xEnd>=[1;*F
+            execute "set <xF1>=\e[1;*P"
+            execute "set <xF2>=\e[1;*Q"
+            execute "set <xF3>=\e[1;*R"
+            execute "set <xF4>=\e[1;*S"
+            execute "set <xHome>=\e[1;*H"
+            execute "set <xEnd>=\e[1;*F"
 
-            set <zHome>=[;*H
-            set <zEnd>=[;*F
+            execute "set <zHome>=\e[;*H"
+            execute "set <zEnd>=\e[;*F"
 
-            set <F17>=OE
+            execute "set <F17>=\eOE"
 
             "Todo: specify correct version for old/new xterm bindings (for now 278 - Ubuntu 13.04 timeframe is the limit)
             if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" ||
                         \ s:term_program == "xterm" && s:term_version < "278"
                 "old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
-                set <xF1>=O1;*P
-                set <xF2>=O1;*Q
-                set <xF3>=O1;*R
-                set <xF4>=O1;*S
+                execute "set <xF1>=\eO1;*P"
+                execute "set <xF2>=\eO1;*Q"
+                execute "set <xF3>=\eO1;*R"
+                execute "set <xF4>=\eO1;*S"
 
-                set <F17>=[E
+                execute "set <F17>=\e[E"
             endif
 
             "Todo: is this necessary, or does Vim implicitely do this
@@ -215,21 +215,21 @@ if !has("gui_running")
             map! <zEnd> <End>
 
             "del is set without modifiers support (by default in Vim) => let's change that
-            set <Del>=[3;*~
+            execute "set <Del>=\e[3;*~"
 
             "cleanup of Vim's internal duplicate bindings
-            set <S-Home>=
-            set <S-Left>=
-            set <S-Right>=
-            set <S-End>=
+            execute "set <S-Home>="
+            execute "set <S-Left>="
+            execute "set <S-Right>="
+            execute "set <S-End>="
 
             "newer xterm can do also right winmenu key (has no setting in Vim,
             " however something nonexistant on typical keyboard can be used - F13 for example)
-            set <F13>=[29;*~
+            execute "set <F13>=\e[29;*~"
 
             "fake key mappings to enable keypad key 5 (Clear) with all modifiers as <F19>
-            set <F18>=O*u
-            set <F19>=[1;*E
+            execute "set <F18>=\eO*u"
+            execute "set <F19>=\e[1;*E"
 
             map <F17> <F19>
             map! <F17> <F19>
@@ -246,55 +246,55 @@ if !has("gui_running")
             set t_Co=256 "override terminfo setting to enable 256 colors
             "rxvt (basic Fn are well covered in default Vim mappings)
             " first two are fixed in rxvt - S-F1 == F11 and S-F2 == F12
-            set <S-F3>=[25;*~
-            set <S-F4>=[26;*~
-            set <S-F5>=[28;*~
-            set <S-F6>=[29;*~
-            set <S-F7>=[31;*~
-            set <S-F8>=[32;*~
-            set <S-F9>=[33;*~
-            set <S-F10>=[34;*~
-            set <S-F11>=[23;*$
-            set <S-F12>=[24;*$
+            execute "set <S-F3>=\e[25;*~"
+            execute "set <S-F4>=\e[26;*~"
+            execute "set <S-F5>=\e[28;*~"
+            execute "set <S-F6>=\e[29;*~"
+            execute "set <S-F7>=\e[31;*~"
+            execute "set <S-F8>=\e[32;*~"
+            execute "set <S-F9>=\e[33;*~"
+            execute "set <S-F10>=\e[34;*~"
+            execute "set <S-F11>=\e[23;*$"
+            execute "set <S-F12>=\e[24;*$"
             "right windows menu key is equal to S-F6 (but not shift version)
-            set <S-F13>=[29;*$
+            execute "set <S-F13>=\e[29;*$"
 
-            set <F19>=Ou
+            execute "set <F19>=\eOu"
 
-            set <kHome>=Ow
-            set <kEnd>=Oq
+            execute "set <kHome>=\eOw"
+            execute "set <kEnd>=\eOq"
 
-            set <kInsert>=Op
+            execute "set <kInsert>=\eOp"
 
-            set <xLeft>=Ot
-            set <xUp>=Ox
-            set <xRight>=Ov
-            set <xDown>=Or
+            execute "set <xLeft>=\eOt"
+            execute "set <xUp>=\eOx"
+            execute "set <xRight>=\eOv"
+            execute "set <xDown>=\eOr"
 
-            set <S-Insert>=[2$
-            set <S-Del>=[3$
-            set <S-Home>=[7$
-            set <S-End>=[8$
-            "set <S-PageUp>=[5$
-            "set <S-PageDown>=[6$
-            "set <C-Insert>=[2^
-            "set <C-Del>=[3^
-            set <C-Home>=[7^
-            set <C-End>=[8^
-            "set <C-PageUp>=[5^
-            "set <C-PageDown>=[6^
-            set <S-Up>=[a
-            set <S-Down>=[b
-            set <S-Left>=[d
-            set <S-Right>=[c
-            "set <C-Up>=Oa
-            "set <C-Down>=Ob
-            set <C-Left>=Od
-            set <C-Right>=Oc
-            "set <A-Up>=[A
-            "set <A-Down>=[B
-            "set <A-Left>=[D
-            "set <A-Right>=[C
+            execute "set <S-Insert>=\e[2$"
+            execute "set <S-Del>=\e[3$"
+            execute "set <S-Home>=\e[7$"
+            execute "set <S-End>=\e[8$"
+            "execute "set <S-PageUp>=\e[5$"
+            "execute "set <S-PageDown>=\e[6$"
+            "execute "set <C-Insert>=\e[2^"
+            "execute "set <C-Del>=\e[3^"
+            execute "set <C-Home>=\e[7^"
+            execute "set <C-End>=\e[8^"
+            "execute "set <C-PageUp>=\e[5^"
+            "execute "set <C-PageDown>=\e[6^"
+            execute "set <S-Up>=\e[a"
+            execute "set <S-Down>=\e[b"
+            execute "set <S-Left>=\e[d"
+            execute "set <S-Right>=\e[c"
+            "execute "set <C-Up>=\eOa"
+            "execute "set <C-Down>=\eOb"
+            execute "set <C-Left>=\eOd"
+            execute "set <C-Right>=\eOc"
+            "execute "set <A-Up>=\e\e[A"
+            "execute "set <A-Down>=\e\e[B"
+            "execute "set <A-Left>=\e\e[D"
+            "execute "set <A-Right>=\e\e[C"
         endif
 
         "common mappings
