@@ -2175,6 +2175,7 @@ function! RefreshAll()
     call SyntasticReset()
     execute "YcmRestartServer"
     call ToggleCursorRefresh()
+    execute "AirlineRefresh"
     "execute "redraw!"
     execute "redrawstatus!"
 endfunction
