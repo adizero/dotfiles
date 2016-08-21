@@ -2082,6 +2082,83 @@ if has('autocmd')
     execute "autocmd! BufWritePost " . g:OS_vimrc . " source %"
 endif
 
+" s:NextNormalWindow() {{{2
+function! s:NextNormalWindow() abort
+    for i in range(1, winnr('$'))
+        let buf = winbufnr(i)
+
+        " skip unlisted buffers
+        if !buflisted(buf)
+            continue
+        endif
+
+        " skip temporary buffers with buftype set
+        if getbufvar(buf, '&buftype') != ''
+            continue
+        endif
+
+        " skip the preview window
+        if getwinvar(i, '&previewwindow')
+            continue
+        endif
+
+        " skip current window
+        if i == winnr()
+            continue
+        endif
+
+        return i
+    endfor
+
+    return -1
+endfunction
+
+" s:QuitIfOnlyWindow() {{{2
+function! s:QuitIfOnlyWindow() abort
+"    let tagbarwinnr = bufwinnr('__Tagbar__')
+"    if tagbarwinnr == -1
+"        return
+"    endif
+"
+"    let curwinnr = winnr()
+"    let prevwinnr = winnr('#') == 0 ? curwinnr : winnr('#')
+"    call s:goto_win(tagbarwinnr, 1)
+"
+    let l:buftype = getbufvar(winbufnr(winnr()), "&buftype")
+    if l:buftype != "quickfix" && l:buftype != "help"
+        return
+    endif
+
+    " Check if there is more than one window
+    if s:NextNormalWindow() == -1
+        " Check if there is more than one tab page
+        if tabpagenr('$') == 1
+            " Before quitting Vim, delete the tagbar buffer so that
+            " the '0 mark is correctly set to the previous buffer.
+            " Also disable autocmd on this command to avoid unnecessary
+            " autocmd nesting.
+            if winnr('$') == 1
+                noautocmd bdelete
+            endif
+            quit
+        else
+            close
+        endif
+    endif
+
+"    call s:goto_win(prevwinnr, 1)
+"    call s:goto_win(curwinnr, 1)
+endfunction
+
+" autoclose last open location/quickfix window on a tab
+if has('autocmd')
+    aug QFClose
+        au!
+        "au WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&buftype") == "quickfix" | q | endif
+        autocmd WinEnter * nested call s:QuitIfOnlyWindow()
+    aug END
+endif
+
 "Todo: check Vim startup time via: vim --startuptime /tmp/startup.txt
 "
 
