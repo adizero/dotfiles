@@ -2246,14 +2246,30 @@ cabbrev xreconnect <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'XReconnect' : '
 function! RefreshAll()
     echomsg "Refresh of everything..."
     "execute "sign unplace * file=" . expand('%:p')
-    execute "sign unplace * buffer=" . bufnr('%')
-    "call sy#util#refresh_windows()
-    execute "SignifyRefresh"
-    call SyntasticReset()
-    execute "YcmRestartServer"
-    call ToggleCursorRefresh()
-    execute "AirlineRefresh"
-    "execute "redraw!"
+    if has('signs')
+        execute "sign unplace * buffer=" . bufnr('%')
+    endif
+    if exists(':SignifyRefresh')
+        "call sy#util#refresh_windows()
+        execute "SignifyRefresh"
+    endif
+    if exists('*SyntasticReset')
+        call SyntasticReset()
+    endif
+    if exists(':YcmRestartServer')
+        execute "YcmRestartServer"
+    endif
+    if exists(':MultipleCursorsReset')
+        execute "MultipleCursorsReset"
+    endif
+    if exists('*ToggleCursorRefresh')
+        call ToggleCursorRefresh()
+    else
+        execute "redraw!"
+    endif
+    if exists(':AirlineRefresh')
+        execute "AirlineRefresh"
+    endif
     execute "redrawstatus!"
 endfunction
 
