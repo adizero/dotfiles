@@ -863,6 +863,9 @@ endfunction
 nnoremap <silent> { :<C-U>call MyParagraphJump(v:count1, 0)<CR>
 nnoremap <silent> } :<C-U>call MyParagraphJump(v:count1, 1)<CR>
 
+onoremap <silent> { :<C-U>call MyParagraphJump(v:count1, 0)<CR>
+onoremap <silent> } :<C-U>call MyParagraphJump(v:count1, 1)<CR>
+
 vnoremap <silent> { :<C-U>call MyParagraphJump(v:count1, 0, visualmode())<CR>
 vnoremap <silent> } :<C-U>call MyParagraphJump(v:count1, 1, visualmode())<CR>
 
