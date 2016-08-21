@@ -1976,7 +1976,7 @@ endfunction
 "command! -bar -nargs=0 -range=% TrimSpaces <line1>,<line2>call TrimSpaces()
 command! -range=% TrimSpaces <line1>,<line2>call TrimSpaces("")
 command! -range=% TrimSpacesConfirm <line1>,<line2>call TrimSpaces("c")
-nnoremap <Leader><Space> :%TrimSpacesConfirm<CR>
+nnoremap <Leader><Space> m`:%TrimSpacesConfirm<CR>
 vnoremap <Leader><Space> :TrimSpaces<CR>
 
 " ================
