@@ -525,7 +525,7 @@ let g:ycm_always_populate_location_list = 1
 
 let g:ycm_disable_for_files_larger_than_kb = 5000
 
-  let g:ycm_filetype_blacklist = {
+let g:ycm_filetype_blacklist = {
         \ 'tagbar' : 1,
         \ 'qf' : 1,
         \ 'notes' : 1,
@@ -538,6 +538,8 @@ let g:ycm_disable_for_files_larger_than_kb = 5000
         \ 'cfg' : 1,
         \ 'mail' : 1
         \}
+
+let b:old_ycm_status = 0
 
 function! Multiple_cursors_before()
     "let g:ycm_auto_trigger = 0
@@ -552,7 +554,9 @@ endfunction
 function! Multiple_cursors_after()
     "let g:ycm_auto_trigger = 1
     if b:old_ycm_status == 1
-        unlet b:ycm_largefile
+        if exists('b:ycm_largefile')
+            unlet b:ycm_largefile
+        endif
     endif
 endfunction
 
