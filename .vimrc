@@ -1767,6 +1767,14 @@ let g:qf_write_changes = 0
 
 " === vim-surround ===
 let g:surround_no_insert_mappings = 1 "disable insert mode mappings (unnecessary ?)
+let g:surround_no_mappings = 1 "disable all mappings
+
+nmap dS  <Plug>Dsurround
+nmap cS  <Plug>Csurround
+nmap yS  <Plug>Ysurround
+nmap ySS <Plug>Yssurround
+xmap S   <Plug>VSurround
+xmap gS  <Plug>VgSurround
 
 " === CSApprox ===
 let g:CSApprox_loaded = 1  "use only for schemes conversion (:CSApproxSnapshout <exported filename> from gVim)
