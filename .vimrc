@@ -1087,7 +1087,7 @@ function! SophTag(str)
                 catch /:E325:/
                     " ATTENTION when opening file
                     return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E426:/
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:/
                     " we will continue with cWORD and cword searches
                 endtry
             endif
@@ -1099,12 +1099,14 @@ function! SophTag(str)
             catch /:E325:/
                 " ATTENTION when opening file
                 return 0
-            catch /:E562:\|:E567:\|:E257:\|:E259:\|:E426:/
+            catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:/
                 " E562 bad usage for cstag - obviously cWORD contains special characters
                 " E567 no cscope connections
                 " E257 cstag tag not found
                 " E259 no matches found for cscope query
                 " E426 tag not found
+                " E499 Empty file name for '%' or '#', only works with :p:h
+                " E560 Usage cs[cope] find a|c|d|e|f|g|i|s|t name (also uppercase letters)
                 try
                     "echomsg search_cmd.expand("<cword>")
                     exec search_cmd.expand("<cword>")
@@ -1846,47 +1848,65 @@ let g:airline#extensions#whitespace#max_lines = 50000
 " ==========================
 " = Miscellaneous functions=
 " ==========================
-" Generates ctags file named tags for specified folder - simple version
-function! MyCTags(fdir)
-    " let l:path = "."
-    if a:fdir == ""
-        let l:path = resolve (expand("%:p:h"))
-    else
-        let l:path = a:fdir
+" Generates ctags and cscope tags for specified folder (without args used currently opened file's folder)
+function! GenCTags(...)
+    let l:fdir = ""
+    if a:0 > 0
+        let l:fdir = a:1
     endif
 
-    silent! execute "!" . g:OS_ctags_command . " --languages=C,C++ -R --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+fq --tag-relative=yes " . l:path
-    "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
+    if l:fdir == ""
+        let l:path = resolve(expand("%:p:h"))
+    else
+        let l:path = resolve(expand(l:fdir))
+    endif
+
+    silent! execute "!" . g:OS_ctags_command . " --languages=C,C++,Tcl -R --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+fq --tag-relative=yes --totals=yes " . l:path
+
+    if &tags != ""
+        let &tags=l:path . g:OS_dir_separator . "tags" . "," . &tags
+    else
+        let &tags=l:path . g:OS_dir_separator . "tags"
+    endif
+
     execute "redraw!"
 endfunction
 
-"comm! CtagsP call MyCTags('.. ' . g:OS_system_includes_dir)
-"comm! CtagsC call MyCTags('. ' . g:OS_system_includes_dir)
-"comm! CtagsQ call MyCTags('.')
+command! -nargs=? -complete=dir GenCTags :call GenCTags(<f-args>)
+"cabbrev genctags <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'GenCTags' : 'genctags')<CR>
 
-" Generates ctags and cscope tags for current folder MyGenTagsCmd(gt), or $ROOT folder MyGenTagsCmd(rt)
-function! MyGenTagsCmd(gtcmd, ...)
-    if (a:gtcmd == "gt")
-"       silent! execute "!" . "ctags --languages=C,C++ --fields=+ia --extra=+fq --tag-relative=yes -R -f tags --totals=yes ; cscope -b -q -u -R -f cscope.out"
-"       cs add cscope.out
-"       if &tags != ""
-"           let &tags="tags" . "," . &tags
-"       else
-"           let &tags.="tags"
-"       endif
-        let l:path = system("pwd")
-        let l:path = substitute(l:path,'\n','','')
-    elseif (a:gtcmd == "rt")
-        let l:path = expand("$ROOT")
+" Generates ctags and cscope tags for specified folder (without args used currently opened file's folder)
+function! GenTags(...)
+    let l:fdir = ""
+    if a:0 > 0
+        let l:fdir = a:1
     endif
+
+    if l:fdir == ""
+        let l:path = resolve(expand("%:p:h"))
+    else
+        let l:path = resolve(expand(l:fdir))
+    endif
+
+    echomsg "fdir = " . l:path
 
     let l:temp_file_list = system("echo /tmp/cf.\$USER.\$RANDOM")
 
-    silent! execute "!" . "find " . l:path . " \\( -name \"*.h\" -o -name \"*.hh\" -o -name \"*.hpp\" -o -name \"*.c\" -o -name \"*.cc\" -o -name \"*.cpp\" -o -name \"*.java\" -o -name \"*.mk\" -o -name \"*.db\" -o -name \"*.sh\" -o -name \"*.cfg\" \\) | grep -v \"/obj/\" > " . l:temp_file_list
-    silent! execute "!" . "ctags --languages=C,C++ --fields=+ia --extra=+fq --tag-relative=yes -f " . l:path . "/tags --totals=yes -L " . l:temp_file_list
-    silent! execute "!" . "cscope -b -q -u -f " . l:path . "/cscope.out" . " -i " . l:temp_file_list
+
+    silent! execute "!" . "find " . l:path . " \\( -name \"*.h\" -o -name \"*.hh\" -o -name \"*.hpp\" -o -name \"*.c\" -o -name \"*.cc\" -o -name \"*.cpp\" -o -name \"*.java\" -o -name \"*.mk\" -o -name \"*.db\" -o -name \"*.sh\" -o -name \"*.cfg\" -o -name \"*.mib\" -o -name \"*.tcl\" -o -name \"*.yang\" \\) | grep -v \"/obj/\" > " . l:temp_file_list
+    silent! execute "!" . "ctags --languages=C,C++,Tcl --fields=+ia --extra=+fq --tag-relative=yes -f " . l:path . "/tags --totals=yes -L " . l:temp_file_list
+    "Note: cscope needs to be away from the folder we are indexing (otherwise is duplicates references)
+    silent! execute "!" . "cd /tmp ; " . "cscope -k -b -q -u -f " . l:path .  "/cscope.out" . " -i " . l:temp_file_list " ; " . "cd -"
+
     silent! execute "!" . "rm " . l:temp_file_list
-    execute "cs add ". l:path . "/" . "cscope.out"
+
+
+    try
+        execute "cs add ". l:path . "/" . "cscope.out"
+    catch /:E568:/
+        " E568 cscope problem: database already added
+    endtry
+
     if &tags != ""
         let &tags=l:path . "/" . "tags" . "," . &tags
     else
@@ -1897,14 +1917,13 @@ function! MyGenTagsCmd(gtcmd, ...)
         cs reset
     catch /:E568:/
         " E568 cscope problem: database already added
-        " just ignore
     endtry
-    "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
+
     execute "redraw!"
 endfunction
 
-"com! -nargs=* Egt call MyGenTagsCmd("gt", <f-args>)
-"com! -nargs=* Ert call MyGenTagsCmd("rt", <f-args>)
+command! -nargs=? -complete=dir GenTags :call GenTags(<f-args>)
+"cabbrev gentags <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'GenTags' : 'gentags')<CR>
 
 " XML formatter (works with selected ranges) - uses xmllint internally
 function! DoFormatXML() range
@@ -2085,12 +2104,13 @@ nmap <RightMouse><LeftMouse> <X1Mouse>
 "vnoremap <LeftRelease> <LeftRelease>y
 
 " moving through cscope/ctags
-nmap <C-S-Right> :call CscopeCtagsSearch(expand("<cword>"))<Enter>
-nmap <C-S-Left> <C-T>
-imap <C-S-Right> <C-o>:call CscopeCtagsSearch(expand("<cword>"))<Enter>
-imap <C-S-Left> <C-o><C-T>
-vmap <C-S-Right> y:call CscopeCtagsSearch("<C-R>"")<Enter>
-vmap <C-S-Left> <Esc><C-T><Enter>
+nmap <silent><C-S-Right> :call CscopeCtagsSearch(expand("<cword>"))<Enter>
+nmap <silent><C-S-Left> <C-T>
+imap <silent><C-S-Right> <C-o>:call CscopeCtagsSearch(expand("<cword>"))<Enter>
+imap <silent><C-S-Left> <C-o><C-T>
+"Todo: improve this (it messes last yank buffer 0)
+vmap <silent><C-S-Right> y<Esc>:call CscopeCtagsSearch("<C-R>0")<Enter>
+vmap <silent><C-S-Left> <Esc><C-T><Enter>
 
 
 " when .vimrc is edited, reload it
