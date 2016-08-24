@@ -2294,6 +2294,46 @@ command! RefreshAll :call RefreshAll()
 cabbrev refreshall <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'RefreshAll' : 'refreshall')<CR>
 
 noremap <Leader><C-L> :call RefreshAll()<CR>
+
+function! LoadCrashBacktrace(symbol_file, ...)
+    let crash_dump_file="bt"
+    let silent_mode = 0
+    if filereadable(expand(a:symbol_file))
+        if a:0 > 0  "input file was specified
+            let crash_dump_file = a:1
+            if filereadable(expand(crash_dump_file))
+                let silent_mode = 1
+            endif
+        endif
+
+        let tmp_file = expand("/tmp/${USER}_" . localtime() . "_crash_resolved.txt")
+
+        echomsg "silent_mode = " . silent_mode
+
+        let gdbtb_cmd = "!" . "gdbtb" ." " . a:symbol_file . " " . crash_dump_file
+        if silent_mode == 0
+            silent! execute gdbtb_cmd . " | tee " . tmp_file
+        else
+            silent! execute gdbtb_cmd . " > " . tmp_file
+        endif
+
+        let old_efm = &l:efm
+        let &l:efm = 'Line %l of "%f" %m'
+        execute "cfile " . tmp_file
+        let &l:efm = old_efm
+
+        silent! execute "!" . "rm" . " " . tmp_file
+        execute "redraw!"
+    else
+        echohl WarningMsg
+            echomsg "Symbol file " . a:symbol_file . " is not existing/not readable"
+        echohl None
+    endif
+endfunction
+
+command! -nargs=+ -complete=file LoadCrashBacktrace :call LoadCrashBacktrace(<f-args>)
+cabbrev loadcrashbacktrace <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'LoadCrashBacktrace' : 'loadcrashbacktrace')<CR>
+
 " =========================================
 " = Project/Versioning system integration =
 " =========================================
