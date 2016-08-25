@@ -834,6 +834,7 @@ function! MyParagraphJump(count, forward, ...)
         execute "normal! gv"
     endif
 
+    "Todo: maybe use :keepjumps instead
     normal m`
 
     let l:position = getpos("v")
@@ -2179,7 +2180,14 @@ function! s:QuitIfOnlyWindow() abort
             endif
             quit
         else
-            close
+            "Note: workaround for the fact that in new tab the buftype is set
+            "too late (and sticks during this WinEntry autocmd to the old -
+            "potentially quickfix/help buftype - that would automatically
+            "close the new tab and open the buffer in copen window instead
+            "New tabpage has previous window set to 0
+            if tabpagewinnr(tabpagenr(), '#') != 0
+                close
+            endif
         endif
     endif
 
