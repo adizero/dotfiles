@@ -457,10 +457,14 @@ if filereadable(vundle_readme)
     Plugin 'vim-airline/vim-airline'
     Plugin 'vim-airline/vim-airline-themes'
 
+    Plugin 'myusuf3/numbers.vim'
+
     "Plugin 'cohama/lexima.vim'
     "Plugin 'rstacruz/vim-closer'
 
     Plugin 'wellle/targets.vim'
+
+    Plugin 'haya14busa/vim-asterisk'
 
     "Plugin 't9md/vim-textmanip'
     "Plugin 'stefandtw/quickfix-reflector.vim'
@@ -486,6 +490,8 @@ if filereadable(vundle_readme)
     Plugin 'syngan/vim-vimlint'
     Plugin 'ynkdir/vim-vimlparser'
 
+    Plugin 'mhinz/vim-startify'
+
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
     filetype plugin indent on    " required
@@ -499,6 +505,7 @@ let g:EclimDisabled = "defined"
 
 if v:version < 704
     let g:loaded_youcompleteme = 1 "too old Vim => disable YouCompleteMe
+    let g:loaded_numbers = 1
 endif
 
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
@@ -678,7 +685,50 @@ if has("wildmenu")
     set wildmenu
 endif
 
+set wildmode=longest:full,list:full
+
+"convenience mappings
+nnoremap Q <nop>
+"if has("user_commands")
+"    command! -bang -nargs=? -complete=file E e<bang> <args>
+"    command! -bang -nargs=? -complete=file W w<bang> <args>
+"    command! -bang -nargs=? -complete=file Wq wq<bang> <args>
+"    command! -bang -nargs=? -complete=file WQ wq<bang> <args>
+"    command! -bang Wa wa<bang>
+"    command! -bang WA wa<bang>
+"    command! -bang Q q<bang>
+"    command! -bang QA qa<bang>
+"    command! -bang Qa qa<bang>
+"endif
+cabbrev E <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'e' : 'E')<CR>
+cabbrev Wq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'wq' : 'Wq')<CR>
+cabbrev WQ <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'wq' : 'WQ')<CR>
+cabbrev W <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'w' : 'W')<CR>
+cabbrev Wa <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'wa' : 'Wa')<CR>
+cabbrev WA <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'wa' : 'WA')<CR>
+cabbrev Q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'q' : 'Q')<CR>
+cabbrev Qa <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'qa' : 'Qa')<CR>
+cabbrev QA <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'qa' : 'QA')<CR>
+cabbrev X <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'x' : 'X')<CR>
+cabbrev Xa <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'xa' : 'Xa')<CR>
+cabbrev XA <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'xa' : 'XA')<CR>
+
+"no splash screen
+set shortmess+=I
+
+"visual block extension beyong line endings ($ still selects up to respective line end)
+set virtualedit=block
+
 set tabpagemax=25
+
+function! Align()
+    '<,'>!column -t|sed 's/  \(\S\)/ \1/g'
+    normal gv=
+endfunction
+
+"xnoremap <silent> gQ :<C-u>silent call Align()<CR>
+"map gQ :pyf ~/toolchains/llvm/share/clang/clang-format.py<cr>
+map gQ :pyf ~/bin/clang-format-from-vim.py<cr>
 
 "needs to be after syn on (syntax on)
 let g:colors_name = g:color_scheme
@@ -737,9 +787,28 @@ cmap w!! %!sudo tee > /dev/null %
 " do not move cursor during yank in visual mode
 vmap y ygv<Esc>
 
+function! s:get_visual_selection()
+    " Why is this not a built-in Vim script function?!
+    let [lnum1, col1] = getpos("'<")[1:2]
+    let [lnum2, col2] = getpos("'>")[1:2]
+    let lines = getline(lnum1, lnum2)
+    let lines[-1] = lines[-1][: col2 - (&selection == 'inclusive' ? 1 : 2)]
+    let lines[0] = lines[0][col1 - 1:]
+    return join(lines, "\n")
+endfunction
+
+" Yank selected text as an escaped search-pattern
+map <silent><Plug>(visual-yank-plaintext)  :<C-U>call setreg(v:register, '\V' . escape(<SID>get_visual_selection(), '\/'))<CR>
+"map <silent><Plug>(visual-yank-plaintext) :<C-U>call setreg('/',
+"'\V'.escape(get_visual_selection(), '\/'))<CR>
+"vmap <C-Q> <Plug>(visual-yank-plaintext)
+"vmap <A-/> "/<Plug>(visual-yank-plaintext)n
+
 " search for visually selected text
-vnoremap // y/<C-R>"<CR>
-vnoremap ?? y?<C-R>"<CR>
+"vnoremap // y/<C-R>"<CR>
+"vnoremap ?? y?<C-R>"<CR>
+"vmap // "/<Plug>(visual-yank-plaintext)n
+"vmap ?? "/<Plug>(visual-yank-plaintext):let v:searchforward=0<CR>n
 
 "better jumping to function beginning/end (does not require {,} to be in the
 "first column of the file
@@ -1019,8 +1088,8 @@ vnoremap <Space> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv><Esc>:let&sw=origsw<CR
 " move selected lines
 vnoremap <C-j> :m '>+1<CR>gv=gv
 vnoremap <C-k> :m '<-2<CR>gv=gv
-vnoremap <C-S-j> :m '>+1<CR>gv
-vnoremap <C-S-k> :m '<-2<CR>gv
+"vnoremap <C-S-j> :m '>+1<CR>gv
+"vnoremap <C-S-k> :m '<-2<CR>gv
 " duplicate (above) selected lines
 vnoremap <C-d> :t .-1<CR>gv
 
@@ -1067,8 +1136,8 @@ function! SophHelp()
 endfunction
 
 " resolves even with :: in the cWORD, but without following (), ->, ., , e.g. DbgwController::getPort vs. DbgwController::getPort()
-function! SophTag(str)
-        "SophTag(...)
+function! s:get_tag_internal(str)
+        "Func(...)
         "let args=a:000
         "for a in args
         "   echo a
@@ -1129,10 +1198,20 @@ function! SophTag(str)
         echohl None
 endfunction
 
-nmap <C-]> :call SophTag("")<Enter>
-imap <C-]> <C-o>:call SophTag("")<Enter>
-"Todo: improve this (it messes last yank buffer 0)
-vmap <C-]> y<Esc>:call SophTag("<C-r>0")<Enter>gv
+function! SophTag(str)
+    let tagcase_saved=&tagcase
+    let &tagcase="match"
+    try
+        call <SID>get_tag_internal(a:str)
+    finally
+        let &tagcase=tagcase_saved
+        unlet tagcase_saved
+    endtry
+endfunction
+
+nmap <silent><C-]> :call SophTag("")<Enter>
+imap <silent><C-]> <C-o>:call SophTag("")<Enter>
+vmap <silent><C-]> <Esc>:call SophTag(<SID>get_visual_selection())<Enter>gv
 
 if v:version >= 703
     nmap <S-F7> :UndotreeToggle<Enter>
@@ -1509,7 +1588,7 @@ function! CleverTabCompletion()
       return "\<C-X>\<C-O>"
    elseif &dictionary != ''
       " no omni completion, try dictionary completion
-      return "\<C-K>"
+      return "\<C-X>\<C-K>"
    else
       "use omni completion or dictionary completion
       "use known-word completion
@@ -1527,26 +1606,28 @@ endfunction
 
 function! ShiftTabCompletion()
     "check if at beginning of line or after a space
-    "let g:str = strpart( getline('.'), col('.'))
     if strpart( getline('.'), 0, col('.')-1 ) =~ '\t\+\s*$'
+        let save_cursor = getcurpos()
         execute "normal F\<C-I>"
         normal x
+        let save_cursor[2] -= 1
+        call setpos('.', save_cursor)
         return ""
     elseif strpart( getline('.'), col('.')-1 ) =~ '^\s*\t\+'
-        normal m`
+        let save_cursor = getcurpos()
         execute "normal f\<C-I>"
         normal x
-        normal ``
+        call setpos('.', save_cursor)
         return ""
     elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
         execute "normal \<LT>\<LT>"
         return ""
     else
-        "return CleverTabCompletion()
         if pumvisible()
             return "\<C-P>"
         else
             return "\<S-Tab>"
+            "return CleverTabCompletion()
         endif
     endif
 endfunction
@@ -1573,6 +1654,7 @@ else
       " Use ag over grep
       set grepprg=ag\ --nogroup\ --nocolor
       "\ --column
+      let g:ag_working_path_mode = "r"
       nmap <Leader>a :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
       nmap \ :Ag<SPACE>
     endif
@@ -1674,9 +1756,61 @@ let c_no_comment_fold=1
 " autoselects based on clang_format#code_style \ "BasedOnStyle" : "Google",
 "Todo: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
 let g:clang_format#code_style = "Google"
-let g:clang_format#style_options = { "BreakBeforeBraces" : "Allman" , "ColumnLimit" : "120"}
+
+"even with following custom config the typedef enum/extern "C" missing break
+"bug is still there in clang-formatter (3.8.1 - regression from 3.7.x):
+"https://llvm.org/bugs/show_bug.cgi?id=26626
+"https://llvm.org/bugs/show_bug.cgi?id=26689
+"            \ "BreakBeforeBraces" : "Custom",
+"            \ "BraceWrapping" : {
+"            \       "AfterClass" : "true",
+"            \       "AfterControlStatement" : "true",
+"            \       "AfterEnum" : "true",
+"            \       "AfterFunction" : "true",
+"            \       "AfterNamespace" : "true",
+"            \       "AfterObjCDeclaration" : "true",
+"            \       "AfterStruct" : "true",
+"            \       "AfterUnion" : "true",
+"            \       "BeforeCatch" : "true",
+"            \       "BeforeElse" : "true",
+"            \ },
+"
+"            \ "BreakBeforeBraces" : "Allman",
+"
+"solution is for now to use clang-formatter 3.7.1 (with everything else 3.8.1)
+let g:clang_format#style_options = {
+            \ "BreakBeforeBraces" : "Allman",
+            \ "ColumnLimit" : "120",
+            \ "AllowShortIfStatementsOnASingleLine" : "false",
+            \ "AllowShortLoopsOnASingleLine" : "false",
+            \ "AllowShortFunctionsOnASingleLine" : "Empty",
+            \ }
 let g:clang_format#auto_formatexpr = 1
 let g:clang_format#no_operator = 1
+
+function! MyFormat()
+    let pos_save = getpos('.')
+    let sel_save = &l:selection
+    ""let &l:selection = "inclusive"
+    "let [save_g_reg, save_g_regtype] = [getreg('g'), getregtype('g')]
+    try
+        pyf ~/bin/clang-format-from-vim.py
+    finally
+        "call setreg('g', save_g_reg, save_g_regtype)
+        let &l:selection = sel_save
+        call setpos('.', pos_save)
+    endtry
+endfunction
+
+"let g:loaded_clang_format = 1 "FIXME turned off
+"if !exists("g:clang_format#autocommands_loaded")
+"    augroup plugin-clang-format-auto-format
+"        autocmd!
+"        autocmd FileType c,cpp,objc,java,javascript,typescript setlocal formatexpr=MyFormat()<CR>
+"    augroup END
+"    let g:clang_format#autocommands_loaded = 1
+"endif
+
 
 " ============================
 " =        UltiSnips         =
@@ -1846,6 +1980,35 @@ let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ "sh", "pyt
 " === Airline ===
 let g:airline#extensions#whitespace#max_lines = 50000
 
+" === vim-asterisk ===
+let g:asterisk#keeppos = 1
+
+map *   <Plug>(asterisk-*)
+map #   <Plug>(asterisk-#)
+map g*  <Plug>(asterisk-g*)
+map g#  <Plug>(asterisk-g#)
+map z*  <Plug>(asterisk-z*)
+map gz* <Plug>(asterisk-gz*)
+map z#  <Plug>(asterisk-z#)
+map gz# <Plug>(asterisk-gz#)
+
+" === vim-startify ===
+let g:startify_files_number = 10
+let g:startify_bookmarks = [
+            \ { 'w': '~/.sr_workspaces' },
+            \ ]
+"let g:startify_change_to_vcs_root = 1
+"let g:startify_session_persistence = 1
+let startify_session_delete_buffers = 1
+let g:startify_session_dir = "~/.vim/sessions"
+let g:ctrlp_reuse_window = 'startify'
+let g:startify_list_order = [
+            \ [ 'MRU' ], 'files', [ 'Sessions' ], 'sessions', [ 'Bookmarks' ],
+            \ 'bookmarks', [ 'Commands' ], 'commands'
+            \ ]
+
+set sessionoptions-=blank
+
 " ==========================
 " = Miscellaneous functions=
 " ==========================
@@ -1862,7 +2025,7 @@ function! GenCTags(...)
         let l:path = resolve(expand(l:fdir))
     endif
 
-    silent! execute "!" . g:OS_ctags_command . " --languages=C,C++,Tcl -R --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+fq --tag-relative=yes --totals=yes " . l:path
+    silent! execute "!" . g:OS_ctags_command . " --languages=C,C++,Tcl -R --c-kinds=+p --c++-kinds=+p --fields=+iaS --extra=+fq --tag-relative=yes --totals=yes --sort=foldcase " . l:path
 
     if &tags != ""
         let &tags=l:path . g:OS_dir_separator . "tags" . "," . &tags
@@ -1895,7 +2058,7 @@ function! GenTags(...)
 
 
     silent! execute "!" . "find " . l:path . " \\( -name \"*.h\" -o -name \"*.hh\" -o -name \"*.hpp\" -o -name \"*.c\" -o -name \"*.cc\" -o -name \"*.cpp\" -o -name \"*.java\" -o -name \"*.mk\" -o -name \"*.db\" -o -name \"*.sh\" -o -name \"*.cfg\" -o -name \"*.mib\" -o -name \"*.tcl\" -o -name \"*.yang\" \\) | grep -v \"/obj/\" > " . l:temp_file_list
-    silent! execute "!" . "ctags --languages=C,C++,Tcl --fields=+ia --extra=+fq --tag-relative=yes -f " . l:path . "/tags --totals=yes -L " . l:temp_file_list
+    silent! execute "!" . "ctags --languages=C,C++,Tcl --fields=+ia --extra=+fq --tag-relative=yes -f " . l:path . "/tags --totals=yes --sort=foldcase -L " . l:temp_file_list
     "Note: cscope needs to be away from the folder we are indexing (otherwise is duplicates references)
     silent! execute "!" . "cd /tmp ; " . "cscope -k -b -q -u -f " . l:path .  "/cscope.out" . " -i " . l:temp_file_list " ; " . "cd -"
 
@@ -2086,13 +2249,13 @@ function! CscopeCtagsSearch(word)
     endtry
 endfunction
 
-nnoremap g<LeftMouse> <LeftMouse>:call CscopeCtagsSearch("")<CR>
-nnoremap g<RightMouse> <C-T>
+nnoremap <silent>g<LeftMouse> <LeftMouse>:call CscopeCtagsSearch("")<CR>
+nnoremap <silent>g<RightMouse> <C-T>
 nmap <C-LeftMouse> g<LeftMouse>
 nmap <C-RightMouse> g<RightMouse>
 
-nnoremap z<LeftMouse> <LeftMouse>:exe "cs f s " . expand("<cword>")<CR>
-nnoremap z<RightMouse> <LeftMouse>:exe "cs f c " . expand("<cword>")<CR>
+nnoremap <silent>z<LeftMouse> <LeftMouse>:exe "cs f s " . expand("<cword>")<CR>
+nnoremap <silent>z<RightMouse> <LeftMouse>:exe "cs f c " . expand("<cword>")<CR>
 nmap <A-LeftMouse> z<LeftMouse>
 nmap <A-RightMouse> z<RightMouse>
 
@@ -2109,8 +2272,7 @@ nmap <silent><C-S-Right> :call CscopeCtagsSearch(expand("<cword>"))<Enter>
 nmap <silent><C-S-Left> <C-T>
 imap <silent><C-S-Right> <C-o>:call CscopeCtagsSearch(expand("<cword>"))<Enter>
 imap <silent><C-S-Left> <C-o><C-T>
-"Todo: improve this (it messes last yank buffer 0)
-vmap <silent><C-S-Right> y<Esc>:call CscopeCtagsSearch("<C-R>0")<Enter>
+vmap <silent><C-S-Right> <Esc>:call CscopeCtagsSearch(<SID>get_visual_selection())<Enter>
 vmap <silent><C-S-Left> <Esc><C-T><Enter>
 
 
@@ -2186,7 +2348,19 @@ function! s:QuitIfOnlyWindow() abort
             "close the new tab and open the buffer in copen window instead
             "New tabpage has previous window set to 0
             if tabpagewinnr(tabpagenr(), '#') != 0
+                let l:last_window = 0
+                if winnr('$') == 1
+                    let l:last_window = 1
+                endif
                 close
+                if l:last_window == 1
+                    "Note: workaround for the same bug, but w.r.t. Airline
+                    "plugin (it needs to refresh buftype and status line after last
+                    "special window autocmd close on a tab page
+                    if exists(':AirlineRefresh')
+                        execute "AirlineRefresh"
+                    endif
+                endif
             endif
         endif
     endif
