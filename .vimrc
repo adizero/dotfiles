@@ -407,7 +407,7 @@ hi clear
 
 "check vundle installation, if installed, then make use of it
 let vundle_readme=expand('~/.vim/bundle/Vundle.vim/README.md')
-if filereadable(vundle_readme)
+if v:version >= 702 && filereadable(vundle_readme)
 "---VUNDLE---
     filetype off                  " required
     "set the runtime path to include Vundle and initialize
@@ -465,6 +465,8 @@ if filereadable(vundle_readme)
     Plugin 'wellle/targets.vim'
 
     Plugin 'haya14busa/vim-asterisk'
+
+    Plugin 'junegunn/vim-easy-align'
 
     "Plugin 't9md/vim-textmanip'
     "Plugin 'stefandtw/quickfix-reflector.vim'
@@ -543,7 +545,8 @@ let g:ycm_filetype_blacklist = {
         \ 'pandoc' : 1,
         \ 'infolog' : 1,
         \ 'cfg' : 1,
-        \ 'mail' : 1
+        \ 'mail' : 1,
+        \ 'tags' : 1,
         \}
 
 let b:old_ycm_status = 0
@@ -616,19 +619,23 @@ let g:user_session_filename = 'session.vim'
 
 silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_sessions_home
 
-"autocmd VimEnter * call LoadSession()
-"autocmd VimLeave * call SaveSession()
 function! SaveSession()
-    execute 'mksession! ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
+    if exists(':SSave')
+        execute 'SSave'
+    else
+        execute 'mksession! ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
+    endif
 endfunction
 function! LoadSession()
-    "if argc() == 0
+    if exists(':SLoad')
+        execute 'SLoad'
+    else
         if v:version > 700
             tabfirst
             tabonly
         endif
         execute 'source ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
-    "endif
+    endif
 endfunction
 
 " open files with the cursor at the last remembered position
@@ -681,11 +688,22 @@ set nostartofline
 "set display+=uhex
 set display+=lastline
 
+set formatoptions=tcq
+if v:version > 703 || (v:version == 703 && has('patch552'))
+    set formatoptions+=j
+endif
+set nrformats=hex
+if v:version > 704 || (v:version == 704 && has('patch1027'))
+    set nrformats+=bin
+endif
+set complete=.,w,b,u,t,i,kspell
+
 if has("wildmenu")
     set wildmenu
 endif
 
-set wildmode=longest:full,list:full
+"set wildmode=longest:full,list:full
+set wildmode=full
 
 "convenience mappings
 nnoremap Q <nop>
@@ -814,6 +832,9 @@ map <silent><Plug>(visual-yank-plaintext)  :<C-U>call setreg(v:register, '\V' . 
 "first column of the file
 
 function! My_PreSection(count, bracket_to_find, search_flags, move_to_execute)
+    "Todo: maybe use :keepjumps instead
+    normal m`
+
     "echomsg "count " . a:count . " " . line(".") . ":" . col(".")
     let i = a:count
     while i > 0
@@ -848,6 +869,9 @@ function! My_PreSection(count, bracket_to_find, search_flags, move_to_execute)
 endfunction
 
 function! My_SectionJump(count, n_move, last_move)
+    "Todo: maybe use :keepjumps instead
+    normal m`
+
     let i = a:count
     let pos_save_orig = getpos('.')
     if a:last_move == "[["
@@ -894,17 +918,17 @@ nnoremap [] :<C-U>call My_SectionJump(v:count1, "[[", "][")<CR>
 "Todo: add visual mappings for custom section jumps (see MyParagraphJump as an example)
 
 function! MyParagraphJump(count, forward, ...)
-    let l:search_flags = "bW"
-    if a:forward == 1
-        let l:search_flags = "W"
-    endif
-
     if a:0 > 0  "visual mode
         execute "normal! gv"
     endif
 
     "Todo: maybe use :keepjumps instead
     normal m`
+
+    let l:search_flags = "bW"
+    if a:forward == 1
+        let l:search_flags = "W"
+    endif
 
     let l:position = getpos("v")
     let l:position[2] = 0  "will jump to column 0
@@ -1199,13 +1223,17 @@ function! s:get_tag_internal(str)
 endfunction
 
 function! SophTag(str)
-    let tagcase_saved=&tagcase
-    let &tagcase="match"
+    if v:version > 704 || (v:version == 704 && has('patch957'))
+        let tagcase_saved=&tagcase
+        let &tagcase="match"
+    endif
     try
         call <SID>get_tag_internal(a:str)
     finally
-        let &tagcase=tagcase_saved
-        unlet tagcase_saved
+        if v:version > 704 || (v:version == 704 && has('patch957'))
+            let &tagcase=tagcase_saved
+            unlet tagcase_saved
+        endif
     endtry
 endfunction
 
@@ -1553,7 +1581,7 @@ if has("gui_running")
         set guioptions="aegmrLtT
 
         " maximize window on start
-        autocmd GUIEnter * simalt ~X
+        autocmd! GUIEnter * simalt ~X
     else
         silent! set guifont=Envy\ Code\ R\ 11
         if &guifont != 'Envy Code R 11'
@@ -1626,8 +1654,8 @@ function! ShiftTabCompletion()
         if pumvisible()
             return "\<C-P>"
         else
-            return "\<S-Tab>"
-            "return CleverTabCompletion()
+            "return "\<S-Tab>"
+            return CleverTabCompletion()
         endif
     endif
 endfunction
@@ -1892,8 +1920,11 @@ nmap <C-_><C-_> gcgc
 "reselects after commenting, beware of uppercasing with keypress `u` in visual mode
 vmap <C-_> gcgv
 "switch to // comments in c/ccp files
-autocmd FileType c set commentstring=//%s
-autocmd FileType cpp set commentstring=//%s
+if has('autocmd')
+    autocmd! FileType c set commentstring=//%s
+    autocmd! FileType cpp set commentstring=//%s
+    autocmd! FileType qf set noscrollbind | set scrolloff=0
+endif
 
 " === quickfix-reflector
 let g:qf_join_changes = 1
@@ -1997,6 +2028,13 @@ let g:startify_files_number = 10
 let g:startify_bookmarks = [
             \ { 'w': '~/.sr_workspaces' },
             \ ]
+let g:startify_commands = [
+    \ {'m': ['Open modified files in tabs', 'call OpenGitModifiedFiles("tabs","modified","normal")']},
+    \ {'M': ['Open branch diverged and modified files in tabs', 'call OpenGitModifiedFiles("tabs","branch","normal")']},
+    \ {'d': ['Open modified files in tabs and show diff', 'call OpenGitModifiedFiles("tabs","modified","diff")']},
+    \ {'D': ['Open branch diverged files in tabs and show diff', 'call OpenGitModifiedFiles("tabs","branch","diff")']},
+    \ ]
+
 "let g:startify_change_to_vcs_root = 1
 "let g:startify_session_persistence = 1
 let startify_session_delete_buffers = 1
@@ -2007,7 +2045,20 @@ let g:startify_list_order = [
             \ 'bookmarks', [ 'Commands' ], 'commands'
             \ ]
 
+let g:startify_session_sort = 0  "sort session list alphabetically
+
 set sessionoptions-=blank
+
+" === vim-easy-align ===
+map ga <Plug>(EasyAlign)
+
+" === VCSCommands.vim ===
+" for startup speed reasons disable non-existing versioning systems (otherwise
+" the plugin searches whole $PATH for executable - this can take around 60ms)
+let g:VCSCommandBZRExec = ""
+let g:VCSCommandHGExec = ""
+let g:VCSCommandSVKExec = ""
+let g:VCSCommandSVNExec = ""
 
 " ==========================
 " = Miscellaneous functions=
@@ -2278,7 +2329,6 @@ vmap <silent><C-S-Left> <Esc><C-T><Enter>
 
 " when .vimrc is edited, reload it
 if has('autocmd')
-"    autocmd! BufWritePost "*" . g:OS_dir_separator . g:OS_vimrc source %
     execute "autocmd! BufWritePost " . g:OS_vimrc . " source %"
 endif
 
@@ -2315,15 +2365,6 @@ endfunction
 
 " s:QuitIfOnlyWindow() {{{2
 function! s:QuitIfOnlyWindow() abort
-"    let tagbarwinnr = bufwinnr('__Tagbar__')
-"    if tagbarwinnr == -1
-"        return
-"    endif
-"
-"    let curwinnr = winnr()
-"    let prevwinnr = winnr('#') == 0 ? curwinnr : winnr('#')
-"    call s:goto_win(tagbarwinnr, 1)
-"
     let l:buftype = getbufvar(winbufnr(winnr()), "&buftype")
     if l:buftype != "quickfix" && l:buftype != "help"
         return
@@ -2333,20 +2374,22 @@ function! s:QuitIfOnlyWindow() abort
     if s:NextNormalWindow() == -1
         " Check if there is more than one tab page
         if tabpagenr('$') == 1
-            " Before quitting Vim, delete the tagbar buffer so that
+            " Before quitting Vim, delete the special buffer so that
             " the '0 mark is correctly set to the previous buffer.
             " Also disable autocmd on this command to avoid unnecessary
             " autocmd nesting.
             if winnr('$') == 1
-                noautocmd bdelete
+                if has('autocmd')
+                    noautocmd bdelete
+                endif
             endif
             quit
         else
-            "Note: workaround for the fact that in new tab the buftype is set
-            "too late (and sticks during this WinEntry autocmd to the old -
-            "potentially quickfix/help buftype - that would automatically
-            "close the new tab and open the buffer in copen window instead
-            "New tabpage has previous window set to 0
+            " Note: workaround for the fact that in new tab the buftype is set
+            " too late (and sticks during this WinEntry autocmd to the old -
+            " potentially quickfix/help buftype - that would automatically
+            " close the new tab and open the buffer in copen window instead
+            " New tabpage has previous window set to 0
             if tabpagewinnr(tabpagenr(), '#') != 0
                 let l:last_window = 0
                 if winnr('$') == 1
@@ -2354,9 +2397,9 @@ function! s:QuitIfOnlyWindow() abort
                 endif
                 close
                 if l:last_window == 1
-                    "Note: workaround for the same bug, but w.r.t. Airline
-                    "plugin (it needs to refresh buftype and status line after last
-                    "special window autocmd close on a tab page
+                    " Note: workaround for the same bug, but w.r.t. Airline
+                    " plugin (it needs to refresh buftype and status line after
+                    " last special window autocmd close on a tab page
                     if exists(':AirlineRefresh')
                         execute "AirlineRefresh"
                     endif
@@ -2364,14 +2407,11 @@ function! s:QuitIfOnlyWindow() abort
             endif
         endif
     endif
-
-"    call s:goto_win(prevwinnr, 1)
-"    call s:goto_win(curwinnr, 1)
 endfunction
 
-" autoclose last open location/quickfix window on a tab
+" autoclose last open location/quickfix/help windows on a tab
 if has('autocmd')
-    aug QFClose
+    aug AutoCloseAllQF
         au!
         "au WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&buftype") == "quickfix" | q | endif
         autocmd WinEnter * nested call s:QuitIfOnlyWindow()
@@ -2535,6 +2575,61 @@ endfunction
 
 command! -nargs=+ -complete=file LoadCrashBacktrace :call LoadCrashBacktrace(<f-args>)
 cabbrev loadcrashbacktrace <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'LoadCrashBacktrace' : 'loadcrashbacktrace')<CR>
+
+function! OpenGitModifiedFiles(opentype, whatfiles, diffstyle)
+    let file_list = []
+    if a:whatfiles == "modified"
+        let file_list = split(system("list_git_modified_files.sh"), "\n")
+    elseif a:whatfiles == "branch"
+        let file_list = split(system("list_git_modified_files.sh"), "\n")
+        let file_list += split(system("list_git_branch_modified_files.sh"), "\n")
+    endif
+
+    let l:type = a:opentype
+    let l:count = 0
+    for l:item in file_list
+        if l:count == 0 && (&ft == "" || &ft == "startify")
+            silent execute "e " . l:item
+        else
+            if l:type == "tabs"
+                silent execute "tabe " . l:item
+            elseif l:type == "splits"
+                silent execute "botright split " . l:item
+            elseif l:type == "vsplits"
+                silent execute "botright vsplit " . l:item
+            elseif l:type == "bufs"
+                silent execute "badd " . l:item
+            endif
+        endif
+        if a:diffstyle == "diff"
+            if a:opentype == "tabs"
+                if exists(':VCSVimDiff')
+                    let l:git_branching_point = system("get_git_upstream_branching_point.sh | tr -d '\n'")
+                    silent execute "VCSVimDiff " . l:git_branching_point
+                endif
+            endif
+        endif
+        let l:count = l:count + 1
+        if l:count == &tabpagemax
+            echomsg "Opened maximum " . l:count . " files (there are more modified files - opening them in buffers)"
+            let l:type = "bufs"
+        endif
+    endfor
+    if l:count == 0
+        echomsg "No modified files"
+    else
+        if a:opentype == "tabs"
+            tabfirst
+        elseif a:opentype == "splits"
+            1wincmd w
+        elseif a:opentype == "vsplits"
+            1wincmd w
+        elseif a:opentype == "bufs"
+            bfirst
+        endif
+    endif
+    "cexpr file_list
+endfunc
 
 " =========================================
 " = Project/Versioning system integration =
