@@ -1719,6 +1719,9 @@ elseif $CTAGS_PREFIX != ""
                     let &tags.=","
                 endif
                 let &tags.=prefixnr
+                if filereadable(prefixnr . ".added")
+                    let &tags = prefixnr . ".added" . "," . &tags
+                endif
             else
                 "echo "file ".prefixnr." not found!"
                 let bre=1
