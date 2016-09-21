@@ -449,6 +449,7 @@ if v:version >= 702 && filereadable(vundle_readme)
     Plugin 'tpope/vim-repeat'
     Plugin 'tpope/vim-unimpaired'
     Plugin 'tpope/vim-fugitive'
+    Plugin 'tpope/vim-vinegar'
     "Plugin 'tpope/vim-commentary'
     Plugin 'wilywampa/vim-commentary'
 
@@ -493,6 +494,8 @@ if v:version >= 702 && filereadable(vundle_readme)
     Plugin 'ynkdir/vim-vimlparser'
 
     Plugin 'mhinz/vim-startify'
+
+    Plugin 'jreybert/vim-largefile'
 
     " All of your Plugins must be added before the following line
     call vundle#end()            " required
@@ -639,7 +642,9 @@ function! LoadSession()
 endfunction
 
 " open files with the cursor at the last remembered position
-autocmd! BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
+if has('autocmd')
+    autocmd! BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
+endif
 
 set helplang=en
 set langmenu=en
@@ -668,7 +673,7 @@ set autoindent
 if has("mouse")
     set mouse=a             " use mouse in xterm to scroll
 endif
-set scrolloff=5         " 5 lines before and after the current line when scrolling
+set scrolloff=5         " 5 lines before and after the current line when scrolling - overriden later
 set ignorecase          " ignore case
 set smartcase           " but don't ignore it, when search string contains uppercase letters
 set hid                 " allow switching buffers, which have unsaved changes
@@ -931,6 +936,7 @@ function! MyParagraphJump(count, forward, ...)
     endif
 
     let l:position = getpos("v")
+    let l:saved_pos = getpos(".")
     let l:position[2] = 0  "will jump to column 0
     let l:i = a:count
     while l:i > 0
@@ -949,13 +955,15 @@ function! MyParagraphJump(count, forward, ...)
             endif
             let l:position[1] = l:found_line
             call setpos(".", l:position)
-            return
+            break
         else
             let l:position[1] = l:found_line
             call setpos(".", l:position)
         endif
         let l:i = l:i - 1
     endwhile
+    " jump to the original column after paragraph move
+    execute "normal " . (l:saved_pos[2] + l:saved_pos[3]) . "|"
 endfunction
 
 nnoremap <silent> { :<C-U>call MyParagraphJump(v:count1, 0)<CR>
@@ -979,11 +987,21 @@ if v:version >= 700
     " dictionary completion CTRL+X CTRL+K in insert mode
     set dictionary=/usr/share/dict/words
     " thesaurus synonyms completion CTRL+X CTRL+T in insert mode
-    "set thesaurus=/usr/share/????
+    "inoremap <C-X><C-T> <C-o>:setlocal isk+=-<CR><C-o>:setlocal isk+=32<CR><C-X><C-T>
+    set thesaurus=~/.vim/plugin/mtopenoffice.txt
     " spell checking (switchable by <Leader>s), CTRL+X CTRL+S in insert mode
     set nospell
     set spelllang=en
     set spellsuggest=5
+
+    " add return to last tab page movement to g<Tab> keybinding
+    if has('autocmd')
+        if !exists("g:lasttab")
+            let g:lasttab = 1
+        endif
+        nmap g<Tab> :exe "tabn ".g:lasttab<CR>
+        autocmd! TabLeave * let g:lasttab = tabpagenr()
+    endif
 endif
 
 " ============================
@@ -993,26 +1011,28 @@ endif
 "let &t_ts="\ek"
 "let &t_fs="\e\"
 "don't reset screen tab's caption to flying...
-"auto VimLeave * let &t_ts="\ek\e\"
+"autocmd! VimLeave * let &t_ts="\ek\e\"
 
 set title
 
-":auto BufEnter * let &titlestring= expand("%:t") . " (" . expand($REL) . "-" . expand($RELP) . " " . expand($VPLOAD) . expand($HOST_TAG) . " " . expand($SS) . " | " . expand($ROOT) . ")"
-if $REL == ""
-    :auto BufEnter * let &titlestring= "%m%r" . expand("%:t")
-else
-    if $VPLOAD != ""
-        if $REL != $RELP
-            :auto BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . "-" . $RELP . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
-        else
-            :auto BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
-        endif
+if has('autocmd')
+    "autocmd! BufEnter * let &titlestring= expand("%:t") . " (" . expand($REL) . "-" . expand($RELP) . " " . expand($VPLOAD) . expand($HOST_TAG) . " " . expand($SS) . " | " . expand($ROOT) . ")"
+    if $REL == ""
+        autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t")
     else
-        :auto BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $CURRENT_LOCATION . " | " . $ROOT . ")"
+        if $VPLOAD != ""
+            if $REL != $RELP
+                autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . "-" . $RELP . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
+            else
+                autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
+            endif
+        else
+            autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $CURRENT_LOCATION . " | " . $ROOT . ")"
+        endif
     endif
 endif
 
-" :auto BufEnter * let &titlestring = hostname() . "/" . expand("%:p")
+" autocmd! BufEnter * let &titlestring = hostname() . "/" . expand("%:p")
 "Here the window title is reset when the user enters a new buffer. It contains the hostname, a forward slash, then the full path of the current file - for an explanation of the %:p syntax see the Filename Modifiers section of the Executing External Commands recipe..
 "
 "Another example is to display the value of an environment variable in the window title along with the filename. For instance, Ruby on Rails developers could prefix the filename with the value of RAILS_ENV, which indicates whether the application is in development, production, staging, or testing mode:
@@ -1159,6 +1179,22 @@ function! SophHelp()
     endif
 endfunction
 
+function! Move_to_column_with_match(str)
+    let saved_cursor = getcurpos()
+    " echomsg "saved_cursor: " . saved_cursor[1] . ":" . saved_cursor[2]
+    call cursor(saved_cursor[1], 1)
+    " echomsg "searched str : " . a:str
+    let l:found_line = search(a:str, "cWz")
+    " echomsg "found line : " . l:found_line
+    if l:found_line == saved_cursor[1]
+        "nothing to do - match inside current line was found (cursor should be
+        "at the start of the match
+    else
+        "no match inside line - go back to previous position
+        call setpos('.', saved_cursor)
+    endif
+endfunction
+
 " resolves even with :: in the cWORD, but without following (), ->, ., , e.g. DbgwController::getPort vs. DbgwController::getPort()
 function! s:get_tag_internal(str)
         "Func(...)
@@ -1166,6 +1202,10 @@ function! s:get_tag_internal(str)
         "for a in args
         "   echo a
         "endfor
+        "first make sure we do not do double work (with cst all :tag commands
+        "use also cscope - order depends on differnt variable: csto)
+        let l:saved_cst = &cst
+        set nocst
         for i in [0,1]
             if &csto == i
                 let search_cmd="cscope find g "
@@ -1177,41 +1217,59 @@ function! s:get_tag_internal(str)
                 try
                     "echo search_cmd.a:str
                     exec search_cmd.a:str
+                    call Move_to_column_with_match(a:str)
+                    let &cst = l:saved_cst
                     return 0  " search no more, result found
                 catch /:E325:/
                     " ATTENTION when opening file
+                    call Move_to_column_with_match(a:str)
+                    let &cst = l:saved_cst
                     return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:/
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:/
                     " we will continue with cWORD and cword searches
                 endtry
             endif
-            try
-                let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
-                "echomsg search_cmd.l:cww
-                exec search_cmd.l:cww
-                return 0  " search no more, result found
-            catch /:E325:/
-                " ATTENTION when opening file
-                return 0
-            catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:/
-                " E562 bad usage for cstag - obviously cWORD contains special characters
-                " E567 no cscope connections
-                " E257 cstag tag not found
-                " E259 no matches found for cscope query
-                " E426 tag not found
-                " E499 Empty file name for '%' or '#', only works with :p:h
-                " E560 Usage cs[cope] find a|c|d|e|f|g|i|s|t name (also uppercase letters)
+            let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
+            if l:cww != a:str
                 try
-                    "echomsg search_cmd.expand("<cword>")
-                    exec search_cmd.expand("<cword>")
+                    "echomsg search_cmd.l:cww
+                    exec search_cmd.l:cww
+                    call Move_to_column_with_match(l:cww)
+                    let &cst = l:saved_cst
                     return 0  " search no more, result found
                 catch /:E325:/
                     " ATTENTION when opening file
+                    call Move_to_column_with_match(a:str)
+                    let &cst = l:saved_cst
                     return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E426:/
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:/
+                    " E562 bad usage for cstag - obviously cWORD contains special characters
+                    " E567 no cscope connections
+                    " E257 cstag tag not found
+                    " E259 no matches found for cscope query
+                    " E426 tag not found
+                    " E433 no tags file
+                    " E499 Empty file name for '%' or '#', only works with :p:h
+                    " E560 Usage cs[cope] find a|c|d|e|f|g|i|s|t name (also uppercase letters)
+                endtry
+            endif
+            let l:cww2=expand("<cword>")
+            if l:cww2 != a:str && l:cww2 != l:cww
+                try
+                    "echomsg search_cmd.l:cww2
+                    exec search_cmd.l:cww2
+                    call Move_to_column_with_match(l:cww2)
+                    let &cst = l:saved_cst
+                    return 0  " search no more, result found
+                catch /:E325:/
+                    " ATTENTION when opening file
+                    call Move_to_column_with_match(a:str)
+                    let &cst = l:saved_cst
+                    return 0
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:/
                     " not found
                 endtry
-            endtry
+            endif
         endfor
         echohl WarningMsg
         if a:str != ""
@@ -1220,6 +1278,7 @@ function! s:get_tag_internal(str)
             echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
         endif
         echohl None
+        let &cst = l:saved_cst
 endfunction
 
 function! SophTag(str)
@@ -1581,7 +1640,9 @@ if has("gui_running")
         set guioptions="aegmrLtT
 
         " maximize window on start
-        autocmd! GUIEnter * simalt ~X
+        if has('autocmd')
+            autocmd! GUIEnter * simalt ~X
+        endif
     else
         silent! set guifont=Envy\ Code\ R\ 11
         if &guifont != 'Envy Code R 11'
@@ -1719,9 +1780,11 @@ elseif $CTAGS_PREFIX != ""
                     let &tags.=","
                 endif
                 let &tags.=prefixnr
-                if filereadable(prefixnr . ".added")
+                " add .added file always (it may not exist yet - it will be
+                " created after update_tags - <F1>)
+                "if filereadable(prefixnr . ".added")
                     let &tags = prefixnr . ".added" . "," . &tags
-                endif
+                "endif
             else
                 "echo "file ".prefixnr." not found!"
                 let bre=1
@@ -1927,6 +1990,7 @@ if has('autocmd')
     autocmd! FileType c set commentstring=//%s
     autocmd! FileType cpp set commentstring=//%s
     autocmd! FileType qf set noscrollbind | set scrolloff=0
+    autocmd! BufEnter * if &ft != 'qf' | set scrolloff=5 | else | set scrolloff=0 | endif
 endif
 
 " === quickfix-reflector
@@ -2013,6 +2077,7 @@ let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ "sh", "pyt
 
 " === Airline ===
 let g:airline#extensions#whitespace#max_lines = 50000
+let g:airline#extensions#wordcount#max_lines = 100000
 
 " === vim-asterisk ===
 let g:asterisk#keeppos = 1
@@ -2062,6 +2127,10 @@ let g:VCSCommandBZRExec = ""
 let g:VCSCommandHGExec = ""
 let g:VCSCommandSVKExec = ""
 let g:VCSCommandSVNExec = ""
+
+" === vim-vinegar ===
+"let g:netrw_keepj=""
+
 
 " ==========================
 " = Miscellaneous functions=
@@ -2245,7 +2314,7 @@ endif
 "set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
 
 "TODO: improve with noundofile for specific files (like /tmp/* files)
-"au BufWritePre /tmp/* setlocal noundofile
+"autocmd! BufWritePre /tmp/* setlocal noundofile
 
 "VIM BUG: unfortunately VIM does not support double trailing slash in
 " backupdir specification (does store path into filename) - see https://code.google.com/p/vim/issues/detail?id=179
@@ -2414,15 +2483,19 @@ endfunction
 
 " autoclose last open location/quickfix/help windows on a tab
 if has('autocmd')
-    aug AutoCloseAllQF
-        au!
+    augroup AutoCloseAllQF
+        autocmd!
         "au WinEnter * if winnr('$') == 1 && getbufvar(winbufnr(winnr()), "&buftype") == "quickfix" | q | endif
         autocmd WinEnter * nested call s:QuitIfOnlyWindow()
-    aug END
+    augroup END
 endif
 
 "Todo: check Vim startup time via: vim --startuptime /tmp/startup.txt
 "
+nnoremap <silent> <leader>DD :exe ":profile start profile.log"<cr>:exe ":profile func *"<cr>:exe ":profile file *"<cr>
+nnoremap <silent> <leader>DP :exe ":profile pause"<cr>
+nnoremap <silent> <leader>DC :exe ":profile continue"<cr>
+nnoremap <silent> <leader>DQ :exe ":profile pause"<cr>:noautocmd qall!<cr>
 
 " clipoard copy and paste functions
 "Todo: only when xsel is installed (perhaps distribute with vi ?)
@@ -2668,9 +2741,9 @@ if g:PROJECT_name == "SR"
     " ,f to show current line nested feature info for setup_cli.cfg/teardown_cli.cfg updates
     map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
 
-    nmap <F1> :execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>
-    imap <F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:cs reset<CR> <C-o>:<CR>
-    vmap <F1> <Esc>:execute "!sr_cscope.sh update"<CR> :cs reset<CR> :<CR>gv
+    nmap <silent><F1> :execute "!sr_cscope.sh update"<CR> :silent cs reset<CR>
+    imap <silent><F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:silent cs reset<CR>
+    vmap <silent><F1> <Esc>:execute "!sr_cscope.sh update"<CR> :silent cs reset<CR>gv
 
     nmap <S-F1> :execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>
     imap <S-F1> <C-o>:execute "!sr_cscope.sh mibupdate"<CR> <C-o>:let &l:enc=&l:enc<CR>
