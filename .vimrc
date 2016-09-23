@@ -984,11 +984,12 @@ if v:version >= 700
     " set completion options
     set completeopt=menu,longest ",longest,preview
 
+    set infercase
     " dictionary completion CTRL+X CTRL+K in insert mode
     set dictionary=/usr/share/dict/words
     " thesaurus synonyms completion CTRL+X CTRL+T in insert mode
-    "inoremap <C-X><C-T> <C-o>:setlocal isk+=-<CR><C-o>:setlocal isk+=32<CR><C-X><C-T>
     set thesaurus=~/.vim/plugin/mtopenoffice.txt
+    "inoremap <C-X><C-T> <C-o>:setlocal isk+=-<CR><C-o>:setlocal isk+=32<CR><C-X><C-T>
     " spell checking (switchable by <Leader>s), CTRL+X CTRL+S in insert mode
     set nospell
     set spelllang=en
@@ -1817,6 +1818,7 @@ endif
 let g:tagbar_ctags_bin = g:OS_ctags_command
 let g:tagbar_left = 1
 let g:tagbar_autofocus = 1
+let g:tagbar_ctags_max_size_in_bytes = 1024 * 1024
 
 " ============================
 " =      TagList plug-in     =
