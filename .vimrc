@@ -1005,6 +1005,97 @@ if v:version >= 700
     endif
 endif
 
+function! MySynonymLookup(mode)
+    let l:isk_orig = &isk
+    set isk+=-
+    set isk+=32
+    set isk+='
+    let v_s = getpos("'<")
+    let v_e = getpos("'>")
+    if a:mode != "v"
+        let l:word = expand("<cword>")
+    else
+        let l:word = <SID>get_visual_selection()
+    endif
+
+    let l:thesaurus_list = split(&thesaurus, ",")
+    let l:all_synonyms = []
+    let l:display_synonyms = []
+    for l:thesaurus in l:thesaurus_list
+        let l:thesaurus_line = system('grep "^' . l:word . ',"' . ' ' . l:thesaurus . ' | tr -d "\n"')
+        let l:synonyms = split(l:thesaurus_line, ",")
+        if len(l:synonyms) > 0
+            "remove the word under cursor (first ony in the list)
+            call remove(l:synonyms, 0)
+            call extend(l:all_synonyms, l:synonyms)
+        else
+            "no synonyms found
+        endif
+    endfor
+
+    "add number to items in the list
+    let l:i = 1
+    for l:item in l:all_synonyms
+        call add(l:display_synonyms, l:i . " \"" . l:all_synonyms[l:i - 1] . "\"")
+        let l:i = l:i + 1
+    endfor
+
+    if len(l:all_synonyms) > 0
+        "insert header
+        call insert(l:all_synonyms, "DUMMY", 0)
+        call insert(l:display_synonyms, "Change \"" . l:word . "\" to (thesaurus):", 0)
+
+
+        "refuse multiline visual
+        if a:mode != "v" || v_s[1] == v_e[1]
+            "present the list to user
+            let l:chosen_number = inputlist(l:display_synonyms)
+            if l:chosen_number > 0 && l:chosen_number < len(l:display_synonyms)
+                let l:replacement = l:all_synonyms[l:chosen_number]
+                let l:current_line = getline(".")
+
+                let saved_cursor = getcurpos()
+
+                "find the start of visual/current word
+                let l:found_line = search(l:word, "bcW")
+                if l:found_line == saved_cursor[1]
+                    let match_cursor = getcurpos()
+                    if match_cursor[2] - 1 > 0
+                        let l:updated_line = l:current_line[:(match_cursor[2] - 1 - 1)] .  l:replacement . l:current_line[(match_cursor[2] - 1 + strlen(l:word)):]
+                    else
+                        let l:updated_line = l:replacement . l:current_line[(match_cursor[2] - 1 + strlen(l:word)):]
+                    endif
+                    "replace line
+                    call setline(".", l:updated_line)
+                    let v_e[2] = v_e[2] - strlen(l:word) + strlen(l:replacement)
+                else
+                    "not found
+                endif
+
+                call setpos(".", saved_cursor)
+            else
+                "substitution aborted by user
+            endif
+        else
+            "multiline visual => do nothing
+        endif
+    else
+        "no synonyms were found
+    endif
+
+    let &isk=l:isk_orig
+
+    if a:mode == "v"
+        "adjust improve former visual boundaries to the replaced word (before reselection)
+        call setpos("'>", v_e)
+        execute "normal! gv"
+    endif
+endfunction
+
+nmap <silent>z_ :call MySynonymLookup("n")<Enter>
+"imap <silent>z_ <C-o>:call MySynonymLookup("i")<Enter>
+vmap <silent>z_ <Esc>:call MySynonymLookup("v")<Enter>
+
 " ============================
 " =       Window title       =
 " ============================
