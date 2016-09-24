@@ -1008,8 +1008,9 @@ endif
 function! MySynonymLookup(mode)
     let l:isk_orig = &isk
     set isk+=-
-    set isk+=32
     set isk+='
+    set isk+=.
+    set isk+=32  "does not change anything (space probably cannot be part of keyword)
     let v_s = getpos("'<")
     let v_e = getpos("'>")
     if a:mode != "v"
@@ -1018,11 +1019,24 @@ function! MySynonymLookup(mode)
         let l:word = <SID>get_visual_selection()
     endif
 
+    " Note: currently comma must be used as a separator
+    " Todo: improve to nonalpha,non-,non',non<space>,non<dot> to support different thesauruses
+    let l:grep_thesaurus_word_separator = "[,]"
+
+    if &ignorecase == 1
+        let l:grep_ic_flag = " -i "
+    else
+        let l:grep_ic_flag = ""
+    endif
+
+    "escape . character - we using grep
+    let l:grep_word = substitute(l:word, '\.', '\\.', 'g')
+
     let l:thesaurus_list = split(&thesaurus, ",")
     let l:all_synonyms = []
     let l:display_synonyms = []
     for l:thesaurus in l:thesaurus_list
-        let l:thesaurus_line = system('grep "^' . l:word . ',"' . ' ' . l:thesaurus . ' | tr -d "\n"')
+        let l:thesaurus_line = system('grep ' . l:grep_ic_flag . ' "^' . l:grep_word . l:grep_thesaurus_word_separator . '"' . ' ' . l:thesaurus . ' | tr -d "\n"')
         let l:synonyms = split(l:thesaurus_line, ",")
         if len(l:synonyms) > 0
             "remove the word under cursor (first ony in the list)
@@ -1036,11 +1050,23 @@ function! MySynonymLookup(mode)
     "add number to items in the list
     let l:i = 1
     for l:item in l:all_synonyms
-        call add(l:display_synonyms, l:i . " \"" . l:all_synonyms[l:i - 1] . "\"")
+        let l:synonym = l:all_synonyms[l:i - 1]
+
+        if &infercase == 1
+            if l:word[0:0] ==# toupper(l:word[0:0])
+                "original input starts with upper case => inferring
+                "upper case start of replacement
+                let l:synonym = toupper(l:synonym[0:0]) . l:synonym[1:]
+                let l:all_synonyms[l:i - 1] = l:synonym
+            endif
+        endif
+
+        call add(l:display_synonyms, l:i . " \"" . synonym . "\"")
         let l:i = l:i + 1
     endfor
 
-    if len(l:all_synonyms) > 0
+    "check if we have any synonyms and not too many (probably a bug, when more than 1024 synonyms)
+    if len(l:all_synonyms) > 0 && len(l:all_synonyms) < 1024
         "insert header
         call insert(l:all_synonyms, "DUMMY", 0)
         call insert(l:display_synonyms, "Change \"" . l:word . "\" to (thesaurus):", 0)
@@ -1052,6 +1078,7 @@ function! MySynonymLookup(mode)
             let l:chosen_number = inputlist(l:display_synonyms)
             if l:chosen_number > 0 && l:chosen_number < len(l:display_synonyms)
                 let l:replacement = l:all_synonyms[l:chosen_number]
+
                 let l:current_line = getline(".")
 
                 let saved_cursor = getcurpos()
