@@ -1094,7 +1094,11 @@ function! MySynonymLookup(mode)
                     endif
                     "replace line
                     call setline(".", l:updated_line)
-                    let v_e[2] = v_e[2] - strlen(l:word) + strlen(l:replacement)
+                    if v_e[2] >= v_s[2]
+                        let v_e[2] = v_e[2] - strlen(l:word) + strlen(l:replacement)
+                    else
+                        let v_s[2] = v_s[2] - strlen(l:word) + strlen(l:replacement)
+                    endif
                 else
                     "not found
                 endif
@@ -1114,6 +1118,7 @@ function! MySynonymLookup(mode)
 
     if a:mode == "v"
         "adjust improve former visual boundaries to the replaced word (before reselection)
+        call setpos("'<", v_s)
         call setpos("'>", v_e)
         execute "normal! gv"
     endif
