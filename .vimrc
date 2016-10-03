@@ -1009,7 +1009,7 @@ function! MySynonymLookup(mode)
     let l:isk_orig = &isk
     set isk+=-
     set isk+='
-    set isk+=.
+    "set isk+=.
     set isk+=32  "does not change anything (space probably cannot be part of keyword)
     let v_s = getpos("'<")
     let v_e = getpos("'>")
@@ -1941,7 +1941,8 @@ endif
 let g:tagbar_ctags_bin = g:OS_ctags_command
 let g:tagbar_left = 1
 let g:tagbar_autofocus = 1
-let g:tagbar_ctags_max_size_in_bytes = 1024 * 1024
+let g:tagbar_ctags_max_size_in_bytes = 1024 * 1024  "maximum ammount of ctags, that we will load (to not slow down too much)
+let g:tagbar_max_backward_scanned_lines_for_nearby_tag_search = 16 * 1024 "functions should be less than 16K lines (otherwise abort nearest tag search)
 
 " ============================
 " =      TagList plug-in     =
