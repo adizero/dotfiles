@@ -2779,17 +2779,22 @@ command! -nargs=+ -complete=file LoadCrashBacktrace :call LoadCrashBacktrace(<f-
 cabbrev loadcrashbacktrace <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'LoadCrashBacktrace' : 'loadcrashbacktrace')<CR>
 
 function! OpenGitModifiedFiles(opentype, whatfiles, diffstyle)
-    let file_list = []
+    let l:file_list = []
     if a:whatfiles == "modified"
-        let file_list = split(system("list_git_modified_files.sh"), "\n")
+        let l:file_list = split(system("list_git_modified_files.sh -r"), "\n")
     elseif a:whatfiles == "branch"
-        let file_list = split(system("list_git_modified_files.sh"), "\n")
-        let file_list += split(system("list_git_branch_modified_files.sh"), "\n")
+        let l:file_list = split(system("list_git_modified_files.sh -r"), "\n")
+        let l:file_list += split(system("list_git_branch_modified_files.sh"), "\n")
+    endif
+
+    if len(l:file_list) > 0
+        silent execute "cd! " . l:file_list[0]
+        call remove(l:file_list, 0)
     endif
 
     let l:type = a:opentype
     let l:count = 0
-    for l:item in file_list
+    for l:item in l:file_list
         if l:count == 0 && (&ft == "" || &ft == "startify")
             silent execute "e " . l:item
         else
@@ -2830,7 +2835,7 @@ function! OpenGitModifiedFiles(opentype, whatfiles, diffstyle)
             bfirst
         endif
     endif
-    "cexpr file_list
+    "cexpr l:file_list
 endfunc
 
 " =========================================
