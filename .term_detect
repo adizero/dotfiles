@@ -21,6 +21,7 @@
 #Konsole         2.13.2                              ^[[>0;115;0c
 #iTerm2          2.9.20 (any version ?)              ^[[>0;95;0c
 #XQuartz(Xterm)  Xterm(314)                          ^[[>41;314;0c
+#crosh/SecureShell (ChromeOS) XTerm(256)             ^[[>0;256;0c
 
 esc_seq=
 
@@ -92,6 +93,9 @@ termInitialDetection()
                 export TERM_NO_X_FORWARDING="-X"
             elif [ "$term_version" == "314" -a "$term_type" == "[>41" ]; then
                 #when connecting from Mac OSX (XQuartz's Xterm), then do not do X forwarding in Vim (XQuartz server is too buggy)
+                export TERM_NO_X_FORWARDING="-X"
+            elif [ "$term_version" == "256" ]; then
+                #when connecting from Chrome OS crosh/Secure Shell, then disable X forwarding (X server does not work properly in Chrome OS)
                 export TERM_NO_X_FORWARDING="-X"
             fi
         elif [ "$term_type" == "[>1" ]; then

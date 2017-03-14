@@ -321,7 +321,7 @@ if !has("gui_running")
         "let &t_ue = "\e[m"
 
         "undercurl as strikethrough (needs terminal support - no KiTTY/PuTTY does strikethrough):
-        if v:version >= 704 || (v:version == 704 && has('patch911'))
+        if v:version > 704 || (v:version == 704 && has('patch911'))
             if expand("$STY") != "$STY"
                 let &t_Cs = "\eP\e[9m\e\\"
                 let &t_Ce = "\eP\e[29m\e\\"
@@ -606,12 +606,6 @@ let s:home_base_path=$HOME
 " ============================
 " replace all directory separators in runtimepath to OS specific
 let &runtimepath=substitute(&runtimepath, '[\/]', g:OS_dir_separator, 'g')
-
-let g:default_search_path = substitute('.,**,../include/**,../src/**,' . expand("$ROOT") . '/panos,' . g:OS_system_includes_dir, '[\/]', g:OS_dir_separator, 'g')
-" set default path
-let &path=g:default_search_path
-
-"set suffixesadd=.h
 
 " ============================
 " =         Sessions         =
@@ -2856,7 +2850,10 @@ elseif expand("$LSF_BINDIR") != "$LSF_BINDIR"
     let g:PROJECT_name="WMM"
 endif
 
+
 if g:PROJECT_name == "SR"
+    let s:project_specific_path = expand("$ROOT") . '/panos,' . expand("$GEN_PATH") . '/,'
+
     " tabs are forbidden in SR projects
     set expandtab
 
@@ -2871,20 +2868,31 @@ if g:PROJECT_name == "SR"
 
     " ,f to show current line nested feature info for setup_cli.cfg/teardown_cli.cfg updates
     map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
+    " ,t to show current .yang file customer tree
+    map <Leader>t :call ToggleYangTreeWindow("")<CR>
 
     nmap <silent><F1> :execute "!sr_cscope.sh update"<CR> :silent cs reset<CR>
     imap <silent><F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:silent cs reset<CR>
     vmap <silent><F1> <Esc>:execute "!sr_cscope.sh update"<CR> :silent cs reset<CR>gv
 
+    " TODO AKO should iterate over all local buffers and run refresh l:enc
+    " (otherwise other windows will not have spell check enabled)
     nmap <S-F1> :execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>
     imap <S-F1> <C-o>:execute "!sr_cscope.sh mibupdate"<CR> <C-o>:let &l:enc=&l:enc<CR>
     vmap <S-F1> <Esc>:execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>gv
 else "other projects
+    let s:project_specific_path = ""
+
     " F1 to display help
     nmap <F1> :call SophHelp()<Enter>
     imap <F1> <C-o>:call SophHelp()<Enter>
     vmap <F1> <Esc>:call SophHelp()<Enter>gv
 endif
+
+let g:default_search_path = substitute('.,**,../include/**,../src/**,' . s:project_specific_path . g:OS_system_includes_dir, '[\/]', g:OS_dir_separator, 'g')
+" set default path
+let &path=g:default_search_path
+"set suffixesadd=.h
 
 let g:loaded_ccase = 1
 
