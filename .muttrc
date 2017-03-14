@@ -44,7 +44,9 @@ set mail_check = 5       # minimum time between scans
 # unset confirmappend      # don't ask, just do!
 set quit = ask-yes         # ask whether to quit (defaults to yes)
 # unset mark_old           # read/new is good enough for me
-set beep_new             # bell on new mails
+unset beep
+unset beep_new             # bell on new mails
+set beep_spool             # bell on new mails in spoolfile mailbox/folder
 # set pipe_decode          # strip headers and eval mimes when piping
 set thorough_search      # strip headers and eval mimes before searching
 
@@ -71,7 +73,8 @@ lists sr-test-bra mg-dev-bra mg-test-bra bra-lab-support build-timetra DL_SK_PUB
 
 #Offline Mails (fetched via offlineimap) ---------------------------------------------------
 set folder="~/Mail/Maildir"
-set spoolfile="~/Mail/Maildir/alu/INBOX"
+#set spoolfile="~/Mail/Maildir/alu/INBOX"
+set spoolfile="~/Mail/Maildir/alu/Main"
 set postponed="~/Mail/Maildir/alu/Drafts"
 set record="~/Mail/Maildir/alu/Sent Items"
 
@@ -212,6 +215,7 @@ macro index a "<limit>all\n" "show all messages (undo limit)"
 #macro index ",c" "<pipe-message>~/.mutt/parse_remind.pl<enter>"  "parse currect mail for appointments (calendar events)"
 
 macro index gi "<change-folder>=alu/INBOX<enter>" "go to INBOX"
+macro index gm "<change-folder>=alu/Main<enter>" "go to Main"
 macro index gs "<change-folder>=alu/Sent<quote-char><space>Items<enter>" "go to Sent Items"
 macro index gt "<change-folder>=alu/Antwerp/SW-TIMETRA<enter>" "go to SW-TIMETRA"
 macro index gr "<change-folder>=alu/Antwerp/REGRESS<enter>" "go to REGRESS"
