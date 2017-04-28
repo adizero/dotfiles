@@ -821,6 +821,14 @@ map <silent><Plug>(visual-yank-plaintext)  :<C-U>call setreg(v:register, '\V' . 
 "vmap <C-Q> <Plug>(visual-yank-plaintext)
 "vmap <A-/> "/<Plug>(visual-yank-plaintext)n
 
+"apply macro on every line of a visually selected range
+xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+
+function! ExecuteMacroOverVisualRange()
+  echo "@".getcmdline()
+  execute ":'<,'>normal @".nr2char(getchar())
+endfunction
+ 
 " search for visually selected text
 "vnoremap // y/<C-R>"<CR>
 "vnoremap ?? y?<C-R>"<CR>
@@ -1302,7 +1310,8 @@ function! Move_to_column_with_match(str)
     " echomsg "saved_cursor: " . saved_cursor[1] . ":" . saved_cursor[2]
     call cursor(saved_cursor[1], 1)
     " echomsg "searched str : " . a:str
-    let l:found_line = search(a:str, "cWz")
+    "turn on ignore case search \\c
+    let l:found_line = search(a:str . "\\c", "cWz")
     " echomsg "found line : " . l:found_line
     if l:found_line == saved_cursor[1]
         "nothing to do - match inside current line was found (cursor should be
@@ -1322,6 +1331,7 @@ function! s:get_tag_internal(str)
         "endfor
         "first make sure we do not do double work (with cst all :tag commands
         "use also cscope - order depends on differnt variable: csto)
+
         let l:saved_cst = &cst
         set nocst
         for i in [0,1]
@@ -1331,24 +1341,30 @@ function! s:get_tag_internal(str)
                 let search_cmd="tag "
             endif
 
-            if a:str != ""
+            let l:str = a:str
+            "escape dash (-) symbols (tag is interpreting them as regexp options)
+            ""let l:str=substitute(l:str, '[-]', '\-', 'ga')
+            if l:str != ""
                 try
-                    "echo search_cmd.a:str
-                    exec search_cmd.a:str
-                    call Move_to_column_with_match(a:str)
+                    "echomsg search_cmd.l:str
+                    exec search_cmd.l:str
+                    call Move_to_column_with_match(l:str)
                     let &cst = l:saved_cst
                     return 0  " search no more, result found
                 catch /:E325:/
                     " ATTENTION when opening file
-                    call Move_to_column_with_match(a:str)
+                    call Move_to_column_with_match(l:str)
                     let &cst = l:saved_cst
                     return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:/
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
                     " we will continue with cWORD and cword searches
                 endtry
             endif
+
             let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
-            if l:cww != a:str
+            "escape dash (-) symbols (tag is interpreting them as regexp options)
+            ""let l:cww=substitute(l:cww, '[-]', '\-', 'ga')
+            if l:cww != l:str
                 try
                     "echomsg search_cmd.l:cww
                     exec search_cmd.l:cww
@@ -1357,10 +1373,10 @@ function! s:get_tag_internal(str)
                     return 0  " search no more, result found
                 catch /:E325:/
                     " ATTENTION when opening file
-                    call Move_to_column_with_match(a:str)
+                    call Move_to_column_with_match(l:str)
                     let &cst = l:saved_cst
                     return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:/
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
                     " E562 bad usage for cstag - obviously cWORD contains special characters
                     " E567 no cscope connections
                     " E257 cstag tag not found
@@ -1371,8 +1387,11 @@ function! s:get_tag_internal(str)
                     " E560 Usage cs[cope] find a|c|d|e|f|g|i|s|t name (also uppercase letters)
                 endtry
             endif
+
             let l:cww2=expand("<cword>")
-            if l:cww2 != a:str && l:cww2 != l:cww
+            "escape dash (-) symbols (tag is interpreting them as regexp options)
+            ""let l:cww2=substitute(l:cww2, '[-]', '\-', 'ga')
+            if l:cww2 != l:str && l:cww2 != l:cww
                 try
                     "echomsg search_cmd.l:cww2
                     exec search_cmd.l:cww2
@@ -1381,17 +1400,17 @@ function! s:get_tag_internal(str)
                     return 0  " search no more, result found
                 catch /:E325:/
                     " ATTENTION when opening file
-                    call Move_to_column_with_match(a:str)
+                    call Move_to_column_with_match(l:str)
                     let &cst = l:saved_cst
                     return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:/
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
                     " not found
                 endtry
             endif
         endfor
         echohl WarningMsg
-        if a:str != ""
-            echo "Sorry, no tag generated for ".a:str." or ".expand("<cWORD>")." or ".expand("<cword>")
+        if l:str != ""
+            echo "Sorry, no tag generated for ".l:str." or ".expand("<cWORD>")." or ".expand("<cword>")
         else
             echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
         endif
