@@ -1,8 +1,8 @@
 # Filename:      custom_prompt.sh
-# Maintainer:    Dave Vehrs 
+# Maintainer:    Dave Vehrs
 # Last Modified: 12 Jul 2005 13:29:40 by Dave Vehrs
 
-# Current Format: USER@HOST [dynamic section] { CURRENT DIRECTORY }$ 
+# Current Format: USER@HOST [dynamic section] { CURRENT DIRECTORY }$
 # USER:      (also sets the base color for the prompt)
 #   Red       == Root(UID 0) Login shell (i.e. sudo bash)
 #   Light Red == Root(UID 0) Login shell (i.e. su -l or direct login)
@@ -18,7 +18,7 @@
 #   Brown     == Insecure remote connection (RSH)
 #   Cyan      == Secure remote connection (i.e. SSH)
 #   Green     == Local session
-# DYNAMIC SECTION:  
+# DYNAMIC SECTION:
 #     (If count is zero for any of the following, it will not appear)
 #   [scr:#] ==== Number of detached screen sessions
 #     Yellow    == 1-2
@@ -34,7 +34,7 @@
 #   Green     == Current user does have write priviledges
 # NOTE:
 #   1.  Displays message on day change at midnight on the line above the
-#       prompt (Day changed to...). 
+#       prompt (Day changed to...).
 #   2.  Command is added to the history file each time you hit enter so its
 #       available to all shells.
 
@@ -68,44 +68,44 @@ function function_exists () {
 }
 
 function __git_prompt_function () {
-	if function_exists __git_ps1; then
-		git_ps1=$(__git_ps1)
-		if [ "$git_ps1" != "" ]; then
-			if [ "$REL" != "" -a "$ROOT" != "" ]; then
-				printf "\033]0;$REL $git_ps1 | $ROOT\007" &
-			else
-				printf "\033]0;$git_ps1\007" &
-			fi
-			## jobs > /tmp/jobs
-			#prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
-			##  prompts=$(cat /tmp/jobs | grep __git_ps1)
-			##  echo "prompts: $prompts"
-			#disown "%$prompts"
-			## disown -r
-		else
-			printf "$1"
-		fi
-	else
-    	printf "$1"
-	fi
+    if function_exists __git_ps1; then
+        git_ps1=$(__git_ps1)
+        if [ "$git_ps1" != "" ]; then
+            if [ "$REL" != "" -a "$ROOT" != "" ]; then
+                printf "\033]0;$REL $git_ps1 | $ROOT\007" &
+            else
+                printf "\033]0;$git_ps1\007" &
+            fi
+            ## jobs > /tmp/jobs
+            #prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+            ##  prompts=$(cat /tmp/jobs | grep __git_ps1)
+            ##  echo "prompts: $prompts"
+            #disown "%$prompts"
+            ## disown -r
+        else
+            printf "$1"
+        fi
+    else
+        printf "$1"
+    fi
 }
 
 # Function to set prompt_command to.
 function promptcmd () {
-    history -a 
+    history -a
     local SSH_FLAG=0
     local TTY=$(tty | awk -F/dev/ '{print $2}')
-    if [[ ${TTY} ]]; then 
+    if [[ ${TTY} ]]; then
         local SESS_SRC=$(who | grep "$TTY "  | awk '{print $6 }')
     fi
-    
+
     # Titlebar
-    case ${TERM} in 
-        xterm*|screen*  )  
-			if [ "$CLEARCASE_ROOT" != "" ]; then
-				printf "\033]0;`cleartool lsview -cview -short 2>/dev/null` | $CLEARCASE_ROOT\007"
-				local TITLEBAR=''
-			elif [ "$REL" != "" ]; then
+    case ${TERM} in
+        xterm*|screen*  )
+            if [ "$CLEARCASE_ROOT" != "" ]; then
+                printf "\033]0;`cleartool lsview -cview -short 2>/dev/null` | $CLEARCASE_ROOT\007"
+                local TITLEBAR=''
+            elif [ "$REL" != "" ]; then
                 if [ "$VPLOAD" != "" ]; then
                     HOST_TAG="L"
                     if [[ "$CURRENT_SHORT_HOST" =~ "wmmbuild" ]]; then
@@ -126,7 +126,7 @@ function promptcmd () {
                 else
 ###                    if function_exists __git_ps1; then
 ###                        #git_ps1=`__git_ps1`
-###						printf "\033]0;$REL $(__git_ps1) | $ROOT\007" &
+###                     printf "\033]0;$REL $(__git_ps1) | $ROOT\007" &
 ###                        # jobs > /tmp/jobs
 ###                        prompts=$(jobs | grep __git_ps1 | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
 ###                        #  prompts=$(cat /tmp/jobs | grep __git_ps1)
@@ -136,52 +136,57 @@ function promptcmd () {
 ###                    else
 ###                        printf "\033]0;$REL $CURRENT_LOCATION | $ROOT\007"
 ###                    fi
-					__git_prompt_function "\033]0;$REL $CURRENT_LOCATION | $ROOT\007" &
-					prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
-					disown "%$prompts"
-				    local TITLEBAR=''
+                    __git_prompt_function "\033]0;$REL $CURRENT_LOCATION | $ROOT\007" &
+                    prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+                    disown "%$prompts"
+                    local TITLEBAR=''
                 fi
-			else
-###				if function_exists __git_ps1; then
+            else
+###             if function_exists __git_ps1; then
 ###                    #git_ps1=`__git_ps1`
-###					printf "\033]0; $(__git_ps1) \007" &
+###                 printf "\033]0; $(__git_ps1) \007" &
 ###                    # jobs > /tmp/jobs
 ###                    prompts=$(jobs | grep __git_ps1 | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
 ###                    #  prompts=$(cat /tmp/jobs | grep __git_ps1)
 ###                    #  echo "prompts: $prompts"
 ###                    disown "%$prompts"
 ###                    # disown -r
-###				else
-###					local TITLEBAR='\[\033]0;\u@\h: { \w }  \007\]'
-###				fi
-				__git_prompt_function "\033]0;$USER@$HOSTNAME: { $PWD }  \007" &
-				prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
-				disown "%$prompts"
-				local TITLEBAR=''
-			fi
+###             else
+###                 local TITLEBAR='\[\033]0;\u@\h: { \w }  \007\]'
+###             fi
+                __git_prompt_function "\033]0;$USER@$HOSTNAME: { $PWD }  \007" &
+                prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+                disown "%$prompts"
+                local TITLEBAR=''
+            fi
             ;;
-        *       )  
-            local TITLEBAR=''                               
+        *       )
+            local TITLEBAR=''
             ;;
     esac
-	PS1="${TITLEBAR}"
+    PS1="${TITLEBAR}"
 
-	#to set both xterm title and screen title (in screen), use something like this:
-	#XTERM_TITLE="xterm/putty window title"
-	#SCREEN_TITLE="current screen title"
-	#echo -ne "\033]0;$XTERM_TITLE\007\033k$SCREEN_TITLE\033\\"
+    #to set both xterm title and screen title (in screen), use something like this:
+    #XTERM_TITLE="xterm/putty window title"
+    #SCREEN_TITLE="current screen title"
+    #echo -ne "\033]0;$XTERM_TITLE\007\033k$SCREEN_TITLE\033\\"
 
     # Test for day change.
     if [ -z $DAY ] ; then
-        export DAY=$(date +%A)
+        export DAY=$(date '+%A,%d_%B_%Y')
     else
-        local today=$(date +%A)
+        local today=$(date '+%A,%d_%B_%Y')
         if [ "${DAY}" != "${today}" ]; then
             PS1="${PS1}\n\[${COLOR_GREEN}\]Day changed to $(date '+%A, %d %B %Y').\n"
             export DAY=$today
+            #once daily source tb_lists (to have properly updated environment variables)
+            if [ -r ${HOME}/tb_lists ]; then
+                #PS1="${PS1}\[${COLOR_GREEN}\]Sourcing tb_lists.\n"
+                source ${HOME}/tb_lists
+            fi
        fi
     fi
-   
+
     # User
     if [ ${UID} -eq 0 ] ; then
         if [ "${USER}" == "${LOGNAME}" ]; then
@@ -190,13 +195,13 @@ function promptcmd () {
             else
                 PS1="${PS1}\[${COLOR_LIGHTRED}\]\u"
             fi
-        else                               
+        else
             PS1="${PS1}\[${COLOR_YELLOW}\]\u"
         fi
     else
-        if [ ${USER} == ${LOGNAME} ]; then     
+        if [ ${USER} == ${LOGNAME} ]; then
             PS1="${PS1}\[${COLOR_GREEN}\]\u"
-        else                               
+        else
             PS1="${PS1}\[${COLOR_BROWN}\]\u"
         fi
     fi
@@ -204,25 +209,25 @@ function promptcmd () {
     # HTTP Proxy var configured or not
     if [ -n "$http_proxy" ] ; then
         PS1="${PS1}\[${COLOR_GREEN}\]@"
-    else                               
+    else
         PS1="${PS1}\[${COLOR_LIGHTRED}\]@"
     fi
 
     # Host
 
-    if [[ ${SSH_CLIENT} ]] || [[ ${SSH2_CLIENT} ]]; then 
+    if [[ ${SSH_CLIENT} ]] || [[ ${SSH2_CLIENT} ]]; then
         SSH_FLAG=1
     fi
-    if [ ${SSH_FLAG} -eq 1 ]; then 
+    if [ ${SSH_FLAG} -eq 1 ]; then
        PS1="${PS1}\[${COLOR_CYAN}\]\h "
-    elif [[ -n ${SESS_SRC} ]]; then 
-        if [ "${SESS_SRC}" == "(:0.0)" ]; then 
+    elif [[ -n ${SESS_SRC} ]]; then
+        if [ "${SESS_SRC}" == "(:0.0)" ]; then
         PS1="${PS1}\[${COLOR_GREEN}\]\h "
-        else 
+        else
             local parent_process=`cat /proc/${PPID}/cmdline`
             if [[ "$parent_process" == "in.rlogind*" ]]; then
                 PS1="${PS1}\[${COLOR_BROWN}\]\h "
-            elif [[ "$parent_process" == "in.telnetd*" ]]; then 
+            elif [[ "$parent_process" == "in.telnetd*" ]]; then
                 PS1="${PS1}\[${COLOR_YELLOW}\]\h "
             else
                 PS1="${PS1}\[${COLOR_LIGHTRED}\]\h "
@@ -230,28 +235,28 @@ function promptcmd () {
         fi
     elif [[ "${SESS_SRC}" == "" ]]; then
         PS1="${PS1}\[${COLOR_GREEN}\]\h "
-    else                                 
-        PS1="${PS1}\[${COLOR_RED}\]\h " 
+    else
+        PS1="${PS1}\[${COLOR_RED}\]\h "
     fi
 
     # Detached Screen Sessions
-	#local screen_path=$(which --skip-alias --skip-functions screen 2>/dev/null)
-	#local screen_path=$(which screen 2>/dev/null | grep -v "alias ")
-	if [ "$CURRENT_OS" == "SunOS" ]; then
-		local screen_path=$(where screen | head -n 1 2>/dev/null | grep -v "alias ")
-	elif [ "$CURRENT_OS" == "Linux" ]; then
-		local screen_path=$(which screen 2>/dev/null | grep -v "alias ")
-	fi
+    #local screen_path=$(which --skip-alias --skip-functions screen 2>/dev/null)
+    #local screen_path=$(which screen 2>/dev/null | grep -v "alias ")
+    if [ "$CURRENT_OS" == "SunOS" ]; then
+        local screen_path=$(where screen | head -n 1 2>/dev/null | grep -v "alias ")
+    elif [ "$CURRENT_OS" == "Linux" ]; then
+        local screen_path=$(which screen 2>/dev/null | grep -v "alias ")
+    fi
 
-	if [ -x "${screen_path}" ]; then
-		local DTCHSCRN=$(screen -ls | grep -c Detach | sed "s/ //g")
-		if [ ${DTCHSCRN} -gt 2 ]; then
-			PS1="${PS1}\[${COLOR_RED}\][scr:${DTCHSCRN}] "
-		elif [ ${DTCHSCRN} -gt 0 ]; then
-			PS1="${PS1}\[${COLOR_YELLOW}\][scr:${DTCHSCRN}] "
-		fi
-	fi
-   
+    if [ -x "${screen_path}" ]; then
+        local DTCHSCRN=$(screen -ls | grep -c Detach | sed "s/ //g")
+        if [ ${DTCHSCRN} -gt 2 ]; then
+            PS1="${PS1}\[${COLOR_RED}\][scr:${DTCHSCRN}] "
+        elif [ ${DTCHSCRN} -gt 0 ]; then
+            PS1="${PS1}\[${COLOR_YELLOW}\][scr:${DTCHSCRN}] "
+        fi
+    fi
+
     # Backgrounded running jobs
     local BKGJBS=$(jobs -r | wc -l | sed "s/ //g")
     if [ ${BKGJBS} -gt 2 ]; then
@@ -259,7 +264,7 @@ function promptcmd () {
     elif [ ${BKGJBS} -gt 0 ]; then
         PS1="${PS1}\[${COLOR_YELLOW}\][bg:${BKGJBS}] "
     fi
-    
+
     # Stopped Jobs
     local STPJBS=$(jobs -s | wc -l | sed "s/ //g")
     if [ ${STPJBS} -gt 2 ]; then
@@ -267,78 +272,78 @@ function promptcmd () {
     elif [ ${STPJBS} -gt 0 ]; then
         PS1="${PS1}\[${COLOR_YELLOW}\][stp:${STPJBS}] "
     fi
-    
+
     # Bracket {
-    if [ ${UID} -eq 0 ]; then              
-        if [ "${USER}" == "${LOGNAME}" ]; then 
+    if [ ${UID} -eq 0 ]; then
+        if [ "${USER}" == "${LOGNAME}" ]; then
             if [[ ${SUDO_USER} ]]; then
                 PS1="${PS1}\[${COLOR_RED}\]"
             else
                 PS1="${PS1}\[${COLOR_LIGHTRED}\]"
             fi
-        else                               
+        else
             PS1="${PS1}\[${COLOR_YELLOW}\]"
         fi
-    else                                 
-        if [ "${USER}" == "${LOGNAME}" ]; then 
+    else
+        if [ "${USER}" == "${LOGNAME}" ]; then
             PS1="${PS1}\[${COLOR_GREEN}\]"
-        else                               
+        else
             PS1="${PS1}\[${COLOR_BROWN}\]"
         fi
     fi
     PS1="${PS1}{ "
-    
+
     # Working directory
-    if [ -w "${PWD}" ]; then 
+    if [ -w "${PWD}" ]; then
         PS1="${PS1}\[${COLOR_GREEN}\]$(prompt_workingdir)"
-    else                                 
+    else
         PS1="${PS1}\[${COLOR_RED}\]$(prompt_workingdir)"
     fi
-    
+
     # Closing bracket } and $\#
-    if [ ${UID} -eq 0 ]; then              
-        if [ "${USER}" == "${LOGNAME}" ]; then 
+    if [ ${UID} -eq 0 ]; then
+        if [ "${USER}" == "${LOGNAME}" ]; then
             if [[ ${SUDO_USER} ]]; then
                 PS1="${PS1}\[${COLOR_RED}\]"
             else
                 PS1="${PS1}\[${COLOR_LIGHTRED}\]"
             fi
-        else                               
+        else
             PS1="${PS1}\[${COLOR_YELLOW}\]"
         fi
-    else                                 
-        if [ "${USER}" == "${LOGNAME}" ]; then 
+    else
+        if [ "${USER}" == "${LOGNAME}" ]; then
             PS1="${PS1}\[${COLOR_GREEN}\]"
-        else                               
+        else
             PS1="${PS1}\[${COLOR_BROWN}\]"
         fi
     fi
     PS1="${PS1} }\$\[${COLOR_DEFAULT}\] "
-}     
+}
 
 # Trim working dir to 1/4 the screen width
 function prompt_workingdir () {
-	local trunc_symbol="..."
-	if [[ $PWD == $HOME* ]]; then
-		newPWD="~${PWD#$HOME}" 
-	else
-		newPWD=${PWD}
-	fi
-	#check whether we know terminal's number of columns, if not, then no tructation will be done
-	if [ -n "$COLUMNS" ]; then
-		local pwdmaxlen=$(($COLUMNS/4))
-		if [ ${#newPWD} -gt $pwdmaxlen ]; then
-			local pwdoffset=$(( ${#newPWD} - $pwdmaxlen + 3 ))
-			newPWD="${trunc_symbol}${newPWD:$pwdoffset:$pwdmaxlen}"
-		fi
-	fi
-	echo $newPWD
+    local trunc_symbol="..."
+    if [[ $PWD == $HOME* ]]; then
+        newPWD="~${PWD#$HOME}"
+    else
+        newPWD=${PWD}
+    fi
+    #check whether we know terminal's number of columns, if not, then no tructation will be done
+    if [ -n "$COLUMNS" ]; then
+        local pwdmaxlen=$(($COLUMNS/4))
+        if [ ${#newPWD} -gt $pwdmaxlen ]; then
+            local pwdoffset=$(( ${#newPWD} - $pwdmaxlen + 3 ))
+            newPWD="${trunc_symbol}${newPWD:$pwdoffset:$pwdmaxlen}"
+        fi
+    fi
+    echo $newPWD
 }
 
 # Determine what prompt to display:
 # 1.  Display simple custom prompt for shell sessions started
-#     by script.  
-# 2.  Display "bland" prompt for shell sessions within emacs or 
+#     by script.
+# 2.  Display "bland" prompt for shell sessions within emacs or
 #     xemacs.
 # 3   Display promptcmd for all other cases.
 
@@ -356,9 +361,9 @@ function load_prompt () {
     ###else
     ###    export DAY=$(date +%A)
     ###    PROMPT_COMMAND=promptcmd
-    ### fi 
-	export DAY=$(date +%A)
-	PROMPT_COMMAND=promptcmd
+    ### fi
+    export DAY=$(date +%A)
+    PROMPT_COMMAND=promptcmd
 
     export PS1 PROMPT_COMMAND
 }
