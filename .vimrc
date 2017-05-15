@@ -179,8 +179,10 @@ if !has("gui_running")
             execute "set <xHome>=\e[1;*H"
             execute "set <xEnd>=\e[1;*F"
 
-            execute "set <zHome>=\e[;*H"
-            execute "set <zEnd>=\e[;*F"
+            if v:version >= 700
+                execute "set <zHome>=\e[;*H"
+                execute "set <zEnd>=\e[;*F"
+            endif
 
             execute "set <F17>=\eOE"
 
@@ -356,9 +358,9 @@ if !has("gui_running")
         ""inoremap <special> <Esc>O[ <Esc>
 
         "Todo: check somehow, whether terminal is capable of cursor shape changes
-        "" changing cursor shape (work in xterm and from screen inside of xterm)
+        "" changing cursor shape (works in xterm and from screen inside of xterm)
         "if expand("$STY") != "$STY"
-        "   let &t_SI .= "\eP\e[5 q\e\\"
+        "    let &t_SI .= "\eP\e[5 q\e\\"
         "    let &t_EI .= "\eP\e[2 q\e\\"
         "else
         "    let &t_SI .= "\e[5 q"
@@ -412,7 +414,7 @@ if v:version >= 702 && filereadable(vundle_readme)
     filetype off                  " required
     "set the runtime path to include Vundle and initialize
     set rtp+=~/.vim/bundle/Vundle.vim
-    call vundle#begin()
+    exe ":call vundle#begin()"
     " alternatively, pass a path where Vundle should install plugins
     "call vundle#begin('~/some/path/here')
 
@@ -420,6 +422,8 @@ if v:version >= 702 && filereadable(vundle_readme)
     Plugin 'gmarik/Vundle.vim'
 
     Plugin 'scrooloose/syntastic'
+    Plugin 'w0rp/ale'
+
     Plugin 'Valloric/YouCompleteMe'
     Plugin 'starcraftman/vim-eclim'
     Plugin 'terryma/vim-multiple-cursors'
@@ -452,6 +456,8 @@ if v:version >= 702 && filereadable(vundle_readme)
     Plugin 'tpope/vim-vinegar'
     "Plugin 'tpope/vim-commentary'
     Plugin 'wilywampa/vim-commentary'
+
+    Plugin 'vim-scripts/QuickFixCurrentNumber'
 
     Plugin 'mhinz/vim-signify'
 
@@ -498,7 +504,7 @@ if v:version >= 702 && filereadable(vundle_readme)
     Plugin 'jreybert/vim-largefile'
 
     " All of your Plugins must be added before the following line
-    call vundle#end()            " required
+    exe ":call vundle#end()"
     filetype plugin indent on    " required
 "---VUNDLE---
 else
@@ -530,27 +536,28 @@ let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_key_invoke_completion = '<C-Space>'
 let g:ycm_cache_omnifunc = 0  "takes simply too much memory in big projects (1GB of sources)
 
-let g:ycm_key_list_select_completion = ['<Down>']
-let g:ycm_key_list_previous_completion = ['<Up>']
-
 let g:ycm_always_populate_location_list = 1
 
 let g:ycm_disable_for_files_larger_than_kb = 5000
 
-let g:ycm_filetype_blacklist = {
-        \ 'tagbar' : 1,
-        \ 'qf' : 1,
-        \ 'notes' : 1,
-        \ 'markdown' : 1,
-        \ 'unite' : 1,
-        \ 'text' : 1,
-        \ 'vimwiki' : 1,
-        \ 'pandoc' : 1,
-        \ 'infolog' : 1,
-        \ 'cfg' : 1,
-        \ 'mail' : 1,
-        \ 'tags' : 1,
-        \}
+if v:version >= 704
+    let g:ycm_key_list_select_completion = ['<Down>']
+    let g:ycm_key_list_previous_completion = ['<Up>']
+    let g:ycm_filetype_blacklist = {
+            \ 'tagbar' : 1,
+            \ 'qf' : 1,
+            \ 'notes' : 1,
+            \ 'markdown' : 1,
+            \ 'unite' : 1,
+            \ 'text' : 1,
+            \ 'vimwiki' : 1,
+            \ 'pandoc' : 1,
+            \ 'infolog' : 1,
+            \ 'cfg' : 1,
+            \ 'mail' : 1,
+            \ 'tags' : 1,
+            \}
+endif
 
 let b:old_ycm_status = 0
 
@@ -627,7 +634,7 @@ function! LoadSession()
     if exists(':SLoad')
         execute 'SLoad'
     else
-        if v:version > 700
+        if v:version >= 700
             tabfirst
             tabonly
         endif
@@ -736,13 +743,15 @@ set shortmess+=I
 "visual block extension beyong line endings ($ still selects up to respective line end)
 set virtualedit=block
 
-set tabpagemax=25
+if v:version >= 700
+    set tabpagemax=25
+endif
 
-function! Align()
-    '<,'>!column -t|sed 's/  \(\S\)/ \1/g'
-    normal gv=
-endfunction
-
+"function! Align()
+"    '<,'>!column -t|sed 's#  \(\S\)# \1#g'
+"    normal gv=
+"endfunction
+"
 "xnoremap <silent> gQ :<C-u>silent call Align()<CR>
 "map gQ :pyf ~/toolchains/llvm/share/clang/clang-format.py<cr>
 map gQ :pyf ~/bin/clang-format-from-vim.py<cr>
@@ -758,8 +767,8 @@ endtry
 let g:color_scheme_loaded = 1
 
 "refresh airline after colorscheme load, if already loaded
-if exists("#airline")
-    call airline#load_theme()
+if v:version >= 700 && exists("#airline")
+    exe ":call airline#load_theme()"
 else
     set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\[HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 endif
@@ -798,8 +807,8 @@ noremap <C-Q> :CtrlPBufTag<CR>
 "noremap! <C-Q> <C-o>:CtrlPBufTag<CR>
 
 " force saving files that require root permission
-"Todo: improve - slows down entering of w character in command mode
-cmap w!! %!sudo tee > /dev/null %
+comm! -nargs=0 SudoWrite %!sudo tee > /dev/null %
+cabbrev w!! <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'SudoWrite' : 'w!!')<CR>
 
 " do not move cursor during yank in visual mode
 vmap y ygv<Esc>
@@ -822,13 +831,15 @@ map <silent><Plug>(visual-yank-plaintext)  :<C-U>call setreg(v:register, '\V' . 
 "vmap <A-/> "/<Plug>(visual-yank-plaintext)n
 
 "apply macro on every line of a visually selected range
-xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+if v:version >= 700
+    xnoremap @ :<C-u>call ExecuteMacroOverVisualRange()<CR>
+endif
 
 function! ExecuteMacroOverVisualRange()
   echo "@".getcmdline()
   execute ":'<,'>normal @".nr2char(getchar())
 endfunction
- 
+
 " search for visually selected text
 "vnoremap // y/<C-R>"<CR>
 "vnoremap ?? y?<C-R>"<CR>
@@ -1050,22 +1061,22 @@ function! MySynonymLookup(mode)
     endfor
 
     "add number to items in the list
-    let l:i = 1
-    for l:item in l:all_synonyms
-        let l:synonym = l:all_synonyms[l:i - 1]
+    let l:syn_index = 1
+    while l:syn_index <= len(l:all_synonyms)
+        let l:synonym = l:all_synonyms[l:syn_index - 1]
 
         if &infercase == 1
             if l:word[0:0] ==# toupper(l:word[0:0])
                 "original input starts with upper case => inferring
                 "upper case start of replacement
                 let l:synonym = toupper(l:synonym[0:0]) . l:synonym[1:]
-                let l:all_synonyms[l:i - 1] = l:synonym
+                let l:all_synonyms[l:syn_index - 1] = l:synonym
             endif
         endif
 
-        call add(l:display_synonyms, l:i . " \"" . synonym . "\"")
-        let l:i = l:i + 1
-    endfor
+        call add(l:display_synonyms, l:syn_index . " \"" . synonym . "\"")
+        let l:syn_index = l:syn_index + 1
+    endwhile
 
     "check if we have any synonyms and not too many (probably a bug, when more than 1024 synonyms)
     if len(l:all_synonyms) > 0 && len(l:all_synonyms) < 1024
@@ -1189,7 +1200,7 @@ endif
 " ============================
 " =Working with multiple tabs=
 " ============================
-if v:version > 700
+if v:version >= 700
     " navigating multiple tabs - works only in graphical modes (gVim)
     nmap <C-Tab> :tabnext<Enter>
     nmap <C-S-Tab> :tabprev<Enter>
@@ -1210,7 +1221,7 @@ endif
 " =====================================
 " =Movement with CTRL,SHIFT and ARROWS=
 " =====================================
-if v:version > 700
+if v:version >= 700
     " CTRL+SHIFT+UP/DOWN works only in graphical modes
     nmap <C-S-Up> <C-w>W
     nmap <C-S-Down> <C-w>w
@@ -1219,6 +1230,12 @@ if v:version > 700
     vmap <C-S-Up> <C-w>Wgv
     vmap <C-S-Down> <C-w>wgv
 endif
+
+" do the same with g+arrows as with <C-w>+arrows (simplified window movement)
+nmap g<Left> <C-w><Left>
+nmap g<Right> <C-w><Right>
+nmap g<Up> <C-w><Up>
+nmap g<Down> <C-w><Down>
 
 " ======================================
 " =Windows editors selection short-cuts=
@@ -1331,6 +1348,7 @@ function! s:get_tag_internal(str)
         "endfor
         "first make sure we do not do double work (with cst all :tag commands
         "use also cscope - order depends on differnt variable: csto)
+        let l:str = a:str
 
         let l:saved_cst = &cst
         set nocst
@@ -1341,7 +1359,6 @@ function! s:get_tag_internal(str)
                 let search_cmd="tag "
             endif
 
-            let l:str = a:str
             "escape dash (-) symbols (tag is interpreting them as regexp options)
             ""let l:str=substitute(l:str, '[-]', '\-', 'ga')
             if l:str != ""
@@ -1516,9 +1533,9 @@ function! Fxxd()
     endif
 endfunction
 
-nmap <F4> :call Fxxd()<Enter>
-imap <F4> <C-o>:call Fxxd()<Enter>
-vmap <F4> <Esc>:call Fxxd()<Enter>gv
+nmap <S-F4> :call Fxxd()<Enter>
+imap <S-F4> <C-o>:call Fxxd()<Enter>
+vmap <S-F4> <Esc>:call Fxxd()<Enter>gv
 
 function! MyDiff()
     let opt = ""
@@ -1593,66 +1610,73 @@ comm! -nargs=1 -complete=tag TT tabnew | cstag <args>
 cabbrev tt <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'TT' : 'tt')<CR>
 
 function! Quickfix_window_move(type, direction)
-    "ignore error E553: no more items and jump to first/last one
-    try
-        if a:type == "quickfix"
-            if a:direction == "prev"
-                try
-                    execute "cprev"
-                catch /:E553:/
-                    execute "cfirst"
-                endtry
-            else
-                try
-                    execute "cnext"
-                catch /:E553:/
-                    execute "clast"
-                endtry
-            endif
+    """ignore error E553: no more items and jump to first/last one
+    ""try
+    ""    if a:type == "quickfix"
+    ""        if a:direction == "prev"
+    ""            try
+    ""                execute "cprev"
+    ""            catch /:E553:/
+    ""                execute "cfirst"
+    ""            endtry
+    ""        else
+    ""            try
+    ""                execute "cnext"
+    ""            catch /:E553:/
+    ""                execute "clast"
+    ""            endtry
+    ""        endif
+    ""    else
+    ""        if a:direction == "prev"
+    ""            try
+    ""                execute "lprev"
+    ""            catch /:E553:/
+    ""                execute "lfirst"
+    ""            endtry
+    ""        else
+    ""            try
+    ""                execute "lnext"
+    ""            catch /:E553:/
+    ""                execute "llast"
+    ""            endtry
+    ""        endif
+    ""    endif
+    ""catch
+    ""    "silently discard other errors
+    ""endtry
+    "Todo: warning on empty quickfix/location list
+    if a:type == "quickfix"
+        if a:direction == "prev"
+            normal [q
         else
-            if a:direction == "prev"
-                try
-                    execute "lprev"
-                catch /:E553:/
-                    execute "lfirst"
-                endtry
-            else
-                try
-                    execute "lnext"
-                catch /:E553:/
-                    execute "llast"
-                endtry
-            endif
+            normal ]q
         endif
-    catch
-        "silently discard other errors
-"        echohl WarningMsg
-"        if a:type == "quickfix"
-"            echo "No further move is possible in quickfix list"
-"        else
-"            echo "No further move is possible in location list"
-"        endif
-"        echohl None
-    endtry
+    else
+        if a:direction == "prev"
+            normal [l
+        else
+            normal ]l
+        endif
+    endif
 endfunction
 
 " Quickfix window - prev/next line jumps
-nmap <F11> :call Quickfix_window_move("quickfix", "prev")<Enter>
-imap <F11> <C-o>:call Quickfix_window_move("quickfix", "prev")<Enter>
-vmap <F11> <Esc>:call Quickfix_window_move("quickfix", "prev")<Enter>v
+nmap <silent> <F11> :call Quickfix_window_move("quickfix", "prev")<Enter>
+imap <silent> <F11> <C-o>:call Quickfix_window_move("quickfix", "prev")<Enter>
+vmap <silent> <F11> <Esc>:call Quickfix_window_move("quickfix", "prev")<Enter>v
 
-nmap <F12> :call Quickfix_window_move("quickfix", "next")<Enter>
-imap <F12> <C-o>:call Quickfix_window_move("quickfix", "next")<Enter>
-vmap <F12> <Esc>:call Quickfix_window_move("quickfix", "next")<Enter>v
+nmap <silent> <F12> :call Quickfix_window_move("quickfix", "next")<Enter>
+imap <silent> <F12> <C-o>:call Quickfix_window_move("quickfix", "next")<Enter>
+vmap <silent> <F12> <Esc>:call Quickfix_window_move("quickfix", "next")<Enter>v
 
-" Location window - prev/next line jumps
-nmap <S-F11> :call Quickfix_window_move("location", "prev")<Enter>
-imap <S-F11> <C-o>:call Quickfix_window_move("location", "prev")<Enter>
-vmap <S-F11> <Esc>:call Quickfix_window_move("location", "prev")<Enter>v
+" Loc<silent> ation window - prev/next line jumps
+nmap <silent> <S-F11> :call Quickfix_window_move("location", "prev")<Enter>
+imap <silent> <S-F11> <C-o>:call Quickfix_window_move("location", "prev")<Enter>
+vmap <silent> <S-F11> <Esc>:call Quickfix_window_move("location", "prev")<Enter>v
 
-nmap <S-F12> :call Quickfix_window_move("location", "next")<Enter>
-imap <S-F12> <C-o>:call Quickfix_window_move("location", "next")<Enter>
-vmap <S-F12> <Esc>:call Quickfix_window_move("location", "next")<Enter>v
+nmap <silent> <S-F12> :call Quickfix_window_move("location", "next")<Enter>
+imap <silent> <S-F12> <C-o>:call Quickfix_window_move("location", "next")<Enter>
+vmap <silent> <S-F12> <Esc>:call Quickfix_window_move("location", "next")<Enter>v
 
 " common leader mappings
 let mapleader = ','
@@ -1707,7 +1731,6 @@ map <Leader>y :call YcmLocalToggle()<CR>
 
 " mouse integration switching
 function! SwitchMouse()
-    let opt = ""
     if &mouse =~ "a"
         set mouse=
     else
@@ -1723,7 +1746,7 @@ map <Leader>m :call SwitchMouse()<CR>
 " =        GUI options       =
 " ============================
 if has("gui_running")
-    if v:version > 700
+    if v:version >= 700
         function! FoldSpellBalloon()
             let foldStart = foldclosed(v:beval_lnum )
             let foldEnd = foldclosedend(v:beval_lnum)
@@ -2212,11 +2235,19 @@ cabbrev diffsplit <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Diffsplit' : 'di
 """ let g:syntastic_tcl_checkers = []
 """ "Pygments package not found
 """ let g:syntastic_rst_checkers = []
-let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ "sh", "python", "perl", "yang", "mib", "cfg" ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
+let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
 
 " === Airline ===
 let g:airline#extensions#whitespace#max_lines = 50000
 let g:airline#extensions#wordcount#max_lines = 100000
+let g:airline#extensions#ycm#enabled = 1
+let g:airline_symbols_ascii = 1
+let g:airline_symbols#linenr = 'ln'
+let g:airline_symbols#maxlinenr = ''
+"let g:airline#extensions#ycm#error_symbol = 'x' "'E:'
+"let g:airline#extensions#ycm#warning_symbol = '⚠' "'W:'
+"let g:airline#extensions#ale#error_symbol = 'x'
+"let g:airline#extensions#ale#warning_symbol = '⚠'
 
 " === vim-asterisk ===
 let g:asterisk#keeppos = 1
@@ -2244,7 +2275,7 @@ let g:startify_commands = [
 
 "let g:startify_change_to_vcs_root = 1
 "let g:startify_session_persistence = 1
-let startify_session_delete_buffers = 1
+let g:startify_session_delete_buffers = 1
 let g:startify_session_dir = "~/.vim/sessions"
 let g:ctrlp_reuse_window = 'startify'
 let g:startify_list_order = [
@@ -2255,6 +2286,11 @@ let g:startify_list_order = [
 let g:startify_session_sort = 0  "sort session list alphabetically
 
 set sessionoptions-=blank
+
+" disable startify in man pager mode
+if expand("$MAN_PN") == "1"
+    let g:startify_disable_at_vimenter = 1
+endif
 
 " === vim-easy-align ===
 map ga <Plug>(EasyAlign)
@@ -2270,6 +2306,42 @@ let g:VCSCommandSVNExec = ""
 " === vim-vinegar ===
 "let g:netrw_keepj=""
 
+" === vim-ALE ===
+"let g:loaded_ale_dont_use_this_in_other_plugins_please = 1
+let g:ale_lint_on_text_changed = 1
+let g:ale_lint_on_insert_leave = 0
+let g:ale_lint_on_enter = 1
+let g:ale_lint_on_save = 1
+let g:ale_sign_column_always = 0
+let g:ale_sign_error = '=>'
+let g:ale_sign_warning = '->'
+let g:ale_statusline_format = ['x %d', '⚠ %d', '✓ ok']
+let g:ale_set_loclist = 1
+let g:ale_set_quickfix = 0
+let g:ale_open_list = 1
+let g:ale_keep_list_window_open = 1
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_emit_conflict_warnings = 0  "do not complain about syntastic
+let g:ale_linters = {
+    \   'c': [],
+    \   'cpp': [],
+    \   'mib': ['mibcomp'],
+    \   'cfg': ['setupteardownchecker'],
+    \   'sh': ['shell'],
+    \   'python': ['python', 'flake8'],
+    \   'perl': ['perl'],
+    \   'tcl': [],
+    \   'vim': [],
+    \   'rst': [],
+    \   'yang': ['pyang'],
+    \}
+
+augroup ALEGroup
+    autocmd!
+    autocmd User ALELint :AirlineRefresh
+augroup END
 
 " ==========================
 " = Miscellaneous functions=
@@ -2360,13 +2432,13 @@ function! DoFormatXML() range
     set ft=
 
     " Add fake initial tag (so we can process multiple top-level elements)
-    exe ":let l:beforeFirstLine=" . a:firstline . "-1"
+    let l:beforeFirstLine= a:firstline - 1
     if l:beforeFirstLine < 0
         let l:beforeFirstLine=0
     endif
     exe a:lastline . "put ='</PrettyXML>'"
     exe l:beforeFirstLine . "put ='<PrettyXML>'"
-    exe ":let l:newLastLine=" . a:lastline . "+2"
+    let l:newLastLine= a:lastline + 2
     if l:newLastLine > line('$')
         let l:newLastLine=line('$')
     endif
@@ -2851,6 +2923,226 @@ function! OpenGitModifiedFiles(opentype, whatfiles, diffstyle)
     "cexpr l:file_list
 endfunc
 
+" This callback will be executed when the entire command is completed
+function! BackgroundCommandClose(channel)
+    " Read the output from the command into the quickfix window
+    execute "cfile! " . g:backgroundCommandOutput
+    " Open the quickfix window
+    copen
+    unlet g:backgroundCommandOutput
+endfunction
+
+function! RunBackgroundCommand(command)
+    " Make sure we're running VIM version 8 or higher.
+    if v:version < 800
+        echoerr 'RunBackgroundCommand requires VIM version 8 or higher'
+        return
+    endif
+
+    if exists('g:backgroundCommandOutput')
+        echo 'Already running task in background'
+    else
+        echo 'Running task in background'
+        " Launch the job.
+        " Notice that we're only capturing out, and not err here. This is because, for some reason, the callback
+        " will not actually get hit if we write err out to the same file. Not sure if I'm doing this wrong or?
+        let g:backgroundCommandOutput = tempname()
+        call job_start(a:command, {'close_cb': 'BackgroundCommandClose', 'out_io': 'file', 'out_name': g:backgroundCommandOutput})
+    endif
+endfunction
+
+" So we can use :BackgroundCommand to call our function.
+command! -nargs=+ -complete=shellcmd RunBackgroundCommand call RunBackgroundCommand(<q-args>)
+
+" function! ExpandCMacro()
+"     "get current info
+"     let l:macro_file_name = "__macroexpand__" . tabpagenr()
+"     let l:file_row = line(".")
+"     let l:file_name = expand("%")
+"     let l:file_window = winnr()
+"
+"     let l:tmp_file = expand("%:h") . "/cscope." . l:macro_file_name . ".cpp"
+"     let l:preprocessed_file = "/tmp" . "/cscope." . l:macro_file_name . ".cpp"
+"     silent! execute "w! " . l:tmp_file
+"     "open tiny window ... check if we have already an open buffer for macro
+"     if bufwinnr( l:macro_file_name ) != -1
+"         execute bufwinnr( l:macro_file_name) . "wincmd w"
+"         setlocal modifiable
+"         silent! execute "normal! gg\"_dG"
+"     else
+"         execute "bot 10split " . l:macro_file_name
+"         execute "setlocal filetype=cpp"
+"         execute "setlocal buftype=nofile"
+"         nnoremap <buffer> q :q!<CR>
+"     endif
+"     "silent! execute "r!compilation.py -e " . l:tmp_file . " -f " . "-" . " 2>/dev/null"
+"     "create mark
+"     silent! execute "!sed -i '" . l:file_row . "i\ int " . l:macro_file_name . ";' " . l:tmp_file
+"     "process file with gcc
+"     "echomsg "tmp: " . l:tmp_file
+"     "echomsg "pre: " . l:preprocessed_file
+"     silent! execute "!compilation.py -e " . l:tmp_file . " -f " .  l:preprocessed_file . " 2>/dev/null"
+"     silent! execute "!rm -f " . l:tmp_file
+"     "read result into tiny window
+"     silent! execute "r " . l:preprocessed_file
+"     "keep only specific macro line
+"     silent! execute "normal! ggV/int " . l:macro_file_name . ";$\<CR>\"_d"
+"     silent! execute "normal! j\"_dG"
+"     "indent
+"     "execute "%!indent -st -kr"
+"     "execute "normal! gg=G"
+"     execute "normal! gggqG"
+"     "resize window
+"     execute "normal! G"
+"     let l:macro_end_row = line(".")
+"     execute "resize " . l:macro_end_row
+"     execute "normal! gg"
+"     "no modifiable
+"     setlocal nomodifiable
+"     "return to origin place
+"     execute l:file_window . "wincmd w"
+" """    execute l:file_row
+" """    execute "normal!u"
+" """    execute "w"
+"     "highlight origin line
+"     let @/ = getline('.')
+"     redraw!
+" endfunction
+"
+" map <leader>e :call ExpandCMacro()<CR>
+
+function! ExpandCMacroAsyncCodeExpandMacroCommandClose(channel)
+    """" Read the output from the command into the quickfix window
+    """execute "cfile! " . g:backgroundCommandOutput
+    """" Open the quickfix window
+    """copen
+    unlet g:backgroundCommandOutput
+
+    call delete(g:tmp_file)
+    "read result into tiny window
+    "echomsg "done"
+    "silent! execute "bot 10split " . g:preprocessed_file
+    silent! execute ":pedit " . g:preprocessed_file
+    call delete(g:preprocessed_file)
+    "store syntax to set the same for preview
+    let l:syntax = &syntax
+    "recalculate file_window
+    let l:file_window = bufwinnr("%")
+    "echomsg "win:" . l:file_window
+    silent! execute "wincmd P"
+    "set no modifiable for preview
+    setlocal nomodifiable
+    let &syntax=l:syntax
+    "resize window
+    let l:expand_lines = line('$')
+    let l:winheight = winheight('%')
+    if l:expand_lines < l:winheight
+        execute "resize " . l:expand_lines
+    elseif l:expand_lines > l:winheight
+        if l:expand_lines > &previewheight
+            let l:expand_lines = &previewheight
+        endif
+        execute "resize " . l:expand_lines
+    endif
+    "return to origin place
+    "redraw
+    silent! execute l:file_window . "wincmd w"
+    "highlight origin line
+    "Todo: add slash escapes (make it work - works only after searching was
+    "already used at least once in current buffer/vim ?
+    "let @/ = "\\V" . getline('.')
+    "redraw!
+    execute '2match none'
+endfunction
+
+function! ExpandCMacroAsync()
+    "get current info
+    execute '2match Search /\%'.line('.').'l/'
+    let l:macro_file_name = "__macroexpand__" . tabpagenr()
+    let l:file_row = line(".")
+    let l:file_name = expand("%")
+    let g:tmp_file = expand("%:h") . "/." . expand("%:t:r") . "." . expand("%:e")
+    let l:rnd = localtime() % 0x10000
+    let g:preprocessed_file = "/tmp" . "/" . expand("$USER") . "." .  l:rnd . "." . l:macro_file_name
+    silent! execute "w! " . g:tmp_file
+
+    "silent! execute "!code_expand_macro.sh " . g:tmp_file . " " . l:file_row . " " . l:preprocessed_file
+
+    let l:async_command = "code_expand_macro.sh " . g:tmp_file . " " . l:file_row . " " . g:preprocessed_file
+    " Make sure we're running VIM version 8 or higher.
+    if v:version < 800
+        echomsg 'Async expand C macro requires VIM version 8 or higher (running sync version)'
+        let g:backgroundCommandOutput = 1
+        silent! execute "!" . l:async_command
+        call ExpandCMacroAsyncCodeExpandMacroCommandClose(0)
+        redraw!
+        return
+    endif
+
+    if exists('g:backgroundCommandOutput')
+        echo 'Already running expand C macro in background'
+    else
+        echo 'Running expand C macro in background'
+        " Launch the job.
+        " Notice that we're only capturing out, and not err here. This is because, for some reason, the callback
+        " will not actually get hit if we write err out to the same file. Not sure if I'm doing this wrong or?
+        "let g:backgroundCommandOutput = tempname()
+        "call job_start(l:async_command, {'close_cb': 'ExpandCMacroAsyncCodeExpandMacroCommandClose', 'out_io': 'file', 'out_name': g:backgroundCommandOutput})
+        let g:backgroundCommandOutput = 1
+        "echo "async: " . l:async_command
+        call job_start(l:async_command, {'close_cb': 'ExpandCMacroAsyncCodeExpandMacroCommandClose'})
+    endif
+endfunction
+
+function! ExpandCMacro2()
+    "get current info
+    let l:macro_file_name = "__macroexpand__" . tabpagenr()
+    let l:file_row = line(".")
+    let l:file_name = expand("%")
+    let l:tmp_file = expand("%:h") . "/." . expand("%:t:r") . "." . expand("%:e")
+    let l:preprocessed_file = "/tmp" . "/" . expand("$USER") . "." .  expand("$RANDOM") . "." . l:macro_file_name
+    silent! execute "w! " . l:tmp_file
+    "execute 'match Search /\%'.line('.').'l/'
+    silent! execute "!code_expand_macro.sh " . l:tmp_file . " " . l:file_row . " " . l:preprocessed_file
+    "execute 'match none'
+    silent! execute "!rm -f " . l:tmp_file
+    "read result into tiny window
+    "echomsg "done"
+    silent! execute ":pedit " . l:preprocessed_file
+    "store syntax to set the same for preview
+    let l:syntax = &syntax
+    "recalculate file_window
+    let l:file_window = bufwinnr("%")
+    "echomsg "win:" . l:file_window
+    silent! execute "wincmd P"
+    "set no modifiable for preview
+    setlocal nomodifiable
+    let &syntax=l:syntax
+    "resize window
+    let l:expand_lines = line('$')
+    let l:winheight = winheight('%')
+    if l:expand_lines < l:winheight
+        execute "resize " . l:expand_lines
+    elseif l:expand_lines > l:winheight
+        if l:expand_lines > &previewheight
+            let l:expand_lines = &previewheight
+        endif
+        execute "resize " . l:expand_lines
+    endif
+    "return to origin place
+    redraw
+    silent! execute l:file_window . "wincmd w"
+    "highlight origin line
+    "Todo: add slash escapes (make it work - works only after searching was
+    "already used at least once in current buffer/vim ?
+    "let @/ = "\\V" . getline('.')
+    redraw!
+endfunction
+
+nmap <F4> :call ExpandCMacroAsync()<Enter>
+imap <F4> <C-o>:call ExpandCMacroAsync()<Enter>
+vmap <F4> <Esc>:call ExpandCMacroAsync()<Enter>gv
+
 " =========================================
 " = Project/Versioning system integration =
 " =========================================
@@ -2889,6 +3181,8 @@ if g:PROJECT_name == "SR"
     map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
     " ,t to show current .yang file customer tree
     map <Leader>t :call ToggleYangTreeWindow("")<CR>
+    " ,T to show customer config and state .yang trees
+    map <Leader>T :call ToggleNokiaYangTreeWindows("")<CR>
 
     nmap <silent><F1> :execute "!sr_cscope.sh update"<CR> :silent cs reset<CR>
     imap <silent><F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:silent cs reset<CR>
