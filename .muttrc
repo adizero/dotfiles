@@ -67,8 +67,8 @@ set from="adrian.kocis@nokia.com"
 
 alternates adrian.kocis@alcatel-lucent.com adrian.kocis@exchange.alcatel-lucent.com akocis@exchange.alcatel-lucent.com adrian.kocis@gmail.com adrian.kocis@alcatel-lucent.sk
 
-subscribe sr-dev-bra sr-devtest-bra sr-filter sw-timetra DL_SK_PUB_magnetova
-lists sr-test-bra mg-dev-bra mg-test-bra bra-lab-support build-timetra DL_SK_PUB build-timetra sros-antwerp 7450-antwerp 7450-weekly 9471-wmm-interest WMM-All cSGSN-Dev
+subscribe sr-sw sr-sw-bra sr-dev-bra sr-devtest-bra sr-filter sw-timetra DL_SK_PUB_magnetova bratislava-engineering I_IPD_FP4_FILTERSCRITERIA
+lists mg-sw-bra sr-build sr-bugscrub sr-test-bra mg-dev-bra mg-test-bra bra-lab-support build-timetra DL_SK_PUB build-timetra sros-antwerp 7450-antwerp 7450-weekly 9471-wmm-interest WMM-All cSGSN-Dev
 
 
 #Offline Mails (fetched via offlineimap) ---------------------------------------------------
