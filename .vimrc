@@ -1,4 +1,5 @@
-set nocompatible
+if &compatible | set nocompatible | endif " Avoid side effects if `nocp` already set
+scriptencoding utf-8
 
 "Xxx: this needs .term_detect script support in shell
 let s:term_program=expand("$TERM_PROGRAM")
@@ -711,6 +712,10 @@ endif
 "set wildmode=longest:full,list:full
 set wildmode=full
 
+" set side scrolling
+set siso=8
+set ss=1
+
 "convenience mappings
 nnoremap Q <nop>
 "if has("user_commands")
@@ -783,19 +788,21 @@ if has("cscope")
     endif
 endif
 
-imap jk <Esc>
+inoremap jk <Esc>
 
 " follow visual lines (instead of lines) - comes into play when line wrapping is on
-map <A-Down> gj
-map <A-Up> gk
-imap <A-Up> <C-o>gk
-imap <A-Down> <C-o>gj
+noremap <A-Down> gj
+noremap <A-Up> gk
+inoremap <A-Up> <C-o>gk
+inoremap <A-Down> <C-o>gj
 
 "reselect visual selection after <,> movements
 vnoremap < <gv
 vnoremap > >gv
+
 " make Y behave like other capitals
-map Y y$
+noremap Y y$
+
 " map u/U in visual mode to undo (instead of to lowercase/to uppercase)
 vnoremap u <Esc>u
 vnoremap U <Esc>U
@@ -811,7 +818,7 @@ comm! -nargs=0 SudoWrite %!sudo tee > /dev/null %
 cabbrev w!! <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'SudoWrite' : 'w!!')<CR>
 
 " do not move cursor during yank in visual mode
-vmap y ygv<Esc>
+vnoremap y ygv<Esc>
 
 function! s:get_visual_selection()
     " Why is this not a built-in Vim script function?!
@@ -1013,11 +1020,169 @@ if v:version >= 700
         if !exists("g:lasttab")
             let g:lasttab = 1
         endif
-        nmap g<Tab> :exe "tabn ".g:lasttab<CR>
+        nnoremap g<Tab> :exe "tabn ".g:lasttab<CR>
         autocmd! TabLeave * let g:lasttab = tabpagenr()
     endif
 endif
 
+" ============================
+" =       Window title       =
+" ============================
+"Xxx: this sets screen tab's caption
+"let &t_ts="\ek"
+"let &t_fs="\e\"
+"don't reset screen tab's caption to flying...
+"autocmd! VimLeave * let &t_ts="\ek\e\"
+
+set title
+
+if has('autocmd')
+    "autocmd! BufEnter * let &titlestring= expand("%:t") . " (" . expand($REL) . "-" . expand($RELP) . " " . expand($VPLOAD) . expand($HOST_TAG) . " " . expand($SS) . " | " . expand($ROOT) . ")"
+    if $REL == ""
+        autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t")
+    else
+        if $VPLOAD != ""
+            if $REL != $RELP
+                autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . "-" . $RELP . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
+            else
+                autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
+            endif
+        else
+            autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $CURRENT_LOCATION . " | " . $ROOT . ")"
+        endif
+    endif
+endif
+
+" autocmd! BufEnter * let &titlestring = hostname() . "/" . expand("%:p")
+"Here the window title is reset when the user enters a new buffer. It contains the hostname, a forward slash, then the full path of the current file - for an explanation of the %:p syntax see the Filename Modifiers section of the Executing External Commands recipe..
+"
+"Another example is to display the value of an environment variable in the window title along with the filename. For instance, Ruby on Rails developers could prefix the filename with the value of RAILS_ENV, which indicates whether the application is in development, production, staging, or testing mode:
+"let &titlestring=expand($RAILS_ENV) . ": " . expand("%:t")
+"One last trick is to embed the value of an external command in the window title using the %{system('command')} syntax. This could be used to display the name of the current branch, if using a version control system, or indicate whether the project's unit tests are passing or failing.
+
+" ============================
+" =          Folding         =
+" ============================
+if v:version > 600
+    if has("folding")
+        set nofoldenable
+        " superslow method of folding from VIM 7.2.274a
+        if v:version < 702
+            set foldmethod=syntax
+        else
+        " another older version of folding (does not work with matching brackets in VIM7
+            "syn region myFold start="{" end="}" transparent fold
+            "syn sync fromstart
+            "set foldlevel=5
+        " older version of folding (only pure brackets)
+            set foldmarker={,}
+            set foldmethod=marker
+        endif
+    endif
+endif
+
+" =====================
+" =Moving between tabs=
+" =====================
+if v:version >= 700
+    " navigating multiple tabs - works only in graphical modes (gVim)
+    nnoremap <C-Tab> :tabnext<Enter>
+    nnoremap <C-S-Tab> :tabprev<Enter>
+    inoremap <C-Tab> <C-o>:tabnext<Enter>
+    inoremap <C-S-Tab> <C-o>:tabprev<Enter>
+    vnoremap <C-Tab> <Esc>:tabnext<Enter>gv
+    vnoremap <C-S-Tab> <Esc>:tabprev<Enter>gv
+endif
+
+" ========================
+" =Moving between windows=
+" ========================
+if v:version >= 700
+    " CTRL+SHIFT+UP/DOWN works only in graphical modes
+    nnoremap <C-S-Up> <C-w>W
+    nnoremap <C-S-Down> <C-w>w
+    inoremap <C-S-Up> <C-o><C-w>W
+    inoremap <C-S-Down> <C-o><C-w>w
+    vnoremap <C-S-Up> <C-w>Wgv
+    vnoremap <C-S-Down> <C-w>wgv
+endif
+
+" simplified movement through windows
+nmap <C-Up> <C-S-Up>
+nmap <C-Down> <C-S-Down>
+imap <C-Up> <C-S-Up>
+imap <C-Down> <C-S-Down>
+vmap <C-Up> <C-S-Up>
+vmap <C-Down> <C-S-Down>
+
+" do the same with g+arrows as with <C-w>+arrows (simplified window movement)
+nnoremap g<Left> <C-w><Left>
+nnoremap g<Right> <C-w><Right>
+nnoremap g<Up> <C-w><Up>
+nnoremap g<Down> <C-w><Down>
+
+" ======================================
+" =Windows editors selection short-cuts=
+" ======================================
+" Todo: improve insert mode (do without _ insertion and marks)
+" word selection
+nnoremap <S-Left> vbge<Space>
+nnoremap <S-Right> vew<BS>
+inoremap <S-Left> _<Esc>mz"_xv`z<BS>obge<Space>
+inoremap <S-Right> _<Esc>my"_xi<Right><C-o><BS>_<Esc>mz"_xv`yo`z
+vnoremap <S-Left> bge<Space>
+vnoremap <S-Right> ew<BS>
+
+" down/up selection
+nnoremap <S-Down> v<Down>
+nnoremap <S-Up> v<Up>
+inoremap <S-Down> _<Esc>mz"_xv`zo`z<Down><Right><BS><BS>
+inoremap <S-Up> _<Esc>mz"_xv`z<Up>o`z<BS>o
+vnoremap <S-Down> <Down>
+vnoremap <S-Up> <Up>
+
+" home/end selection
+nnoremap <S-Home> v<Home>
+nnoremap <S-End> v<End>
+inoremap <S-Home> _<Esc>mz"_s<C-o><Left><C-o>`z<Esc>v<Home>
+inoremap <S-End> _<Esc>mz"_xv`zo<End>
+vnoremap <S-Home> <C-S-Home>
+vnoremap <S-End> <C-S-End>
+
+" half page down/up selection (gVim only?)
+nnoremap <S-PageDown> v<End><C-d><End>
+nnoremap <S-PageUp> v<Home><C-u>
+inoremap <S-PageDown> _<Esc>mz"_xv`zo<End><C-d><End>
+inoremap <S-PageUp> _<Esc>mz"_xv`z<BS>o<Home><C-u>
+vnoremap <S-PageDown> <End><C-d><End>
+vnoremap <S-PageUp> <Home><C-u>
+
+" word deletion
+inoremap <C-BS> <C-w>
+"imap <C-Del> _<Esc>mzew<BS>i<Del><Esc>v`z"_c
+inoremap <C-Del> <C-o>de
+
+" ========================
+" =Visual mode operations=
+" ========================
+" indentation with Tab/S-Tab on selected blocks
+vnoremap <Tab> >gv
+vnoremap <S-Tab> <LT>gv
+
+" indentation by one space with Space/Backspace on selected blocks
+vnoremap <Backspace> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv<<Esc>:let&sw=origsw<CR>gv
+vnoremap <Space> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv><Esc>:let&sw=origsw<CR>gv
+
+" move selected lines
+vnoremap <C-j> :m '>+1<CR>gv=gv
+vnoremap <C-k> :m '<-2<CR>gv=gv
+"vnoremap <C-S-j> :m '>+1<CR>gv
+"vnoremap <C-S-k> :m '<-2<CR>gv
+
+" duplicate (above) selected lines (leave selection intact)
+vnoremap <C-d> :t .-1<CR>gv
+
+" thesaurus lookup
 function! MySynonymLookup(mode)
     let l:isk_orig = &isk
     set isk+=-
@@ -1137,161 +1302,84 @@ function! MySynonymLookup(mode)
     endif
 endfunction
 
-nmap <silent>z_ :call MySynonymLookup("n")<Enter>
-"imap <silent>z_ <C-o>:call MySynonymLookup("i")<Enter>
-vmap <silent>z_ <Esc>:call MySynonymLookup("v")<Enter>
+nnoremap <silent>z_ :call MySynonymLookup("n")<Enter>
+vnoremap <silent>z_ <Esc>:call MySynonymLookup("v")<Enter>
 
-" ============================
-" =       Window title       =
-" ============================
-"Xxx: this sets screen tab's caption
-"let &t_ts="\ek"
-"let &t_fs="\e\"
-"don't reset screen tab's caption to flying...
-"autocmd! VimLeave * let &t_ts="\ek\e\"
-
-set title
-
-if has('autocmd')
-    "autocmd! BufEnter * let &titlestring= expand("%:t") . " (" . expand($REL) . "-" . expand($RELP) . " " . expand($VPLOAD) . expand($HOST_TAG) . " " . expand($SS) . " | " . expand($ROOT) . ")"
-    if $REL == ""
-        autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t")
+let s:noquiting = 0
+" Todo: do not try to move special windows like tagbar,undotree (when they close buffer ceases to
+" exist, hence no b <number> command is possible)
+function! MoveToPrevTab()
+    "there is only one window
+    if tabpagenr('$') == 1
+        if winnr('$') == 1
+            echomsg "Single window - no move allowed"
+            return
+        endif
+    endif
+    let l:buftype = getbufvar(winbufnr(winnr()), "&buftype")
+    if l:buftype == "quickfix" || l:buftype == "help"
+        echomsg "Special window - no move allowed"
+        return
+    endif
+    let s:noquiting = 1
+    "preparing new window
+    let l:tab_nr = tabpagenr('$')
+    let l:cur_buf = bufnr('%')
+    let l:cur_tab = tabpagenr()
+    if l:cur_tab != 1
+        close!
+        if l:cur_tab < tab_nr
+            tabprev
+        elseif l:tab_nr == tabpagenr('$')
+            "nwhole tab was not closed => move to prev tab to make split
+            tabprev
+        endif
+        vertical botright sp
     else
-        if $VPLOAD != ""
-            if $REL != $RELP
-                autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . "-" . $RELP . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
-            else
-                autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $VPLOAD . $HOST_TAG . " " . $SS . " | " . $ROOT . ")"
-            endif
-        else
-            autocmd! BufEnter * let &titlestring= "%m%r" . expand("%:t") . " (" . $REL . " " . $CURRENT_LOCATION . " | " . $ROOT . ")"
+        close!
+        exe "0tabnew"
+    endif
+    "opening current buffer in new window
+    exe "b".l:cur_buf
+    let s:noquiting = 0
+endfunc
+
+function! MoveToNextTab()
+    "there is only one window
+    if tabpagenr('$') == 1
+        if winnr('$') == 1
+            echomsg "Single window - no move allowed"
+            return
         endif
     endif
-endif
-
-" autocmd! BufEnter * let &titlestring = hostname() . "/" . expand("%:p")
-"Here the window title is reset when the user enters a new buffer. It contains the hostname, a forward slash, then the full path of the current file - for an explanation of the %:p syntax see the Filename Modifiers section of the Executing External Commands recipe..
-"
-"Another example is to display the value of an environment variable in the window title along with the filename. For instance, Ruby on Rails developers could prefix the filename with the value of RAILS_ENV, which indicates whether the application is in development, production, staging, or testing mode:
-"let &titlestring=expand($RAILS_ENV) . ": " . expand("%:t")
-"One last trick is to embed the value of an external command in the window title using the %{system('command')} syntax. This could be used to display the name of the current branch, if using a version control system, or indicate whether the project's unit tests are passing or failing.
-
-" ============================
-" =          Folding         =
-" ============================
-if v:version > 600
-    if has("folding")
-        set nofoldenable
-        " superslow method of folding from VIM 7.2.274a
-        if v:version < 702
-            set foldmethod=syntax
-        else
-        " another older version of folding (does not work with matching brackets in VIM7
-            "syn region myFold start="{" end="}" transparent fold
-            "syn sync fromstart
-            "set foldlevel=5
-        " older version of folding (only pure brackets)
-            set foldmarker={,}
-            set foldmethod=marker
-        endif
+    let l:buftype = getbufvar(winbufnr(winnr()), "&buftype")
+    if l:buftype == "quickfix" || l:buftype == "help"
+        echomsg "Special window - no move allowed"
+        return
     endif
-endif
+    let s:noquiting = 1
+    "preparing new window
+    let l:tab_nr = tabpagenr('$')
+    let l:cur_buf = bufnr('%')
+    let l:cur_tab = tabpagenr()
+    if l:cur_tab < tab_nr
+        close!
+        if l:tab_nr == tabpagenr('$')
+            "whole tab was not closed => move to next tab to make split
+            tabnext
+        endif
+        vert topleft sp
+    else
+        close!
+        tabnew
+    endif
+    "opening current buffer in new window
+    exe "b".l:cur_buf
+    let s:noquiting = 0
+endfunc
 
-" ============================
-" =Working with multiple tabs=
-" ============================
-if v:version >= 700
-    " navigating multiple tabs - works only in graphical modes (gVim)
-    nmap <C-Tab> :tabnext<Enter>
-    nmap <C-S-Tab> :tabprev<Enter>
-    imap <C-Tab> <C-o>:tabnext<Enter>
-    imap <C-S-Tab> <C-o>:tabprev<Enter>
-    vmap <C-Tab> <Esc>:tabnext<Enter>gv
-    vmap <C-S-Tab> <Esc>:tabprev<Enter>gv
-
-    " simplified movement through windows
-    nmap <C-Up> <C-S-Up>
-    nmap <C-Down> <C-S-Down>
-    imap <C-Up> <C-S-Up>
-    imap <C-Down> <C-S-Down>
-    vmap <C-Up> <C-S-Up>
-    vmap <C-Down> <C-S-Down>
-endif
-
-" =====================================
-" =Movement with CTRL,SHIFT and ARROWS=
-" =====================================
-if v:version >= 700
-    " CTRL+SHIFT+UP/DOWN works only in graphical modes
-    nmap <C-S-Up> <C-w>W
-    nmap <C-S-Down> <C-w>w
-    imap <C-S-Up> <C-o><C-w>W
-    imap <C-S-Down> <C-o><C-w>w
-    vmap <C-S-Up> <C-w>Wgv
-    vmap <C-S-Down> <C-w>wgv
-endif
-
-" do the same with g+arrows as with <C-w>+arrows (simplified window movement)
-nmap g<Left> <C-w><Left>
-nmap g<Right> <C-w><Right>
-nmap g<Up> <C-w><Up>
-nmap g<Down> <C-w><Down>
-
-" ======================================
-" =Windows editors selection short-cuts=
-" ======================================
-" word selection
-nmap <S-Left> vbge<Space>
-nmap <S-Right> vew<BS>
-imap <S-Left> _<Esc>mz"_xv`z<BS>obge<Space>
-imap <S-Right> _<Esc>my"_xi<Right><C-o><BS>_<Esc>mz"_xv`yo`z
-vmap <S-Left> bge<Space>
-vmap <S-Right> ew<BS>
-
-" down/up selection
-nmap <S-Down> v<Down>
-nmap <S-Up> v<Up>
-imap <S-Down> _<Esc>mz"_xv`zo`z<Down><Right><BS><BS>
-imap <S-Up> _<Esc>mz"_xv`z<Up>o`z<BS>o
-vmap <S-Down> <Down>
-vmap <S-Up> <Up>
-
-" home/end selection
-nmap <S-Home> v<Home>
-nmap <S-End> v<End>
-imap <S-Home> _<Esc>mz"_s<C-o><Left><C-o>`z<Esc>v<Home>
-imap <S-End> _<Esc>mz"_xv`zo<End>
-vmap <S-Home> <C-S-Home>
-vmap <S-End> <C-S-End>
-
-" indentation with Tab/S-Tab on selected blocks
-vnoremap <Tab> >gv
-vnoremap <S-Tab> <LT>gv
-
-" indentation by one space with Space/Backspace on selected blocks
-vnoremap <Backspace> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv<<Esc>:let&sw=origsw<CR>gv
-vnoremap <Space> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv><Esc>:let&sw=origsw<CR>gv
-
-" move selected lines
-vnoremap <C-j> :m '>+1<CR>gv=gv
-vnoremap <C-k> :m '<-2<CR>gv=gv
-"vnoremap <C-S-j> :m '>+1<CR>gv
-"vnoremap <C-S-k> :m '<-2<CR>gv
-" duplicate (above) selected lines
-vnoremap <C-d> :t .-1<CR>gv
-
-" half page down/up selection (gVim)
-nmap <S-PageDown> v<End><C-d><End>
-nmap <S-PageUp> v<Home><C-u>
-imap <S-PageDown> _<Esc>mz"_xv`zo<End><C-d><End>
-imap <S-PageUp> _<Esc>mz"_xv`z<BS>o<Home><C-u>
-vmap <S-PageDown> <End><C-d><End>
-vmap <S-PageUp> <Home><C-u>
-
-" word deletion
-imap <C-BS> <C-w>
-"imap <C-Del> _<Esc>mzew<BS>i<Del><Esc>v`z"_c
-imap <C-Del> <C-o>de
+nnoremap z, :call MoveToPrevTab()<CR>
+nnoremap z. :call MoveToNextTab()<CR>
 
 " ============================
 " =        Fx commands       =
@@ -1441,6 +1529,7 @@ function! SophTag(str)
         let &tagcase="match"
     endif
     try
+        " echomsg "searched str [" . a:str . "]"
         call <SID>get_tag_internal(a:str)
     finally
         if v:version > 704 || (v:version == 704 && has('patch957'))
@@ -1645,12 +1734,38 @@ function! Quickfix_window_move(type, direction)
     ""    "silently discard other errors
     ""endtry
     "Todo: warning on empty quickfix/location list
+    let l:bufferQflist = a:type != "quickfix" ? getloclist(0) : getqflist()
+    let l:len = len(l:bufferQflist)
+    if l:len == 0
+        echohl WarningMsg
+        if a:type == "quickfix"
+            echomsg "Quickfix list is empty"
+        else
+            echomsg "Location list for current window is empty"
+        endif
+        echohl None
+        return
+    endif
+
     if a:type == "quickfix"
         if a:direction == "prev"
-            normal [q
+            try
+                execute "cprev"
+            catch /:E553:/
+                execute "cfirst"
+            endtry
         else
-            normal ]q
+            try
+                execute "cnext"
+            catch /:E553:/
+                execute "clast"
+            endtry
         endif
+        " if a:direction == "prev"
+        "     normal [q
+        " else
+        "     normal ]q
+        " endif
     else
         if a:direction == "prev"
             normal [l
@@ -1885,10 +2000,10 @@ imap <Tab> <C-r>=TabCompletion()<CR>
 imap <S-Tab> <C-r>=ShiftTabCompletion()<CR>
 
 " bind ,a to grep word under cursor
-nmap <Leader>a :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+nnoremap <Leader>a :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 " bind \ to Ag - similar to /, just enter search string
-nmap \ :grep!<SPACE>
+nnoremap \ :grep!<SPACE>
 
 " ============================
 " =        OS specific       =
@@ -2329,18 +2444,19 @@ let g:ale_linters = {
     \   'cpp': [],
     \   'mib': ['mibcomp'],
     \   'cfg': ['setupteardownchecker'],
-    \   'sh': ['shell'],
+    \   'sh': ['shell', 'shellcheck'],
     \   'python': ['python', 'flake8'],
     \   'perl': ['perl'],
     \   'tcl': [],
-    \   'vim': [],
+    \   'vim': ['vint'],
     \   'rst': [],
     \   'yang': ['pyang'],
+    \   'mail': ['grammarcheck'],
     \}
 
 augroup ALEGroup
     autocmd!
-    autocmd User ALELint :AirlineRefresh
+    autocmd User ALELint if exists(':AirlineRefresh') | execute "AirlineRefresh" | endif
 augroup END
 
 " ==========================
@@ -2602,12 +2718,12 @@ nmap <RightMouse><LeftMouse> <X1Mouse>
 "vnoremap <LeftRelease> <LeftRelease>y
 
 " moving through cscope/ctags
-nmap <silent><C-S-Right> :call CscopeCtagsSearch(expand("<cword>"))<Enter>
-nmap <silent><C-S-Left> <C-T>
-imap <silent><C-S-Right> <C-o>:call CscopeCtagsSearch(expand("<cword>"))<Enter>
-imap <silent><C-S-Left> <C-o><C-T>
-vmap <silent><C-S-Right> <Esc>:call CscopeCtagsSearch(<SID>get_visual_selection())<Enter>
-vmap <silent><C-S-Left> <Esc><C-T><Enter>
+nnoremap <silent><C-S-Right> :call CscopeCtagsSearch(expand("<cword>"))<Enter>
+nnoremap <silent><C-S-Left> <C-T>
+inoremap <silent><C-S-Right> <C-o>:call CscopeCtagsSearch(expand("<cword>"))<Enter>
+inoremap <silent><C-S-Left> <C-o><C-T>
+vnoremap <silent><C-S-Right> <Esc>:call CscopeCtagsSearch(<SID>get_visual_selection())<Enter>
+vnoremap <silent><C-S-Left> <Esc><C-T><Enter>
 
 
 " when .vimrc is edited, reload it
@@ -2649,7 +2765,7 @@ endfunction
 " s:QuitIfOnlyWindow() {{{2
 function! s:QuitIfOnlyWindow() abort
     let l:buftype = getbufvar(winbufnr(winnr()), "&buftype")
-    if l:buftype != "quickfix" && l:buftype != "help"
+    if s:noquiting == 1 || l:buftype != "quickfix" && l:buftype != "help"
         return
     endif
 
@@ -2855,7 +2971,7 @@ function! LoadCrashBacktrace(symbol_file, ...)
         execute "redraw!"
     else
         echohl WarningMsg
-            echomsg "Symbol file " . a:symbol_file . " is not existing/not readable"
+        echomsg "Symbol file " . a:symbol_file . " is not existing/not readable"
         echohl None
     endif
 endfunction
@@ -3010,8 +3126,53 @@ command! -nargs=+ -complete=shellcmd RunBackgroundCommand call RunBackgroundComm
 " endfunction
 "
 " map <leader>e :call ExpandCMacro()<CR>
+"
+" function! ExpandCMacro2()
+"     "get current info
+"     let l:macro_file_name = "__macroexpand__" . tabpagenr()
+"     let l:file_row = line(".")
+"     let l:file_name = expand("%")
+"     let l:tmp_file = expand("%:h") . "/." . expand("%:t:r") . "." . expand("%:e")
+"     let l:preprocessed_file = "/tmp" . "/" . expand("$USER") . "." .  expand("$RANDOM") . "." . l:macro_file_name
+"     silent! execute "w! " . l:tmp_file
+"     "execute 'match Search /\%'.line('.').'l/'
+"     silent! execute "!code_expand_macro.sh " . l:tmp_file . " " . l:file_row . " " . l:preprocessed_file
+"     "execute 'match none'
+"     silent! execute "!rm -f " . l:tmp_file
+"     "read result into tiny window
+"     "echomsg "done"
+"     silent! execute ":pedit " . l:preprocessed_file
+"     "store syntax to set the same for preview
+"     let l:syntax = &syntax
+"     "recalculate file_window
+"     let l:file_window = bufwinnr("%")
+"     "echomsg "win:" . l:file_window
+"     silent! execute "wincmd P"
+"     "set no modifiable for preview
+"     setlocal nomodifiable
+"     let &syntax=l:syntax
+"     "resize window
+"     let l:expand_lines = line('$')
+"     let l:winheight = winheight('%')
+"     if l:expand_lines < l:winheight
+"         execute "resize " . l:expand_lines
+"     elseif l:expand_lines > l:winheight
+"         if l:expand_lines > &previewheight
+"             let l:expand_lines = &previewheight
+"         endif
+"         execute "resize " . l:expand_lines
+"     endif
+"     "return to origin place
+"     redraw
+"     silent! execute l:file_window . "wincmd w"
+"     "highlight origin line
+"     "Todo: add slash escapes (make it work - works only after searching was
+"     "already used at least once in current buffer/vim ?
+"     "let @/ = "\\V" . getline('.')
+"     redraw!
+" endfunction
 
-function! ExpandCMacroAsyncCodeExpandMacroCommandClose(channel)
+function! ExpandCMacroAsyncCommandClose(channel)
     """" Read the output from the command into the quickfix window
     """execute "cfile! " . g:backgroundCommandOutput
     """" Open the quickfix window
@@ -3074,7 +3235,7 @@ function! ExpandCMacroAsync()
         echomsg 'Async expand C macro requires VIM version 8 or higher (running sync version)'
         let g:backgroundCommandOutput = 1
         silent! execute "!" . l:async_command
-        call ExpandCMacroAsyncCodeExpandMacroCommandClose(0)
+        call ExpandCMacroAsyncCommandClose(0)
         redraw!
         return
     endif
@@ -3087,61 +3248,54 @@ function! ExpandCMacroAsync()
         " Notice that we're only capturing out, and not err here. This is because, for some reason, the callback
         " will not actually get hit if we write err out to the same file. Not sure if I'm doing this wrong or?
         "let g:backgroundCommandOutput = tempname()
-        "call job_start(l:async_command, {'close_cb': 'ExpandCMacroAsyncCodeExpandMacroCommandClose', 'out_io': 'file', 'out_name': g:backgroundCommandOutput})
+        "call job_start(l:async_command, {'close_cb':
+        "'ExpandCMacroAsyncCommandClose', 'out_io': 'file', 'out_name': g:backgroundCommandOutput})
         let g:backgroundCommandOutput = 1
         "echo "async: " . l:async_command
-        call job_start(l:async_command, {'close_cb': 'ExpandCMacroAsyncCodeExpandMacroCommandClose'})
+        call job_start(l:async_command, {'close_cb': 'ExpandCMacroAsyncCommandClose'})
     endif
-endfunction
-
-function! ExpandCMacro2()
-    "get current info
-    let l:macro_file_name = "__macroexpand__" . tabpagenr()
-    let l:file_row = line(".")
-    let l:file_name = expand("%")
-    let l:tmp_file = expand("%:h") . "/." . expand("%:t:r") . "." . expand("%:e")
-    let l:preprocessed_file = "/tmp" . "/" . expand("$USER") . "." .  expand("$RANDOM") . "." . l:macro_file_name
-    silent! execute "w! " . l:tmp_file
-    "execute 'match Search /\%'.line('.').'l/'
-    silent! execute "!code_expand_macro.sh " . l:tmp_file . " " . l:file_row . " " . l:preprocessed_file
-    "execute 'match none'
-    silent! execute "!rm -f " . l:tmp_file
-    "read result into tiny window
-    "echomsg "done"
-    silent! execute ":pedit " . l:preprocessed_file
-    "store syntax to set the same for preview
-    let l:syntax = &syntax
-    "recalculate file_window
-    let l:file_window = bufwinnr("%")
-    "echomsg "win:" . l:file_window
-    silent! execute "wincmd P"
-    "set no modifiable for preview
-    setlocal nomodifiable
-    let &syntax=l:syntax
-    "resize window
-    let l:expand_lines = line('$')
-    let l:winheight = winheight('%')
-    if l:expand_lines < l:winheight
-        execute "resize " . l:expand_lines
-    elseif l:expand_lines > l:winheight
-        if l:expand_lines > &previewheight
-            let l:expand_lines = &previewheight
-        endif
-        execute "resize " . l:expand_lines
-    endif
-    "return to origin place
-    redraw
-    silent! execute l:file_window . "wincmd w"
-    "highlight origin line
-    "Todo: add slash escapes (make it work - works only after searching was
-    "already used at least once in current buffer/vim ?
-    "let @/ = "\\V" . getline('.')
-    redraw!
 endfunction
 
 nmap <F4> :call ExpandCMacroAsync()<Enter>
 imap <F4> <C-o>:call ExpandCMacroAsync()<Enter>
 vmap <F4> <Esc>:call ExpandCMacroAsync()<Enter>gv
+
+function! RefreshTagsAsyncCommandClose(channel)
+    if g:refreshTagsCommandVar == "mibupdate"
+        let &l:enc=&l:enc
+    else
+        cs reset
+    endif
+    echo 'Finished refresh tags in background'
+    unlet g:refreshTagsCommandVar
+endfunction
+
+function! RefreshTagsAsync(subcommand)
+    let l:async_command = "sr_cscope.sh " . a:subcommand
+    " Make sure we're running VIM version 8 or higher.
+    if v:version < 800
+        echomsg 'Async refresh tags requires VIM version 8 or higher (running sync version)'
+        let g:refreshTagsCommandVar = a:subcommand
+        silent! execute "!" . l:async_command
+        call RefreshTagsAsyncCommandClose(0)
+        redraw!
+        return
+    endif
+
+    if exists('g:refreshTagsCommandVar')
+        echo 'Already running refresh tags in background'
+    else
+        echo 'Running refresh tags in background'
+        " Launch the job.
+        " Notice that we're only capturing out, and not err here. This is because, for some reason, the callback
+        " will not actually get hit if we write err out to the same file. Not sure if I'm doing this wrong or?
+        "let g:refreshTagsCommandOutput = tempname()
+        "call job_start(l:async_command, {'close_cb': 'RefreshTagsAsyncCommandClose', 'out_io': 'file', 'out_name': g:refreshTagsCommandOutput})
+        let g:refreshTagsCommandVar = a:subcommand
+        "echo "async: " . l:async_command
+        call job_start(l:async_command, {'close_cb': 'RefreshTagsAsyncCommandClose'})
+    endif
+endfunction
 
 " =========================================
 " = Project/Versioning system integration =
@@ -3184,15 +3338,15 @@ if g:PROJECT_name == "SR"
     " ,T to show customer config and state .yang trees
     map <Leader>T :call ToggleNokiaYangTreeWindows("")<CR>
 
-    nmap <silent><F1> :execute "!sr_cscope.sh update"<CR> :silent cs reset<CR>
-    imap <silent><F1> <C-o>:execute "!sr_cscope.sh update"<CR> <C-o>:silent cs reset<CR>
-    vmap <silent><F1> <Esc>:execute "!sr_cscope.sh update"<CR> :silent cs reset<CR>gv
+    nmap <silent><F1> :call RefreshTagsAsync("update")<CR>
+    imap <silent><F1> <C-o>:call RefreshTagsAsync("update")<CR>
+    vmap <silent><F1> <Esc>:call RefreshTagsAsync("update")<CR>gv
 
     " TODO AKO should iterate over all local buffers and run refresh l:enc
     " (otherwise other windows will not have spell check enabled)
-    nmap <S-F1> :execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>
-    imap <S-F1> <C-o>:execute "!sr_cscope.sh mibupdate"<CR> <C-o>:let &l:enc=&l:enc<CR>
-    vmap <S-F1> <Esc>:execute "!sr_cscope.sh mibupdate"<CR> :let &l:enc=&l:enc<CR>gv
+    nmap <silent><S-F1> :call RefreshTagsAsync("mibupdate")<CR>
+    imap <silent><S-F1> <C-o>:call RefreshTagsAsync("mibupdate")<CR>
+    vmap <silent><S-F1> <Esc>:call RefreshTagsAsync("mibupdate")<CR>gv
 else "other projects
     let s:project_specific_path = ""
 
