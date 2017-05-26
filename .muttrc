@@ -258,7 +258,7 @@ set editor = "vim -X -c 'normal gg' -c 'if nextnonblank(1) == 1 | normal O' -c '
 # bind attach <return> view-mailcap # View attachments properly.
 
 #create folder ~/.cache/mutt in filesystem (or pick another folder for temporary html attachment storage)
-macro attach 'V' "<pipe-entry>cat >~/.cache/mutt/mail.html && DISPLAY=`cat ~/.display_variable` $BROWSER ~/.cache/mutt/mail.html && rm ~/.cache/mutt/mail.html<enter>"
+macro attach 'V' "<pipe-entry>cat >~/.cache/mutt/mail.html && ~/.mutt/open_in_browser.sh ~/.cache/mutt/mail.html && rm ~/.cache/mutt/mail.html<enter>"
 
 
 # Colors --------------------------------
