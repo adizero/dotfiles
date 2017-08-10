@@ -2,26 +2,29 @@ if &compatible | set nocompatible | endif " Avoid side effects if `nocp` already
 scriptencoding utf-8
 
 "Xxx: this needs .term_detect script support in shell
-let s:term_program=expand("$TERM_PROGRAM")
-let s:term_version=expand("$TERM_VERSION")
-if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" ||
-            \ s:term_program == "xterm" || s:term_program == "Konsole" ||
-            \ s:term_program == "PuTTY" || s:term_program == "Cygwin"
-    let &term = "xterm"
-elseif s:term_program == "rxvt" || s:term_program == "urxvt"
-    let &term = "rxvt"
+let s:term_program=expand('$TERM_PROGRAM')
+let s:term_version=expand('$TERM_VERSION')
+if s:term_version ==# '$TERM_VERSION'
+    let s:term_version = 0
+endif
+if s:term_program ==# 'lxterminal' || s:term_program ==# 'gnome-terminal' ||
+            \ s:term_program ==# 'xterm' || s:term_program ==# 'Konsole' ||
+            \ s:term_program ==# 'PuTTY' || s:term_program ==# 'Cygwin'
+    let &term = 'xterm'
+elseif s:term_program ==# 'rxvt' || s:term_program ==# 'urxvt'
+    let &term = 'rxvt'
 else
     "Todo: this is a hack for screen-bce/screen.rxvt to behave as xterm/rxvt in Vim
-    if &term == "screen-bce" || &term == "screen"
-        if expand("$STY") == "$STY"
+    if &term ==# 'screen-bce' || &term ==# 'screen'
+        if expand('$STY') ==# '$STY'
             "ssh to devpc from inside of a screen (let's fake STY)
-            let $STY = "0.dev"
+            let $STY = '0.dev'
         endif
-        let &term = "xterm"
-    elseif &term == "screen.rxvt"
-        let &term = "rxvt"
-    elseif &term =~ "rxvt"  "for urxvt and 256 color variants
-        let &term = "rxvt"
+        let &term = 'xterm'
+    elseif &term ==# 'screen.rxvt'
+        let &term = 'rxvt'
+    elseif &term =~# 'rxvt'  "for urxvt and 256 color variants
+        let &term = 'rxvt'
     endif
 endif
 
@@ -29,8 +32,8 @@ command! -nargs=1 Silent
             \ | execute ':silent !'.<q-args>
             \ | execute ':redraw!'
 
-if has("win64") || has("win32") || has("win16")
-    let g:OS_name="windows"
+if has('win64') || has('win32') || has('win16')
+    let g:OS_name='windows'
 
     let g:OS_dir_separator = '\'
     let g:OS_cat_command = 'type'
@@ -39,7 +42,7 @@ if has("win64") || has("win32") || has("win16")
     let g:OS_ctags_command = 'c:\Apps\ctags57\ctags.exe'
     let g:OS_system_includes_dir = 'c:\Apps\Dev-Cpp\include'
 
-    let g:OS_vimrc = "_vimrc"
+    let g:OS_vimrc = '_vimrc'
 
     "windows vista uses $HOME\.vim path, xp uses $HOME\vimfiles path
     "so in xp we change it to $HOME\.vim and $HOME\.vim\after
@@ -62,38 +65,33 @@ else
     let g:OS_dir_separator = '/'
     let g:OS_cat_command = 'cat'
     let g:OS_mkdir_command = 'mkdir -p'
-    "let g:OS_ctags_command = '/opt/exp/bin/ctags'
-    "if filereadable(g:OS_ctags_command) == 0
-        let g:OS_ctags_command = 'ctags'
-    "endif
+    let g:OS_ctags_command = 'ctags'
     let g:OS_system_includes_dir = '/usr/include'
 
-    let g:OS_vimrc = ".vimrc"
+    let g:OS_vimrc = '.vimrc'
 
-    "
-    " What was the name that we were called as?
-    "
-    let vinvoke=fnamemodify($_, ":p")
-    let fullp=substitute(vinvoke, '^\(.*[/]\).*$', '\1', "")
     "
     " It's possible that $VIMRUNTIME does not exist.
     " Let's see if there is a directory vimshare below where we were started
     "
     if isdirectory($VIMRUNTIME) == 0
-        let vimshare=fullp . "vimshare"
-        if isdirectory(vimshare) == 1
-            let $VIMRUNTIME=vimshare . "/vim" . substitute(v:version, "50", "5", "")
-            let &helpfile=vimshare . "/vim" . substitute(v:version, "50", "5", "") . "/doc/help.txt"
+        "
+        " What was the name that we were called as?
+        "
+        let g:vimshare=substitute(fnamemodify($_, ':p'), '^\(.*[/]\).*$', '\1', '') . 'vimshare'
+        if isdirectory(g:vimshare) == 1
+            let $VIMRUNTIME=g:vimshare . '/vim' . substitute(v:version, '50', '5', '')
+            let &helpfile=g:vimshare . '/vim' . substitute(v:version, '50', '5', '') . '/doc/help.txt'
         endif
     endif
 endif
 
-if !has("gui_running")
-    if g:OS_name != "windows"
+if !has('gui_running')
+    if g:OS_name !=# 'windows'
         "set t_Cc=1
         "set t_pa=32767
 
-        if &term =~ "xterm"
+        if &term =~# 'xterm'
             "general termcap options
 
             "must go before first shell execute command (e.g. execute !ls) from .vimrc
@@ -188,8 +186,8 @@ if !has("gui_running")
             execute "set <F17>=\eOE"
 
             "Todo: specify correct version for old/new xterm bindings (for now 278 - Ubuntu 13.04 timeframe is the limit)
-            if s:term_program == "lxterminal" || s:term_program == "gnome-terminal" ||
-                        \ s:term_program == "xterm" && s:term_version < "278"
+            if s:term_program ==# 'lxterminal' || s:term_program ==# 'gnome-terminal' ||
+                        \ s:term_program ==# 'xterm' && s:term_version < 278
                 "old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
                 execute "set <xF1>=\eO1;*P"
                 execute "set <xF2>=\eO1;*Q"
@@ -221,10 +219,10 @@ if !has("gui_running")
             execute "set <Del>=\e[3;*~"
 
             "cleanup of Vim's internal duplicate bindings
-            execute "set <S-Home>="
-            execute "set <S-Left>="
-            execute "set <S-Right>="
-            execute "set <S-End>="
+            execute 'set <S-Home>='
+            execute 'set <S-Left>='
+            execute 'set <S-Right>='
+            execute 'set <S-End>='
 
             "newer xterm can do also right winmenu key (has no setting in Vim,
             " however something nonexistant on typical keyboard can be used - F13 for example)
@@ -245,7 +243,7 @@ if !has("gui_running")
             map <M-C-S-F18> <M-C-S-F19>
             map! <M-C-S-F18> <M-C-S-F19>
 
-        elseif &term =~ "rxvt"
+        elseif &term =~# 'rxvt'
             set t_Co=256 "override terminfo setting to enable 256 colors
             "rxvt (basic Fn are well covered in default Vim mappings)
             " first two are fixed in rxvt - S-F1 == F11 and S-F2 == F12
@@ -325,7 +323,7 @@ if !has("gui_running")
 
         "undercurl as strikethrough (needs terminal support - no KiTTY/PuTTY does strikethrough):
         if v:version > 704 || (v:version == 704 && has('patch911'))
-            if expand("$STY") != "$STY"
+            if expand('$STY') !=# '$STY'
                 let &t_Cs = "\eP\e[9m\e\\"
                 let &t_Ce = "\eP\e[29m\e\\"
             else
@@ -340,7 +338,7 @@ if !has("gui_running")
 
         "italic (italics is already enabled in wombat256 colorscheme)
         "needs escaping from screen
-        if expand("$STY") != "$STY"
+        if expand('$STY') !=# '$STY'
             let &t_ZH = "\eP\e[3m\e\\"
             let &t_ZR = "\eP\e[23m\e\\"
         else
@@ -374,57 +372,58 @@ if !has("gui_running")
     endif
 endif
 
-let g:color_scheme = ""
-if has("gui_running")
-    if g:OS_name == "windows"
+let g:color_scheme = ''
+if has('gui_running')
+    if g:OS_name ==# 'windows'
         "colorscheme zenburn
         let g:molokai_original = 1
-        let g:color_scheme = "molokai"
-        let g:airline_theme = "molokai"
+        let g:color_scheme = 'molokai'
+        let g:airline_theme = 'molokai'
     else
         "colorscheme desert
         if &t_Co == 256
-            let g:color_scheme = "wombat256mod"
+            let g:color_scheme = 'wombat256mod'
         else
-            let g:color_scheme = "wombat"
+            let g:color_scheme = 'wombat'
         endif
-        let g:airline_theme = "wombat"
+        let g:airline_theme = 'wombat'
     endif
 else
     "no GUI - console mode
-    if g:OS_name == "windows"
+    if g:OS_name ==# 'windows'
         "8-color terminal in windows only, zellner looks OK
-        let g:color_scheme = "zellner"
-        let g:airline_theme = "dark"
+        let g:color_scheme = 'zellner'
+        let g:airline_theme = 'dark'
     else
         if &t_Co == 256
-            let g:color_scheme = "wombat256mod"
+            let g:color_scheme = 'wombat256mod'
         else
-            let g:color_scheme = "wombat"
+            let g:color_scheme = 'wombat'
         endif
-        let g:airline_theme = "wombat"
+        let g:airline_theme = 'wombat'
     endif
 endif
 set background=dark
 hi clear
 
 "check vundle installation, if installed, then make use of it
-let vundle_readme=expand('~/.vim/bundle/Vundle.vim/README.md')
-if v:version >= 702 && filereadable(vundle_readme)
+let g:vundle_readme=expand('~/.vim/bundle/Vundle.vim/README.md')
+if v:version >= 702 && filereadable(g:vundle_readme)
 "---VUNDLE---
     filetype off                  " required
     "set the runtime path to include Vundle and initialize
-    set rtp+=~/.vim/bundle/Vundle.vim
-    exe ":call vundle#begin()"
+    set runtimepath+=~/.vim/bundle/Vundle.vim
+    exe ':call vundle#begin()'
     " alternatively, pass a path where Vundle should install plugins
     "call vundle#begin('~/some/path/here')
 
     " let Vundle manage Vundle, required
     Plugin 'gmarik/Vundle.vim'
 
-    Plugin 'scrooloose/syntastic'
+    "Plugin 'scrooloose/syntastic'
     Plugin 'w0rp/ale'
 
+    "Plugin 'vim-scripts/OmniCppComplete'  "too slow - fully replaced with YouCompleteMe
     Plugin 'Valloric/YouCompleteMe'
     Plugin 'starcraftman/vim-eclim'
     Plugin 'terryma/vim-multiple-cursors'
@@ -436,11 +435,12 @@ if v:version >= 702 && filereadable(vundle_readme)
     "Plugin 'ivan-cukic/vim-ctrlp-switcher'
 
     Plugin 'adizero/vim-togglecursor'
-    Plugin 'adizero/vim-clang-format'
+    "Plugin 'adizero/vim-clang-format'  "no longer needed - better implementation in function Code
     Plugin 'adizero/cscope_maps.vim'
 
     Plugin 'vim-scripts/vcscommand.vim'
     Plugin 'mikeage/ccase.vim'
+    "Plugin 'chrisbra/vim-diff-enhanced'
 
     Plugin 'benjifisher/matchit.zip'
     "Plugin 'Firef0x/matchit'
@@ -482,7 +482,7 @@ if v:version >= 702 && filereadable(vundle_readme)
     "Plugin 'vim-scripts/taglist.vim'
     Plugin 'majutsushi/tagbar'
 
-    Plugin 'mbbill/code_complete'
+    Plugin 'mbbill/code_complete'  "<Ctrl-B> function args completion and snippets
     Plugin 'mbbill/undotree'
 
     Plugin 'rking/ag.vim'
@@ -505,7 +505,7 @@ if v:version >= 702 && filereadable(vundle_readme)
     Plugin 'jreybert/vim-largefile'
 
     " All of your Plugins must be added before the following line
-    exe ":call vundle#end()"
+    exe ':call vundle#end()'
     filetype plugin indent on    " required
 "---VUNDLE---
 else
@@ -513,29 +513,33 @@ else
 endif
 
 "Todo: enable Eclim (by removing following line)
-let g:EclimDisabled = "defined"
+let g:EclimDisabled = 'defined'
 
 if v:version < 704
     let g:loaded_youcompleteme = 1 "too old Vim => disable YouCompleteMe
     let g:loaded_numbers = 1
 endif
 
+"let g:ycm_python_binary_path = 'python2.7'  "used only for python completers - not ycmd server
+let g:ycm_server_python_interpreter = expand('$HOME/toolchains/python2712/bin/python')
+
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 "Do not ask when starting vim
 let g:ycm_confirm_extra_conf = 0
 "set tags += $HOME/tmp/ycm.tags
 function! YCM_tagfiles()
-    if expand("$CSCOPE_FILES_DIR") != "$CSCOPE_FILES_DIR"
-        return [expand("$CSCOPE_FILES_DIR") . '/ycm.tags']
+    if expand('$CSCOPE_FILES_DIR') !=# '$CSCOPE_FILES_DIR'
+        return [expand('$CSCOPE_FILES_DIR') . '/ycm.tags']
     else
-        return [expand("$HOME") . '/tmp/ycm.tags']
+        return [expand('$HOME') . '/tmp/ycm.tags']
     endif
 endfunction
 let g:ycm_collect_identifiers_from_tags_files = 1
 
 let g:ycm_add_preview_to_completeopt = 0
 let g:ycm_key_invoke_completion = '<C-Space>'
-let g:ycm_cache_omnifunc = 0  "takes simply too much memory in big projects (1GB of sources)
+let g:ycm_key_detailed_diagnostics = '<Leader><Leader>?'
+let g:ycm_cache_omnifunc = 1  "takes simply too much memory in big projects (1GB of sources)
 
 let g:ycm_always_populate_location_list = 1
 
@@ -581,31 +585,32 @@ function! Multiple_cursors_after()
     endif
 endfunction
 
-" make YCM completion via ycm_key_invoke_completion work only after . or ->
-" otherwise it is unusably slow (and breaks YCM altogether on huge source bases)
-function! YcmConditionalComplete()
-    "check if after . or ->, then allow, otherwise ignore
-    "check filetype (ft) to prevent for c,c++ only, otherwise allow everywhere
-    "(heavy search can be still cancelled by CTRL+C)
-    if &ft == "c" || &ft == "cpp"
-        let l:start = col('.')-3
-        if l:start < 0
-            let l:start = 0
-        endif
-        let l:part = strpart( getline('.'), l:start, col('.')-1 )
-        if l:part =~ '.\.$' || part =~ '->$' || part =~ '::$'
-            return "\<C-X>\<C-O>\<C-P>"
-        else
-            return ""
-        endif
-    else
-        return "\<C-X>\<C-O>\<C-P>"
-        "return ""
-    endif
-endfunction
-
-"inoremap g:ycm_key_invoke_completion <C-r>=YcmConditionalComplete()<CR>
-exe "inoremap ".g:ycm_key_invoke_completion." <C-r>=YcmConditionalComplete()<CR>"
+"""" this does not really trigger YCM, but omni cpp completion instead
+"""" make YCM completion via ycm_key_invoke_completion work only after . or ->
+"""" otherwise it is unusably slow (and breaks YCM altogether on huge source bases)
+"""function! OmniConditionalComplete()
+"""    "check if after . or ->, then allow, otherwise ignore
+"""    "check filetype (ft) to prevent for c,c++ only, otherwise allow everywhere
+"""    "(heavy search can be still cancelled by CTRL+C)
+"""    if &ft == "c" || &ft == "cpp"
+"""        let l:start = col('.')-3
+"""        if l:start < 0
+"""            let l:start = 0
+"""        endif
+"""        let l:part = strpart( getline('.'), l:start, col('.')-1 )
+"""        if l:part =~ '.\.$' || part =~ '->$' || part =~ '::$'
+"""            return "\<C-X>\<C-O>\<C-P>"
+"""        else
+"""            return ""
+"""        endif
+"""    else
+"""        return "\<C-X>\<C-O>\<C-P>"
+"""        "return ""
+"""    endif
+"""endfunction
+"""
+""""inoremap g:ycm_key_invoke_completion <C-r>=OmniConditionalComplete()<CR>
+"""exe "inoremap ".g:ycm_key_invoke_completion." <C-r>=OmniConditionalComplete()<CR>"
 
 let s:home_base_path=$HOME
 
@@ -622,12 +627,14 @@ let &runtimepath=substitute(&runtimepath, '[\/]', g:OS_dir_separator, 'g')
 let g:user_sessions_home = substitute($HOME, '[\/]$', '', '') . g:OS_dir_separator . '.vim' . g:OS_dir_separator . 'sessions'
 let g:user_session_filename = 'session.vim'
 
-silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_sessions_home
-
 function! SaveSession()
     if exists(':SSave')
         execute 'SSave'
     else
+        if isdirectory(g:user_sessions_home) == 0
+            "silent! execute '!' . g:OS_mkdir_command . ' ' . g:user_sessions_home
+            call system(g:OS_mkdir_command . ' ' . g:user_sessions_home)
+        endif
         execute 'mksession! ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
     endif
 endfunction
@@ -639,13 +646,21 @@ function! LoadSession()
             tabfirst
             tabonly
         endif
+        if isdirectory(g:user_sessions_home) == 0
+            call system(g:OS_mkdir_command . ' ' . g:user_sessions_home)
+        endif
         execute 'source ' . g:user_sessions_home . g:OS_dir_separator . g:user_session_filename
     endif
 endfunction
 
 " open files with the cursor at the last remembered position
+" commit filetype buffers are ignored
+" quickfix windows are ignored also (needed for ALE async lopen with linter errors during select-mode anomaly)
 if has('autocmd')
-    autocmd! BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal g`\"" | endif
+    autocmd! BufReadPost *
+                \ if line("'\"") > 0 && line("'\"") <= line("$") && &ft !~# 'commit' && &ft !~# 'qf'
+                \ |   execute "normal! g`\""
+                \ | endif
 endif
 
 set helplang=en
@@ -667,18 +682,18 @@ set incsearch       " do incremental searching
 set tabstop=4
 
 set number              " line numbers
-if exists("+relativenumber")
+if exists('+relativenumber')
     set relativenumber      " relative line numbers
 endif
 set cindent
 set autoindent
-if has("mouse")
+if has('mouse')
     set mouse=a             " use mouse in xterm to scroll
 endif
 set scrolloff=5         " 5 lines before and after the current line when scrolling - overriden later
 set ignorecase          " ignore case
 set smartcase           " but don't ignore it, when search string contains uppercase letters
-set hid                 " allow switching buffers, which have unsaved changes
+set hidden              " allow switching buffers, which have unsaved changes
 set shiftwidth=4        " 4 characters for indenting
 set showmatch           " showmatch: Show the matching bracket for the last ')'?
 
@@ -690,6 +705,9 @@ set hlsearch
 
 set nostartofline
 "set shiftround
+
+set splitright
+set splitbelow
 
 "set autoread
 "set display+=uhex
@@ -705,7 +723,7 @@ if v:version > 704 || (v:version == 704 && has('patch1027'))
 endif
 set complete=.,w,b,u,t,i,kspell
 
-if has("wildmenu")
+if has('wildmenu')
     set wildmenu
 endif
 
@@ -713,21 +731,14 @@ endif
 set wildmode=full
 
 " set side scrolling
-set siso=8
-set ss=1
+set sidescrolloff=8
+set sidescroll=1
 
 "convenience mappings
 nnoremap Q <nop>
 "if has("user_commands")
 "    command! -bang -nargs=? -complete=file E e<bang> <args>
-"    command! -bang -nargs=? -complete=file W w<bang> <args>
-"    command! -bang -nargs=? -complete=file Wq wq<bang> <args>
-"    command! -bang -nargs=? -complete=file WQ wq<bang> <args>
 "    command! -bang Wa wa<bang>
-"    command! -bang WA wa<bang>
-"    command! -bang Q q<bang>
-"    command! -bang QA qa<bang>
-"    command! -bang Qa qa<bang>
 "endif
 cabbrev E <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'e' : 'E')<CR>
 cabbrev Wq <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'wq' : 'Wq')<CR>
@@ -758,13 +769,11 @@ endif
 "endfunction
 "
 "xnoremap <silent> gQ :<C-u>silent call Align()<CR>
-"map gQ :pyf ~/toolchains/llvm/share/clang/clang-format.py<cr>
-map gQ :pyf ~/bin/clang-format-from-vim.py<cr>
 
 "needs to be after syn on (syntax on)
 let g:colors_name = g:color_scheme
 try
-    exec "colorscheme " . g:color_scheme
+    exec 'colorscheme ' . g:color_scheme
 catch /:E185:/
     " E185 colorscheme not found
     " just ignore
@@ -772,16 +781,16 @@ endtry
 let g:color_scheme_loaded = 1
 
 "refresh airline after colorscheme load, if already loaded
-if v:version >= 700 && exists("#airline")
-    exe ":call airline#load_theme()"
+if v:version >= 700 && exists('#airline')
+    exe ':call airline#load_theme()'
 else
     set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [ASCII=\%03.3b]\[HEX=\%02.2B]\ [POS=%04l,%04v][%p%%]\ [LEN=%L]
 endif
 
-if has("cscope")
+if has('cscope')
     set cscopetag
-    set csto=1
-    set cspc=0
+    set cscopetagorder=1
+    set cscopepathcomp=0
     set cscopequickfix=s-,c-,d-,i-,t-,e-,f0,g0      " cscope will fill results into quickfix window (possible to open via :copen command, move with <F11><F12>)
     if v:version > 704 || (v:version == 704 && has('patch2033'))
         set cscopequickfix+=a-
@@ -820,14 +829,33 @@ cabbrev w!! <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'SudoWrite' : 'w!!')<CR
 " do not move cursor during yank in visual mode
 vnoremap y ygv<Esc>
 
+function! g:StoreSelectionMode()
+    let l:reselect = 0
+    if mode() ==? 'v' || mode() ==# "\<c-v>"
+        let l:reselect = 1
+    elseif mode() ==? 's' || mode() ==# "\<c-s>"
+        let l:reselect = 2
+    endif
+    return l:reselect
+endfunction
+
+function! g:RestoreSelectionMode(reselect)
+    if a:reselect > 0
+        execute 'normal! gv'
+        if a:reselect > 1
+            execute "normal! \<c-g>"
+        endif
+    endif
+endfunction
+
 function! s:get_visual_selection()
     " Why is this not a built-in Vim script function?!
-    let [lnum1, col1] = getpos("'<")[1:2]
-    let [lnum2, col2] = getpos("'>")[1:2]
-    let lines = getline(lnum1, lnum2)
-    let lines[-1] = lines[-1][: col2 - (&selection == 'inclusive' ? 1 : 2)]
-    let lines[0] = lines[0][col1 - 1:]
-    return join(lines, "\n")
+    let [l:lnum1, l:col1] = getpos("'<")[1:2]
+    let [l:lnum2, l:col2] = getpos("'>")[1:2]
+    let l:lines = getline(l:lnum1, l:lnum2)
+    let l:lines[-1] = l:lines[-1][: l:col2 - (&selection ==# 'inclusive' ? 1 : 2)]
+    let l:lines[0] = l:lines[0][l:col1 - 1:]
+    return join(l:lines, "\n")
 endfunction
 
 " Yank selected text as an escaped search-pattern
@@ -1017,7 +1045,7 @@ if v:version >= 700
 
     " add return to last tab page movement to g<Tab> keybinding
     if has('autocmd')
-        if !exists("g:lasttab")
+        if !exists('g:lasttab')
             let g:lasttab = 1
         endif
         nnoremap g<Tab> :exe "tabn ".g:lasttab<CR>
@@ -1064,7 +1092,7 @@ endif
 " =          Folding         =
 " ============================
 if v:version > 600
-    if has("folding")
+    if has('folding')
         set nofoldenable
         " superslow method of folding from VIM 7.2.274a
         if v:version < 702
@@ -1120,6 +1148,10 @@ nnoremap g<Left> <C-w><Left>
 nnoremap g<Right> <C-w><Right>
 nnoremap g<Up> <C-w><Up>
 nnoremap g<Down> <C-w><Down>
+xnoremap g<Left> <C-w><Left>
+xnoremap g<Right> <C-w><Right>
+xnoremap g<Up> <C-w><Up>
+xnoremap g<Down> <C-w><Down>
 
 " ======================================
 " =Windows editors selection short-cuts=
@@ -1166,12 +1198,12 @@ inoremap <C-Del> <C-o>de
 " =Visual mode operations=
 " ========================
 " indentation with Tab/S-Tab on selected blocks
-vnoremap <Tab> >gv
-vnoremap <S-Tab> <LT>gv
+xnoremap <Tab> >gv
+xnoremap <S-Tab> <LT>gv
 
 " indentation by one space with Space/Backspace on selected blocks
-vnoremap <Backspace> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv<<Esc>:let&sw=origsw<CR>gv
-vnoremap <Space> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv><Esc>:let&sw=origsw<CR>gv
+xnoremap <Backspace> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv<<Esc>:let&sw=origsw<CR>gv
+xnoremap <Space> <Esc>:let origsw=&sw<CR>:let &sw=1<CR>gv><Esc>:let&sw=origsw<CR>gv
 
 " move selected lines
 vnoremap <C-j> :m '>+1<CR>gv=gv
@@ -1239,7 +1271,7 @@ function! MySynonymLookup(mode)
             endif
         endif
 
-        call add(l:display_synonyms, l:syn_index . " \"" . synonym . "\"")
+        call add(l:display_synonyms, l:syn_index . " \"" . l:synonym . "\"")
         let l:syn_index = l:syn_index + 1
     endwhile
 
@@ -1410,153 +1442,20 @@ function! SophHelp()
     endif
 endfunction
 
-function! Move_to_column_with_match(str)
-    let saved_cursor = getcurpos()
-    " echomsg "saved_cursor: " . saved_cursor[1] . ":" . saved_cursor[2]
-    call cursor(saved_cursor[1], 1)
-    " echomsg "searched str : " . a:str
-    "turn on ignore case search \\c
-    let l:found_line = search(a:str . "\\c", "cWz")
-    " echomsg "found line : " . l:found_line
-    if l:found_line == saved_cursor[1]
-        "nothing to do - match inside current line was found (cursor should be
-        "at the start of the match
-    else
-        "no match inside line - go back to previous position
-        call setpos('.', saved_cursor)
-    endif
-endfunction
-
-" resolves even with :: in the cWORD, but without following (), ->, ., , e.g. DbgwController::getPort vs. DbgwController::getPort()
-function! s:get_tag_internal(str)
-        "Func(...)
-        "let args=a:000
-        "for a in args
-        "   echo a
-        "endfor
-        "first make sure we do not do double work (with cst all :tag commands
-        "use also cscope - order depends on differnt variable: csto)
-        let l:str = a:str
-
-        let l:saved_cst = &cst
-        set nocst
-        for i in [0,1]
-            if &csto == i
-                let search_cmd="cscope find g "
-            else
-                let search_cmd="tag "
-            endif
-
-            "escape dash (-) symbols (tag is interpreting them as regexp options)
-            ""let l:str=substitute(l:str, '[-]', '\-', 'ga')
-            if l:str != ""
-                try
-                    "echomsg search_cmd.l:str
-                    exec search_cmd.l:str
-                    call Move_to_column_with_match(l:str)
-                    let &cst = l:saved_cst
-                    return 0  " search no more, result found
-                catch /:E325:/
-                    " ATTENTION when opening file
-                    call Move_to_column_with_match(l:str)
-                    let &cst = l:saved_cst
-                    return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
-                    " we will continue with cWORD and cword searches
-                endtry
-            endif
-
-            let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
-            "escape dash (-) symbols (tag is interpreting them as regexp options)
-            ""let l:cww=substitute(l:cww, '[-]', '\-', 'ga')
-            if l:cww != l:str
-                try
-                    "echomsg search_cmd.l:cww
-                    exec search_cmd.l:cww
-                    call Move_to_column_with_match(l:cww)
-                    let &cst = l:saved_cst
-                    return 0  " search no more, result found
-                catch /:E325:/
-                    " ATTENTION when opening file
-                    call Move_to_column_with_match(l:str)
-                    let &cst = l:saved_cst
-                    return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
-                    " E562 bad usage for cstag - obviously cWORD contains special characters
-                    " E567 no cscope connections
-                    " E257 cstag tag not found
-                    " E259 no matches found for cscope query
-                    " E426 tag not found
-                    " E433 no tags file
-                    " E499 Empty file name for '%' or '#', only works with :p:h
-                    " E560 Usage cs[cope] find a|c|d|e|f|g|i|s|t name (also uppercase letters)
-                endtry
-            endif
-
-            let l:cww2=expand("<cword>")
-            "escape dash (-) symbols (tag is interpreting them as regexp options)
-            ""let l:cww2=substitute(l:cww2, '[-]', '\-', 'ga')
-            if l:cww2 != l:str && l:cww2 != l:cww
-                try
-                    "echomsg search_cmd.l:cww2
-                    exec search_cmd.l:cww2
-                    call Move_to_column_with_match(l:cww2)
-                    let &cst = l:saved_cst
-                    return 0  " search no more, result found
-                catch /:E325:/
-                    " ATTENTION when opening file
-                    call Move_to_column_with_match(l:str)
-                    let &cst = l:saved_cst
-                    return 0
-                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
-                    " not found
-                endtry
-            endif
-        endfor
-        echohl WarningMsg
-        if l:str != ""
-            echo "Sorry, no tag generated for ".l:str." or ".expand("<cWORD>")." or ".expand("<cword>")
-        else
-            echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
-        endif
-        echohl None
-        let &cst = l:saved_cst
-endfunction
-
-function! SophTag(str)
-    if v:version > 704 || (v:version == 704 && has('patch957'))
-        let tagcase_saved=&tagcase
-        let &tagcase="match"
-    endif
-    try
-        " echomsg "searched str [" . a:str . "]"
-        call <SID>get_tag_internal(a:str)
-    finally
-        if v:version > 704 || (v:version == 704 && has('patch957'))
-            let &tagcase=tagcase_saved
-            unlet tagcase_saved
-        endif
-    endtry
-endfunction
-
-nmap <silent><C-]> :call SophTag("")<Enter>
-imap <silent><C-]> <C-o>:call SophTag("")<Enter>
-vmap <silent><C-]> <Esc>:call SophTag(<SID>get_visual_selection())<Enter>gv
-
 if v:version >= 703
-    nmap <S-F7> :UndotreeToggle<Enter>
-    imap <S-F7> <C-o>:UndotreeToggle<Enter>
-    vmap <S-F7> <Esc>:UndotreeToggle<Enter>gv
+    nmap <silent><S-F7> :UndotreeToggle<Enter>
+    imap <silent><S-F7> <C-o>:UndotreeToggle<Enter>
+    vmap <silent><S-F7> <Esc>:UndotreeToggle<Enter>gv
 else
-    nmap <S-F7> :call SophHelp()<Enter>
-    imap <S-F7> <C-o>:call SophHelp()<Enter>
-    vmap <S-F7> <Esc>:call SophHelp()<Enter>gv
+    nmap <silent><S-F7> :call SophHelp()<Enter>
+    imap <silent><S-F7> <C-o>:call SophHelp()<Enter>
+    vmap <silent><S-F7> <Esc>:call SophHelp()<Enter>gv
 endif
 
 " F2 to save
-nmap <F2> :w<Enter>
-imap <F2> <C-o>:w<Enter>
-vmap <F2> <Esc>:w<Enter>gv
+nmap <silent><F2> :w<Enter>
+imap <silent><F2> <C-o>:w<Enter>
+vmap <silent><F2> <Esc>:w<Enter>gv
 
 " F3 to toggle source/header
 let g:header_source_flip_search_path = substitute('.,**,../include/**,../src/**,' . expand("$ROOT") . '/panos,', '[\/]', g:OS_dir_separator, 'g')
@@ -1608,7 +1507,7 @@ function! Header_switch()
     endif
 endfunction
 
-map <silent> <F3> :call Header_switch()<CR>
+map <silent><F3> :call Header_switch()<CR>
 "imap <F3> <C-o>:call Mosh_Flip_Ext()<CR>
 "vmap <F3> <Esc>:call Mosh_Flip_Ext()<CR>gv
 
@@ -1622,31 +1521,222 @@ function! Fxxd()
     endif
 endfunction
 
-nmap <S-F4> :call Fxxd()<Enter>
-imap <S-F4> <C-o>:call Fxxd()<Enter>
-vmap <S-F4> <Esc>:call Fxxd()<Enter>gv
+nmap <silent><S-F4> :call Fxxd()<Enter>
+imap <silent><S-F4> <C-o>:call Fxxd()<Enter>
+vmap <silent><S-F4> <Esc>:call Fxxd()<Enter>gv
 
-function! MyDiff()
-    let opt = ""
-    if &diffopt =~ "icase"
-        let opt = opt . "-i "
+function! s:ConvertToNormalDiff(list) "{{{2
+  " Convert unified diff into normal diff
+  let result=[]
+  let start=1
+  let hunk_start = '^@@ -\(\d\+\)\%(,\(\d\+\)\)\? +\(\d\+\)\%(,\(\d\+\)\)\? @@.*$'
+  let last = ''
+  for line in a:list
+    if start && line !~# '^@@'
+      continue
+    else
+      let start=0
     endif
-    if &diffopt =~ "iwhite"
-        "let opt = opt . "-b "
-        let opt = opt . "-w "
+    if line =~? '^+'
+      if last is# 'old'
+        call add(result, '---')
+        let last='new'
+      endif
+      call add(result, substitute(line, '^+', '> ', ''))
+    elseif line =~? '^-'
+      let last='old'
+      call add(result, substitute(line, '^-', '< ', ''))
+    elseif line =~? '^ ' " skip context lines
+      continue
+    elseif line =~? hunk_start
+      let list = matchlist(line, hunk_start)
+      let old_start = list[1] + 0
+      let old_len   = list[2] + 0
+      let new_start = list[3] + 0
+      let new_len   = list[4] + 0
+      let action    = 'c'
+      let before_end= ''
+      let after_end = ''
+      let last = ''
+
+      if list[2] is# '0'
+        let action = 'a'
+      elseif list[4] is# '0'
+        let action = 'd'
+      endif
+
+      if (old_len)
+        let before_end = printf(',%s', old_start + old_len - 1)
+      endif
+      if (new_len)
+        let after_end  = printf(',%s', new_start + new_len - 1)
+      endif
+      call add(result, old_start.before_end.action.new_start.after_end)
     endif
-    if exists("t:diffoptions")
-        let opt = opt . t:diffoptions
-    endif
-    silent execute "!diff -a --binary " . opt . " " . v:fname_in . " " . v:fname_new . " > " . v:fname_out
-    "Note: redraw has problems with Vim compiled in tiny version (even though the function is not used)
-    execute "redraw!"
+  endfor
+  return result
 endfunction
-"ignore whitespace differences
-set diffopt=filler,context:6
-"almost the same as without setting diffexpr (but can be easily changed in the future)
-set diffexpr=MyDiff()  "produces some artifacts on command line after execution
 
+function! s:SysList(cmd)
+  if exists('*systemlist')
+    return systemlist(a:cmd)
+  endif
+  return split(system(a:cmd), '\n')
+endfunction
+
+"almost the same as without setting diffexpr (but can be easily changed in the future)
+"produces some artifacts on command line after execution
+function! MyDiff()
+    let l:diffargs = ''
+    if &diffopt =~# 'icase'
+        let l:diffargs = l:diffargs . '-i'
+    endif
+    if &diffopt =~# 'iwhite'
+        "let l:diffargs = l:diffargs . '-b'  "ignore whitespace change
+        let l:diffargs = l:diffargs . '-w'
+    endif
+    if exists('g:diffoptions')
+        if g:diffoptions !=# ''
+            let l:diffargs = l:diffargs . '-d'  "only minimal algorithm supported in basic diff
+        endif
+    endif
+    "silent execute '!diff -a --binary ' . l:diffargs . ' ' . v:fname_in . ' ' . v:fname_new . ' > ' . v:fname_out
+    call system('diff -a --binary ' . l:diffargs . ' ' . v:fname_in . ' ' .  v:fname_new . ' > ' . v:fname_out)
+endfunction
+
+" Note: this function is called twice during any diff operation in Vim (once to check validity with two one line files)
+function! GitDiff()
+    let l:diffargs = []
+    if &diffopt =~# 'iwhite'
+        call add(l:diffargs, '-w')
+    endif
+
+    if !exists('g:gitdiff_exists')
+        let g:gitdiff_exists = executable(g:diffexecutable)
+    endif
+
+    if g:gitdiff_exists
+        if g:diffoptions !=# ''
+            call add(l:diffargs, g:diffoptions)
+        endif
+        let l:diffcmd = g:diffexecutable . ' ' . g:difffixedargs . ' ' .  g:diffnoindex
+    else
+        if g:diffoptions !=# ''
+            call add(l:diffargs, '-d')  "minimal algorithm for basic linux diff
+        endif
+        let l:diffcmd = 'diff -a --binary'
+    endif
+
+    call add(l:diffargs, v:fname_in)
+    call add(l:diffargs, v:fname_new)
+
+    " echomsg l:diffcmd . ' ' . join(l:diffargs, ' ')
+
+    let l:difflist=s:SysList(l:diffcmd . ' ' . join(l:diffargs, ' '))
+
+    " if unified diff...
+    " do some processing here
+    if !empty(l:difflist) && l:difflist[0] !~# '\m\C^\%(\d\+\)\%(,\d\+\)\?[acd]\%(\d\+\)\%(,\d\+\)\?'
+        " transform into normal diff
+        let l:difflist=s:ConvertToNormalDiff(l:difflist)
+        call writefile(l:difflist, v:fname_out)
+    elseif empty(l:difflist)
+        call writefile([''], v:fname_out)
+        " it is too late to abort here - the split is already open (how to improve ?)
+        "echohl InfoMsg
+        "redraw! | echomsg 'There is no difference'
+        "echohl None
+        "diffoff!
+        "wincmd p
+        "wincmd q
+    else
+        call writefile(l:difflist, v:fname_out)
+    endif
+endfunction
+
+function! ToggleDiffWhitespace()
+    if &diffopt =~# 'iwhite'
+        set diffopt-=iwhite
+    let l:infomsg = 'diff mode changed to evaluate whitespace changes'
+    else
+        set diffopt+=iwhite
+        let l:infomsg = 'diff mode changed to ignore whitespace changes'
+    endif
+    execute "normal! zz"
+    execute "normal! \<c-e>"
+    execute "normal! \<c-y>"
+    " redraw!
+    echohl ModeMsg
+    echomsg l:infomsg
+    echohl None
+endfunction
+
+function! ToggleDiffOptions()
+    if !exists('g:gitdiff_exists')
+        let g:gitdiff_exists = executable(g:diffexecutable)
+    endif
+
+    if g:gitdiff_exists
+        if g:diffoptions ==# ''
+            let g:diffoptions = '--diff-algorithm=histogram --indent-heuristic'
+            let l:infomsg = 'diff mode changed to histogram with indent heuristic'
+        elseif g:diffoptions ==# '--diff-algorithm=histogram --indent-heuristic'
+            let g:diffoptions = '--diff-algorithm=histogram'
+            let l:infomsg = 'diff mode changed to histogram'
+        else
+            let g:diffoptions = ''
+            let l:infomsg = 'diff mode changed to basic myers algorithm'
+        endif
+    else
+        if g:diffoptions ==# ''
+            let g:diffoptions = '-d'
+            let l:infomsg = 'diff mode changed to minimal algorithm'
+        else
+            let g:diffoptions = ''
+            let l:infomsg = 'diff mode changed to basic myers algorithm'
+        endif
+    endif
+    diffupdate
+    execute "normal! zz"
+    execute "normal! \<c-e>"
+    execute "normal! \<c-y>"
+    if exists(':SignifyRefresh')
+        let g:signify_vcs_cmds['git'] = g:diffexecutable . ' ' . g:difffixedargs . ' ' . g:diffoptions . ' -- %f'
+        "call sy#util#refresh_windows()
+        execute 'SignifyRefresh'
+    endif
+    " redraw!
+    echohl ModeMsg
+    echomsg l:infomsg
+    echohl None
+endfunction
+
+function! ToggleWithinLineDiffCharAllLines()
+    if g:DiffModeSync == 0
+        let g:DiffModeSync = 1
+    else
+        let g:DiffModeSync = 0
+    endif
+    if &diff
+        execute "normal \<Plug>ToggleDiffCharAllLines"
+    endif
+    echohl ModeMsg
+    echomsg 'diff mode changed to ' . (g:DiffModeSync ? 'show' : 'hide') . ' exact character diffs within changed line'
+    echohl None
+endfunction
+
+" ignore whitespace differences is on by default (iwhite)
+set diffopt=filler,context:6,foldcolumn:0,vertical,iwhite
+" no character inside line diff by default (g:DiffModeSync)
+let g:DiffModeSync = 0
+let g:diffexecutable = 'git_2_13_3'
+let g:difffixedargs = 'diff -U0 --no-color --no-ext-diff'
+let g:diffnoindex = '--no-index'
+" histogram with indent heuristic by default
+let g:diffoptions = '--diff-algorithm=histogram --indent-heuristic'
+let g:signify_vcs_cmds = {}
+let g:signify_vcs_cmds['git'] = g:diffexecutable . ' ' . g:difffixedargs . ' ' . g:diffoptions . ' -- %f'
+set diffexpr=GitDiff()
 " =========
 " = Signs =
 " =========
@@ -1665,38 +1755,34 @@ endif
 
 set pastetoggle=<F7>
 
-nmap <F8> :TagbarToggle<Enter>
-imap <F8> <C-o>:TagbarToggle<Enter>
-vmap <F8> <Esc>:TagbarToggle<Enter>gv
+nmap <silent><F8> :TagbarToggle<Enter>
+imap <silent><F8> <C-o>:TagbarToggle<Enter>
+vmap <silent><F8> <Esc>:TagbarToggle<Enter>gv
 
-"nmap <S-F8> :TlistToggle<Enter>
-"imap <S-F8> <C-o>:TlistToggle<Enter>
-"vmap <S-F8> <Esc>:TlistToggle<Enter>gv
+"nmap <silent><S-F8> :TlistToggle<Enter>
+"imap <silent><S-F8> <C-o>:TlistToggle<Enter>
+"vmap <silent><S-F8> <Esc>:TlistToggle<Enter>gv
 
-nmap <S-F6> :call LoadSession()<Enter>
-imap <S-F6> <C-o>:call LoadSession()<Enter>
-vmap <S-F6> <Esc>:call LoadSession()<Enter>gv
+nmap <silent><S-F6> :call LoadSession()<Enter>
+imap <silent><S-F6> <C-o>:call LoadSession()<Enter>
+vmap <silent><S-F6> <Esc>:call LoadSession()<Enter>gv
 
-nmap <S-F5> :call SaveSession()<Enter>
-imap <S-F5> <C-o>:call SaveSession()<Enter>
-vmap <S-F5> <Esc>:call SaveSession()<Enter>gv
+nmap <silent><S-F5> :call SaveSession()<Enter>
+imap <silent><S-F5> <C-o>:call SaveSession()<Enter>
+vmap <silent><S-F5> <Esc>:call SaveSession()<Enter>gv
 
 " F10 to quit
-nmap <F10> :q<Enter>
-imap <F10> <C-o>:q<Enter>
-vmap <F10> <Esc>:q<Enter>gv
+nmap <silent><F10> :q<Enter>
+imap <silent><F10> <C-o>:q<Enter>
+vmap <silent><F10> <Esc>:q<Enter>gv
 "map ^_ gf
 
-nmap <S-F10> :qa<Enter>
-imap <S-F10> <C-o>:qa<Enter>
-vmap <S-F10> <Esc>:qa<Enter>gv
+nmap <silent><S-F10> :qa<Enter>
+imap <silent><S-F10> <C-o>:qa<Enter>
+vmap <silent><S-F10> <Esc>:qa<Enter>gv
 
 "comm! -nargs=? -bang A call AlternateFile("n<bang>", <f-args>)
 "abbreviate/iabbrev/cabbrev
-
-" command mode abbreviation of tt as tabnew | tag <args>
-comm! -nargs=1 -complete=tag TT tabnew | cstag <args>
-cabbrev tt <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'TT' : 'tt')<CR>
 
 function! Quickfix_window_move(type, direction)
     """ignore error E553: no more items and jump to first/last one
@@ -1733,14 +1819,13 @@ function! Quickfix_window_move(type, direction)
     ""catch
     ""    "silently discard other errors
     ""endtry
-    "Todo: warning on empty quickfix/location list
     let l:bufferQflist = a:type != "quickfix" ? getloclist(0) : getqflist()
     let l:len = len(l:bufferQflist)
     if l:len == 0
         echohl WarningMsg
         if a:type == "quickfix"
             echomsg "Quickfix list is empty"
-        else
+            echomsg "Quickfix list is empty"
             echomsg "Location list for current window is empty"
         endif
         echohl None
@@ -1768,10 +1853,23 @@ function! Quickfix_window_move(type, direction)
         " endif
     else
         if a:direction == "prev"
-            normal [l
+            try
+                execute "lprev"
+            catch /:E553:/
+                execute "lfirst"
+            endtry
         else
-            normal ]l
+            try
+                execute "lnext"
+            catch /:E553:/
+                execute "llast"
+            endtry
         endif
+        " if a:direction == "prev"
+        "     normal [l
+        " else
+        "     normal ]l
+        " endif
     endif
 endfunction
 
@@ -1793,28 +1891,111 @@ nmap <silent> <S-F12> :call Quickfix_window_move("location", "next")<Enter>
 imap <silent> <S-F12> <C-o>:call Quickfix_window_move("location", "next")<Enter>
 vmap <silent> <S-F12> <Esc>:call Quickfix_window_move("location", "next")<Enter>v
 
-" common leader mappings
-let mapleader = ','
-map <Leader>l :set invlist!<CR>
-map <Leader>n :set nu!<CR>
-map <Leader>N :set rnu!<CR>
-map <Leader>I :set diffopt-=iwhite<CR>
-map <Leader>i :set diffopt+=iwhite<CR>
-
-function! LetDiffOptionsForTab(options)
-    let t:diffoptions=a:options
-    diffupdate
+function! ToggleNumbers()
+    let l:relative = 0
+    if exists("+relativenumber")
+        let l:relative = &l:rnu
+    endif
+    if &l:nu || l:relative
+        let w:stored_nu = &l:nu
+        let &l:nu = 0
+        if exists("+relativenumber")
+            let w:stored_rnu = &l:rnu
+            let &l:rnu = 0
+        endif
+    else
+        if exists(w:stored_nu)
+            let &l:nu = w:stored_nu
+            if exists("+relativenumber")
+                let &l:rnu = w:stored_rnu
+            endif
+        else
+            let &l:nu = 1
+            if exists("+relativenumber")
+                let &l:rnu = 1
+            endif
+        endif
+    endif
+    echohl ModeMsg
+    echomsg 'numbers are turned ' . (&l:nu ? 'on' : 'off')
+    echohl None
 endfunction
-map <Leader>D :call LetDiffOptionsForTab("")<CR>
-map <Leader>d :call LetDiffOptionsForTab("-d")<CR>
 
+function! ToggleNumberDisplayMode()
+    if exists("+relativenumber")
+        if &l:rnu == 1
+            let &l:nu = 1
+            let &l:rnu = 0
+        else
+            let &l:nu = 1
+            let &l:rnu = 1
+        endif
+        echohl ModeMsg
+        echomsg 'relative numbers are turned ' . (&l:rnu ? 'on' : 'off')
+        echohl None
+    endif
+endfunction
+
+" common leader mappings (TODO add vmap support in general to all toggles and diff options)
+let g:mapleader = ','
+map <Leader>n :call ToggleNumbers()<CR>
+map <Leader>N :call ToggleNumberDisplayMode()<CR>
+
+map <Leader>dw :call ToggleDiffWhitespace()<CR>
+map <Leader>da :call ToggleDiffOptions()<CR>
+map <silent> <Leader>dc :call ToggleWithinLineDiffCharAllLines()<CR>
+map <silent> <Leader>dr :diffupdate<CR>
+
+map <Leader>l :set invlist!<CR>
 map <Leader>s :set spell!<CR>
-map <Leader>h :set hls!<CR>
-map <Leader>H :nohlsearch<CR>
-map <Leader>f :set foldenable!<CR>
+map <Leader>H :set hls!<CR>
+" TODO rework - it conflicts with setup/teardown window (also ,f)
+map <Leader>F :set foldenable!<CR>
 map <Leader>w :set wrap!<CR>
-
 map <Leader>p :set paste!<CR>
+
+map <Leader>f :YcmCompleter FixIt<CR>
+map <Leader>t :YcmCompleter GetType<CR>
+map <Leader>T :YcmCompleter GetParent<CR>
+"map <Leader>h :YcmCompleter GoToDeclaration<CR>
+
+" bind Shift+Tab key in normal mode to operation <C-O> - will be symmetrical to Tab key being bound to <C-I>
+nnoremap <S-Tab> <C-O>
+
+function! ALEGlobalToggle()
+    if g:ale_enabled == 1
+        ALEDisable
+    else
+        ALEEnable
+    endif
+    let l:infomsg = 'ALE (asynchronous linting) is turned ' . ((g:ale_enabled == 0) ? 'off' : 'on') . ' globally'
+    echohl ModeMsg
+    echomsg l:infomsg
+    echohl None
+endfunction
+function! ALELocalToggle()
+    if !exists('b:ale_enabled') || b:ale_enabled == 1
+        let b:ale_enabled = 0
+        call ale#engine#Cleanup(bufnr('%'))
+        " Remove highlights for the current buffer now.
+        if g:ale_set_highlights
+            call ale#highlight#UpdateHighlights()
+        endif
+
+        if g:ale_set_balloons
+            call ale#balloon#Disable()
+        endif
+    else
+        unlet b:ale_enabled
+        ALELint
+    endif
+    let l:infomsg = 'ALE (asynchronous linting) is turned ' . (exists('b:ale_enabled') ? 'off' : 'on') . ' for current buffer'
+    echohl ModeMsg
+    echomsg l:infomsg
+    echohl None
+endfunction
+map <Leader>a :call ALELocalToggle()<CR>
+map <Leader>A :call ALEGlobalToggle()<CR>
 
 " YouCompleteMe automatic code completion global toggle
 function! YcmGlobalToggle()
@@ -1822,25 +2003,31 @@ function! YcmGlobalToggle()
         let g:ycm_largefile = 1
         "let g:ycm_auto_trigger = 0 "use this to toggle automatic(as you type) completion and semantic triggers (., ::, ->) as well
         "let g:ycm_min_num_of_chars_for_completion = 99 "use this instead to keep semantic triggers
-        echo "YouCompleteMe automatic completion is turned off globally"
+        let l:infomsg = "YouCompleteMe automatic completion is turned off globally"
     else
         unlet g:ycm_largefile
         "let g:ycm_auto_trigger = 1 "use this to toggle automatic(as you type) completion and semantic triggers (., ::, ->) as well
         "let g:ycm_min_num_of_chars_for_completion = 2 "use this instead to keep semantic triggers
-        echo "YouCompleteMe automatic completion is turned on globally"
+        let l:infomsg = "YouCompleteMe automatic completion is turned on globally"
     endif
+    echohl ModeMsg
+    echomsg l:infomsg
+    echohl None
 endfunction
 map <Leader>Y :call YcmGlobalToggle()<CR>
 
 " YouCompleteMe automatic code completion buffer toggle
 function! YcmLocalToggle()
-    if !exists('b:ycm_largefile')
+    if !exists('b:ycm_largefile') || b:ycm_largefile == 0
         let b:ycm_largefile = 1
-        echo "YouCompleteMe automatic completion is turned off for current buffer"
+        let l:infomsg = "YouCompleteMe automatic completion is turned off for current buffer"
     else
         unlet b:ycm_largefile
-        echo "YouCompleteMe automatic completion is turned on for current buffer"
+        let l:infomsg = "YouCompleteMe automatic completion is turned on for current buffer"
     endif
+    echohl ModeMsg
+    echomsg l:infomsg
+    echohl None
 endfunction
 map <Leader>y :call YcmLocalToggle()<CR>
 
@@ -1851,6 +2038,9 @@ function! SwitchMouse()
     else
         set mouse=a
     endif
+    echohl ModeMsg
+    echomsg 'mouse is turned ' . (&mouse == 'a' ? 'on' : 'off')
+    echohl None
 endfunction
 map <Leader>m :call SwitchMouse()<CR>
 
@@ -1905,11 +2095,11 @@ if has("gui_running")
         set guitabtooltip=%!InfoGuiTooltip()
     endif
 
-    if g:OS_name == "windows"
+    if g:OS_name ==# 'windows'
         "set guifont=Lucida_Console:h8:cEASTEUROPE
         "set guifont=Dina:h8:cANSI
         silent! set guifont=Envy\ Code\ R:h11:cEASTEUROPE
-        if &guifont != 'Envy Code R:h11:cEASTEUROPE'
+        if &guifont !=# 'Envy Code R:h11:cEASTEUROPE'
             silent! set guifont=Lucida_Console:h11:cEASTEUROPE
         endif
         set guioptions="aegmrLtT
@@ -1920,7 +2110,7 @@ if has("gui_running")
         endif
     else
         silent! set guifont=Envy\ Code\ R\ 11
-        if &guifont != 'Envy Code R 11'
+        if &guifont !=# 'Envy Code R 11'
             silent! set guifont=Dejavu\ Sans\ Mono\ 11
         endif
 
@@ -1945,70 +2135,122 @@ endif
 " ============================
 " =       Super S-TAB        =
 " ============================
-function! CleverTabCompletion()
-   " do we have omni completion available
-   if &omnifunc != ''
-      "use omni-completion 1. priority
-      return "\<C-X>\<C-O>"
-   elseif &dictionary != ''
-      " no omni completion, try dictionary completion
-      return "\<C-X>\<C-K>"
-   else
-      "use omni completion or dictionary completion
-      "use known-word completion
-      return "\<C-N>"
-  endif
-endfunction
+"function! CleverTabCompletion()
+"   " do we have omni completion available
+"   if &omnifunc != ''
+"      "use omni-completion 1. priority
+"      return "\<C-X>\<C-O>"
+"   elseif &dictionary != ''
+"      " no omni completion, try dictionary completion
+"      return "\<C-X>\<C-K>"
+"   else
+"      "use omni completion or dictionary completion
+"      "use known-word completion
+"      return "\<C-N>"
+"  endif
+"endfunction
+"
+"function! CleverShiftTabCompletion()
+"    "check if at beginning of line or after a space
+"    if strpart( getline('.'), 0, col('.')-1 ) =~ '\t\+\s*$'
+"        let save_cursor = getcurpos()
+"        execute "normal F\<C-I>"
+"        normal x
+"        let save_cursor[2] -= 1
+"        call setpos('.', save_cursor)
+"        return ""
+"    elseif strpart( getline('.'), col('.')-1 ) =~ '^\s*\t\+'
+"        let save_cursor = getcurpos()
+"        execute "normal f\<C-I>"
+"        normal x
+"        call setpos('.', save_cursor)
+"        return ""
+"    elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
+"        execute "normal \<LT>\<LT>"
+"        return ""
+"    else
+"        if pumvisible()
+"            return "\<C-P>"
+"        else
+"            "return "\<S-Tab>"
+"            return CleverTabCompletion()
+"        endif
+"    endif
+"endfunction
 
-function! TabCompletion()
-    if pumvisible()
-        return "\<C-N>"
-    else
-        return "\<Tab>"
-    endif
-endfunction
-
-function! ShiftTabCompletion()
-    "check if at beginning of line or after a space
-    if strpart( getline('.'), 0, col('.')-1 ) =~ '\t\+\s*$'
-        let save_cursor = getcurpos()
-        execute "normal F\<C-I>"
-        normal x
-        let save_cursor[2] -= 1
-        call setpos('.', save_cursor)
-        return ""
-    elseif strpart( getline('.'), col('.')-1 ) =~ '^\s*\t\+'
-        let save_cursor = getcurpos()
-        execute "normal f\<C-I>"
-        normal x
-        call setpos('.', save_cursor)
-        return ""
-    elseif strpart( getline('.'), 0, col('.')-1 ) =~ '^\s*$'
-        execute "normal \<LT>\<LT>"
-        return ""
-    else
-        if pumvisible()
-            return "\<C-P>"
+function! TabCompletion(shift)
+    let l:storedpumvisible = pumvisible()
+    let l:result = ''
+    " we do not want function completions, when completion menu is already open
+    " templates are still evaluated
+    let l:completion = CodeComplete(!l:storedpumvisible)
+    let l:result = l:completion[1]
+    if l:result ==# ''
+        " no expansion found
+        " try jumping to first/next marker
+        let l:result = SwitchRegion(a:shift)
+        if l:result ==# ''
+            " no marker found either
+            if pumvisible()
+                if l:storedpumvisible
+                    " completion menu was already visible
+                    " move to next item in the menu
+                    if a:shift
+                        return "\<C-P>"
+                    else
+                        return "\<C-N>"
+                    endif
+                else
+                    " completion menu was newly opened
+                    " multiple completions were found
+                    " do nothing extra - stay on the first item (or go to last if shift)
+                    if a:shift
+                        return "\<C-P>\<C-P>"
+                    else
+                        return ''
+                    endif
+                endif
+            else
+                " just insert the plain old key
+                if a:shift
+                    return "\<S-Tab>"
+                else
+                    return "\<Tab>"
+                endif
+            endif
         else
-            "return "\<S-Tab>"
-            return CleverTabCompletion()
+            " jump to found marker
+            return l:result
         endif
+    else
+        " function args expansion or template expansion found
+        " jump to first marker (if any)
+        "return l:result . "\<C-R>=" . SwitchRegion() . "\<CR>"
+        let l:final = "\<C-R>=" ."Multiple_cursors_before()\<CR>\<BS>"
+        let l:final .= l:result
+        let l:final .= "\<C-R>=" ."Multiple_cursors_after()\<CR>\<BS>"
+        let l:final .= "\<C-R>=" . 'SwitchRegion(' . a:shift . ')' . "\<CR>"
+        return l:final
     endif
 endfunction
+
 " bind function to the tab key
-imap <Tab> <C-r>=TabCompletion()<CR>
-imap <S-Tab> <C-r>=ShiftTabCompletion()<CR>
+imap <Tab> <C-r>=TabCompletion(0)<CR>
+imap <S-Tab> <C-r>=TabCompletion(1)<CR>
+
+smap <Tab> <Esc>:call SwitchRegion(0)<CR>
+smap <S-Tab> <Esc>:call SwitchRegion(1)<CR>
 
 " bind ,a to grep word under cursor
-nnoremap <Leader>a :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+" disabled " nnoremap <Leader>a :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 
 " bind \ to Ag - similar to /, just enter search string
-nnoremap \ :grep!<SPACE>
+" disabled " nnoremap \ :grep!<SPACE>
 
 " ============================
 " =        OS specific       =
 " ============================
-if g:OS_name == "windows"
+if g:OS_name ==# 'windows'
     set grepprg=findstr\ /R\ /S\ /N
 else
     set grepprg=grep\ -nH\ $*\ /dev/null
@@ -2018,9 +2260,9 @@ else
       " Use ag over grep
       set grepprg=ag\ --nogroup\ --nocolor
       "\ --column
-      let g:ag_working_path_mode = "r"
-      nmap <Leader>a :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
-      nmap \ :Ag<SPACE>
+      let g:ag_working_path_mode = 'r'
+      " disabled " nmap <Leader>a :Ag "\b<C-R><C-W>\b"<CR>:cw<CR>
+      " disabled " nmap \ :Ag<SPACE>
     endif
 
     "set equalprg=indent\ -gnu
@@ -2102,9 +2344,13 @@ let Tlist_Ctags_Cmd = g:OS_ctags_command
 let Tlist_Show_Menu = 0  " there is a bug in gVim with taglist show menu turned on (E792: Empty menu name)
 
 " ============================
-" =   CodeComplete plug-in   =
+" =   Code_Complete plug-in   =
 " ============================
-let g:completekey ='<C-B>'
+"let g:disable_codecomplete = 1
+"""let g:completekey ='<C-B>'
+
+" === numbers.vim ===
+"let g:loaded_numbers = 1
 
 " ============================
 " =    Clearcase plug-in     =
@@ -2122,66 +2368,68 @@ let c_no_comment_fold=1
 " ============================
 " =     Clang Formatter      =
 " ============================
-" autodetects from l:shiftwidth \ "IndentWidth" : "4",
-" autodetects from l:expandtab \ "UseTab" : "false",
-" autoselects based on clang_format#code_style \ "BasedOnStyle" : "Google",
-"Todo: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
-let g:clang_format#code_style = "Google"
-
-"even with following custom config the typedef enum/extern "C" missing break
-"bug is still there in clang-formatter (3.8.1 - regression from 3.7.x):
-"https://llvm.org/bugs/show_bug.cgi?id=26626
-"https://llvm.org/bugs/show_bug.cgi?id=26689
-"            \ "BreakBeforeBraces" : "Custom",
-"            \ "BraceWrapping" : {
-"            \       "AfterClass" : "true",
-"            \       "AfterControlStatement" : "true",
-"            \       "AfterEnum" : "true",
-"            \       "AfterFunction" : "true",
-"            \       "AfterNamespace" : "true",
-"            \       "AfterObjCDeclaration" : "true",
-"            \       "AfterStruct" : "true",
-"            \       "AfterUnion" : "true",
-"            \       "BeforeCatch" : "true",
-"            \       "BeforeElse" : "true",
-"            \ },
-"
-"            \ "BreakBeforeBraces" : "Allman",
-"
-"solution is for now to use clang-formatter 3.7.1 (with everything else 3.8.1)
-let g:clang_format#style_options = {
-            \ "BreakBeforeBraces" : "Allman",
-            \ "ColumnLimit" : "120",
-            \ "AllowShortIfStatementsOnASingleLine" : "false",
-            \ "AllowShortLoopsOnASingleLine" : "false",
-            \ "AllowShortFunctionsOnASingleLine" : "Empty",
-            \ }
-let g:clang_format#auto_formatexpr = 1
-let g:clang_format#no_operator = 1
-
-function! MyFormat()
-    let pos_save = getpos('.')
-    let sel_save = &l:selection
-    ""let &l:selection = "inclusive"
-    "let [save_g_reg, save_g_regtype] = [getreg('g'), getregtype('g')]
-    try
-        pyf ~/bin/clang-format-from-vim.py
-    finally
-        "call setreg('g', save_g_reg, save_g_regtype)
-        let &l:selection = sel_save
-        call setpos('.', pos_save)
-    endtry
-endfunction
-
-"let g:loaded_clang_format = 1 "FIXME turned off
-"if !exists("g:clang_format#autocommands_loaded")
-"    augroup plugin-clang-format-auto-format
-"        autocmd!
-"        autocmd FileType c,cpp,objc,java,javascript,typescript setlocal formatexpr=MyFormat()<CR>
-"    augroup END
-"    let g:clang_format#autocommands_loaded = 1
-"endif
-
+"""" autodetects from l:shiftwidth \ "IndentWidth" : "4",
+"""" autodetects from l:expandtab \ "UseTab" : "false",
+"""" autoselects based on clang_format#code_style \ "BasedOnStyle" : "Google",
+""""Todo: autoselect Braces formatting based on the edited file surrounding context (default to Allman)
+"""let g:clang_format#code_style = "Google"
+"""
+""""even with following custom config the typedef enum/extern "C" missing break
+""""bug is still there in clang-formatter (3.8.1 - regression from 3.7.x):
+""""https://llvm.org/bugs/show_bug.cgi?id=26626
+""""https://llvm.org/bugs/show_bug.cgi?id=26689
+""""            \ "BreakBeforeBraces" : "Custom",
+""""            \ "BraceWrapping" : {
+""""            \       "AfterClass" : "true",
+""""            \       "AfterControlStatement" : "true",
+""""            \       "AfterEnum" : "true",
+""""            \       "AfterFunction" : "true",
+""""            \       "AfterNamespace" : "true",
+""""            \       "AfterObjCDeclaration" : "true",
+""""            \       "AfterStruct" : "true",
+""""            \       "AfterUnion" : "true",
+""""            \       "BeforeCatch" : "true",
+""""            \       "BeforeElse" : "true",
+""""            \ },
+""""
+""""            \ "BreakBeforeBraces" : "Allman",
+""""
+""""solution is for now to use clang-formatter 3.7.1 (with everything else 3.8.1)
+"""let g:clang_format#style_options = {
+"""            \ "BreakBeforeBraces" : "Allman",
+"""            \ "ColumnLimit" : "120",
+"""            \ "AllowShortIfStatementsOnASingleLine" : "false",
+"""            \ "AllowShortLoopsOnASingleLine" : "false",
+"""            \ "AllowShortFunctionsOnASingleLine" : "Empty",
+"""            \ }
+"""let g:clang_format#auto_formatexpr = 1
+"""let g:clang_format#no_operator = 1
+"""
+"""function! MyFormat()
+"""    let pos_save = getpos('.')
+"""    let sel_save = &l:selection
+"""    ""let &l:selection = "inclusive"
+"""    "let [save_g_reg, save_g_regtype] = [getreg('g'), getregtype('g')]
+"""    try
+"""        pyf ~/bin/clang-format-from-vim.py
+"""    finally
+"""        "call setreg('g', save_g_reg, save_g_regtype)
+"""        let &l:selection = sel_save
+"""        call setpos('.', pos_save)
+"""    endtry
+"""endfunction
+"""
+""""""map gQ :pyf ~/toolchains/llvm/share/clang/clang-format.py<cr>
+"""""map gQ :pyf ~/bin/clang-format-from-vim.py<cr>
+"""
+"""let g:loaded_clang_format = 1 "turned off
+""""if !exists("g:clang_format#autocommands_loaded")
+""""    augroup plugin-clang-format-auto-format
+""""        autocmd!
+""""        autocmd FileType c,cpp,objc,java,javascript,typescript setlocal formatexpr=MyFormat()<CR>
+""""    augroup END
+""""    let g:clang_format#autocommands_loaded = 1
+""""endif
 
 " ============================
 " =        UltiSnips         =
@@ -2243,17 +2491,25 @@ let g:ctrlp_extensions = ['tag', 'buffertag']
 " E803: ID not found: 142
 "let g:loaded_diffchar = "defined"
 let g:DiffUpdate = 1
-nmap <silent> <Leader>dc <Plug>ToggleDiffCharAllLines
-nmap <silent> <Leader>dC <Plug>ToggleDiffCharCurrentLine
+"nmap <silent> <Leader>dc <Plug>ToggleDiffCharAllLines
+"nmap <silent> <Leader>dC <Plug>ToggleDiffCharCurrentLine
+nmap <silent><Plug>(toggle-diff-char-all-lines) <Plug>ToggleDiffCharAllLines
+nmap <silent><Plug>(toggle-diff-char-current-line) <Plug>ToggleDiffCharCurrentLine
+
+if !exists('*gettabvar')  " fallback for Vim 7.2 and earlier releases -> turn off diffchar
+    let g:DiffModeSync = 0
+endif
 
 " === vim-commentary ===
 "Xxx: insert mode mapping does not work
 "Xxx: <C-/> is the same key as <C-_> in terminals
 "Todo: solve readonly file warning, when commenting in RO file (first change)
+let g:commentary_map_backslash = 0
 
 nmap <C-_> gc
-"does not work in column one, when trying to comment a line
-nmap <C-_><C-_> gcgc
+"comment a line
+nmap <C-_><C-_> gcc
+
 "not really useful
 "nmap <C-_><C-_><C-_> :set commentstring=/*%s*/<CR>gcgc
 
@@ -2326,31 +2582,31 @@ hi link EasyMotionTarget2Second MatchParen
 hi link EasyMotionMoveHL Search
 
 " === Syntastic ===
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 3  "value of 1 - autoclose and autoopen clashes with YCM
-let g:syntastic_check_on_open = 0
-let g:syntastic_check_on_wq = 0
-
-let g:syntastic_yang_pyang_args = "--ignore-error=LEAFREF_IDENTIFIER_BAD_NODE --ignore-error=UNUSED_IMPORT"
-" --ignore-error=LEAFREF_IDENTIFIER_NOT_FOUND --ignore-error=BAD_VALUE"  "only for pyang-1.7 and higher (does not work 100% even then)
-
-let g:syntastic_enable_perl_checker = 1  "Perl is a bit special (this can be dangerous: perl -c execing current file)
-let g:syntastic_perl_checkers = ["perl"]
-
-"let g:syntastic_debug_file = "~/syntastic.log"
-"let g:syntastic_debug = 33
-
-"following diffsplit override is needed to make Syntastic understand that
-"particular window is going to be diff windows and hence not extra Syntastic
-"window should be displayed
-command! -nargs=* -complete=file Diffsplit let &diff=1 | diffsplit <args>
-cabbrev diffsplit <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Diffsplit' : 'diffsplit')<CR>
-
-""" "TODO enable nagelfar, when source-ing of .tcl script is resolved (otherwise too many errors are shown)
-""" let g:syntastic_tcl_checkers = []
-""" "Pygments package not found
-""" let g:syntastic_rst_checkers = []
-let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
+" let g:syntastic_always_populate_loc_list = 1
+" let g:syntastic_auto_loc_list = 3  "value of 1 - autoclose and autoopen clashes with YCM
+" let g:syntastic_check_on_open = 0
+" let g:syntastic_check_on_wq = 0
+"
+" let g:syntastic_yang_pyang_args = "--ignore-error=LEAFREF_IDENTIFIER_BAD_NODE --ignore-error=UNUSED_IMPORT"
+" " --ignore-error=LEAFREF_IDENTIFIER_NOT_FOUND --ignore-error=BAD_VALUE"  "only for pyang-1.7 and higher (does not work 100% even then)
+"
+" let g:syntastic_enable_perl_checker = 1  "Perl is a bit special (this can be dangerous: perl -c execing current file)
+" let g:syntastic_perl_checkers = ["perl"]
+"
+" "let g:syntastic_debug_file = "~/syntastic.log"
+" "let g:syntastic_debug = 33
+"
+" "following diffsplit override is needed to make Syntastic understand that
+" "particular window is going to be diff windows and hence not extra Syntastic
+" "window should be displayed
+" command! -nargs=* -complete=file Diffsplit let &diff=1 | diffsplit <args>
+" cabbrev diffsplit <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'Diffsplit' : 'diffsplit')<CR>
+"
+" """ "TODO enable nagelfar, when source-ing of .tcl script is resolved (otherwise too many errors are shown)
+" """ let g:syntastic_tcl_checkers = []
+" """ "Pygments package not found
+" """ let g:syntastic_rst_checkers = []
+" let g:syntastic_mode_map = { 'mode': 'passive', 'active_filetypes': [ ], 'passive_filetypes': [ "tcl", "vim", "rst" ] }
 
 " === Airline ===
 let g:airline#extensions#whitespace#max_lines = 50000
@@ -2403,7 +2659,7 @@ let g:startify_session_sort = 0  "sort session list alphabetically
 set sessionoptions-=blank
 
 " disable startify in man pager mode
-if expand("$MAN_PN") == "1"
+if expand('$MAN_PN') ==# '1'
     let g:startify_disable_at_vimenter = 1
 endif
 
@@ -2418,45 +2674,104 @@ let g:VCSCommandHGExec = ""
 let g:VCSCommandSVKExec = ""
 let g:VCSCommandSVNExec = ""
 
+" disable all ,c<XYZ> mappings
+let g:VCSCommandDisableMappings = 1
+let g:VCSCommandDisableExtensionMappings = 1
+
 " === vim-vinegar ===
 "let g:netrw_keepj=""
+nmap _ <Plug>VinegarUp
 
 " === vim-ALE ===
+let g:ycm_show_diagnostics_ui = 0  "disable YCM syntax checking (not needed ALE)
 "let g:loaded_ale_dont_use_this_in_other_plugins_please = 1
-let g:ale_lint_on_text_changed = 1
-let g:ale_lint_on_insert_leave = 0
+let g:ale_lint_on_text_changed = 'normal'  " disable with 'never' - see :help ALE
+let g:ale_lint_delay = 200
+let g:ale_lint_on_insert_leave = 1
+let g:ale_lint_on_filetype_changed = 1
 let g:ale_lint_on_enter = 1
 let g:ale_lint_on_save = 1
 let g:ale_sign_column_always = 0
 let g:ale_sign_error = '=>'
 let g:ale_sign_warning = '->'
+let g:ale_sign_info = 'i>'
+let g:ale_sign_style_error = '= '
+let g:ale_sign_style_warning = '- '
+highlight link ALEErrorSign Error
+highlight link ALEError Error
+highlight link ALEWarningSign Todo
+highlight link ALEWarning Todo
+highlight link ALEInfoSign SpellCap
+highlight link ALEInfo SpellCap
+highlight link ALEStyleErrorSign SpellRare
+highlight link ALEStyleError SpellRare
+highlight link ALEStyleWarningSign SpellLocal
+highlight link ALEStyleWarning SpellLocal
 let g:ale_statusline_format = ['x %d', '⚠ %d', '✓ ok']
 let g:ale_set_loclist = 1
 let g:ale_set_quickfix = 0
 let g:ale_open_list = 1
-let g:ale_keep_list_window_open = 1
+"let g:ale_keep_list_window_open = 1
 let g:ale_echo_msg_error_str = 'E'
 let g:ale_echo_msg_warning_str = 'W'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_emit_conflict_warnings = 0  "do not complain about syntastic
 let g:ale_linters = {
-    \   'c': [],
-    \   'cpp': [],
-    \   'mib': ['mibcomp'],
+    \   'c': ['compilation'],
+    \   'ccp': ['ccplint'],
     \   'cfg': ['setupteardownchecker'],
-    \   'sh': ['shell', 'shellcheck'],
-    \   'python': ['python', 'flake8'],
+    \   'cpp': ['compilation'],
+    \   'mail': ['grammarcheck'],
+    \   'mib': ['mibcomp'],
     \   'perl': ['perl'],
+    \   'python': ['python', 'flake8'],
+    \   'rst': [],
+    \   'sh': ['shell', 'shellcheck'],
     \   'tcl': [],
     \   'vim': ['vint'],
-    \   'rst': [],
+    \   'yaml': [],
     \   'yang': ['pyang'],
-    \   'mail': ['grammarcheck'],
     \}
+
+let g:ale_pedantic_linting = 0  "can be controlled via <Leader>P
+
+let g:ale_python_flake8_use_global = 1  "CAUTION: without this every execution of flake8 linter would traverse disk to find parent python environment (this causes huge slowdowns)
+let g:ale_python_flake8_executable = 'flake8_linter.sh'
+let g:ale_vim_vint_executable = 'vint_linter.sh'
+
+" see output from pyang --list-errors (grep LEAFREF + UNUSED_IMPORT)
+let g:ale_yang_pyang_args = '
+            \ --ignore-error=LEAFREF_BAD_PREDICATE
+            \ --ignore-error=LEAFREF_BAD_PREDICATE_PTR
+            \ --ignore-error=LEAFREF_MULTIPLE_KEYS
+            \ --ignore-error=LEAFREF_DEREF_NOT_LEAFREF
+            \ --ignore-error=LEAFREF_NOT_LEAF
+            \ --ignore-error=LEAFREF_TOO_MANY_UP
+            \ --ignore-error=LEAFREF_BAD_CONFIG
+            \ --ignore-error=LEAFREF_DEREF_NOT_KEY
+            \ --ignore-error=LEAFREF_IDENTIFIER_BAD_NODE
+            \ --ignore-error=LEAFREF_IDENTIFIER_NOT_FOUND
+            \ --ignore-error=LEAFREF_NO_KEY
+            \ --ignore-error=UNUSED_IMPORT'
+
+" next section fixes the bug with preview window messing with buffer highlights after closing it with dedicated functin pclose or <C-W>z
+command! -nargs=* -complete=file PClose wincmd P | wincmd q <args>
+cabbrev pclose <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'PClose' : 'pclose')<CR>
+nmap <C-W>z :PClose<Enter>
+vmap <C-W>z <Esc>:PClose<Enter>gv
+
+function! ALELintingFinished()
+    if exists(':SignifyRefresh')
+        execute 'SignifyRefresh'
+    endif
+    if exists(':AirlineRefresh')
+        execute 'AirlineRefresh'
+    endif
+endfunction
 
 augroup ALEGroup
     autocmd!
-    autocmd User ALELint if exists(':AirlineRefresh') | execute "AirlineRefresh" | endif
+    autocmd User ALELint call ALELintingFinished()
 augroup END
 
 " ==========================
@@ -2509,7 +2824,7 @@ function! GenTags(...)
 
     silent! execute "!" . "find " . l:path . " \\( -name \"*.h\" -o -name \"*.hh\" -o -name \"*.hpp\" -o -name \"*.c\" -o -name \"*.cc\" -o -name \"*.cpp\" -o -name \"*.java\" -o -name \"*.mk\" -o -name \"*.db\" -o -name \"*.sh\" -o -name \"*.cfg\" -o -name \"*.mib\" -o -name \"*.tcl\" -o -name \"*.yang\" \\) | grep -v \"/obj/\" > " . l:temp_file_list
     silent! execute "!" . "ctags --languages=C,C++,Tcl --fields=+ia --extra=+fq --tag-relative=yes -f " . l:path . "/tags --totals=yes --sort=foldcase -L " . l:temp_file_list
-    "Note: cscope needs to be away from the folder we are indexing (otherwise is duplicates references)
+    "Note: cscope needs to be away from the folder we are indexing (otherwise it duplicates references)
     silent! execute "!" . "cd /tmp ; " . "cscope -k -b -q -u -f " . l:path .  "/cscope.out" . " -i " . l:temp_file_list " ; " . "cd -"
 
     silent! execute "!" . "rm " . l:temp_file_list
@@ -2686,16 +3001,199 @@ else
     "set ttymouse=xterm2
 end
 
-function! CscopeCtagsSearch(word)
-    let csto_saved=&csto
-    let &csto=0
-    "echomsg a:word
-    "exe "cstag " . a:word
+function! Move_to_column_with_match(str)
+    let saved_cursor = getcurpos()
+    " echomsg "saved_cursor: " . saved_cursor[1] . ":" . saved_cursor[2]
+    call cursor(saved_cursor[1], 1)
+    " echomsg "searched str : " . a:str
+    "turn on ignore case search \\c
+    let l:found_line = search(a:str . "\\c", "cWz")
+    " echomsg "found line : " . l:found_line
+    if l:found_line == saved_cursor[1]
+        "nothing to do - match inside current line was found (cursor should be
+        "at the start of the match
+    else
+        "no match inside line - go back to previous position
+        call setpos('.', saved_cursor)
+    endif
+endfunction
+
+" resolves even with :: in the cWORD, but without following (), ->, ., , e.g. DbgwController::getPort vs. DbgwController::getPort()
+function! s:get_tag_internal(str, type)
+        "Func(...)
+        "let args=a:000
+        "for a in args
+        "   echo a
+        "endfor
+        "first make sure we do not do double work (with cst all :tag commands
+        "use also cscope - order depends on differnt variable: csto)
+        let l:str = a:str
+
+        let l:saved_cst = &cst
+        set nocst
+        for i in [0,1]
+            if &csto == i
+                let search_cmd="cscope find g "
+            else
+                if a:type == "tag"
+                    let search_cmd = "tag "
+                elseif a:type == "tjump"
+                    let search_cmd = "tjump "
+                else
+                    echohl WarningMsg
+                    echo "Wrong ctags search type chosen: " . a:type
+                    echohl None
+                endif
+            endif
+
+            "escape dash (-) symbols (tag is interpreting them as regexp options)
+            ""let l:str=substitute(l:str, '[-]', '\-', 'ga')
+            if l:str != ""
+                try
+                    "echomsg search_cmd.l:str
+                    exec search_cmd.l:str
+                    call Move_to_column_with_match(l:str)
+                    let &cst = l:saved_cst
+                    return 0  " search no more, result found
+                catch /:E325:/
+                    " ATTENTION when opening file
+                    call Move_to_column_with_match(l:str)
+                    let &cst = l:saved_cst
+                    return 0
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
+                    " we will continue with cWORD and cword searches
+                endtry
+            endif
+
+            let l:cww=substitute(expand("<cWORD>"), '[^A-Za-z_:]', '', 'ga')
+            "escape dash (-) symbols (tag is interpreting them as regexp options)
+            ""let l:cww=substitute(l:cww, '[-]', '\-', 'ga')
+            if l:cww != l:str
+                try
+                    "echomsg search_cmd.l:cww
+                    exec search_cmd.l:cww
+                    call Move_to_column_with_match(l:cww)
+                    let &cst = l:saved_cst
+                    return 0  " search no more, result found
+                catch /:E325:/
+                    " ATTENTION when opening file
+                    call Move_to_column_with_match(l:str)
+                    let &cst = l:saved_cst
+                    return 0
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
+                    " E562 bad usage for cstag - obviously cWORD contains special characters
+                    " E567 no cscope connections
+                    " E257 cstag tag not found
+                    " E259 no matches found for cscope query
+                    " E426 tag not found
+                    " E433 no tags file
+                    " E499 Empty file name for '%' or '#', only works with :p:h
+                    " E560 Usage cs[cope] find a|c|d|e|f|g|i|s|t name (also uppercase letters)
+                endtry
+            endif
+
+            let l:cww2=expand("<cword>")
+            "escape dash (-) symbols (tag is interpreting them as regexp options)
+            ""let l:cww2=substitute(l:cww2, '[-]', '\-', 'ga')
+            if l:cww2 != l:str && l:cww2 != l:cww
+                try
+                    "echomsg search_cmd.l:cww2
+                    exec search_cmd.l:cww2
+                    call Move_to_column_with_match(l:cww2)
+                    let &cst = l:saved_cst
+                    return 0  " search no more, result found
+                catch /:E325:/
+                    " ATTENTION when opening file
+                    call Move_to_column_with_match(l:str)
+                    let &cst = l:saved_cst
+                    return 0
+                catch /:E562:\|:E567:\|:E257:\|:E259:\|:E499:\|:E560:\|:E426:\|:E433:\|:E434:\|:E435:/
+                    " not found
+                endtry
+            endif
+        endfor
+        echohl WarningMsg
+        if l:str != ""
+            echo "Sorry, no tag generated for ".l:str." or ".expand("<cWORD>")." or ".expand("<cword>")
+        else
+            echo "Sorry, no tag generated for ".expand("<cWORD>")." or ".expand("<cword>")
+        endif
+        echohl None
+        let &cst = l:saved_cst
+endfunction
+
+" PauseALE and ResumeALE are longer needed after Bram's inputlist fix ?
+function! PauseALE()
+    let l:buf = bufnr('%')
+    if !exists('b:ale_enabled') || b:ale_enabled == 1
+        let l:enabled = 1
+    else
+        let l:enabled = 0
+    endif
+    if l:enabled == 1
+        let b:ale_enabled = 0
+    endif
+    let l:ale_is_linting = ale#engine#IsCheckingBuffer(l:buf)
+    if l:ale_is_linting
+        call ale#engine#Cleanup(l:buf)
+    endif
+    return [l:buf, l:enabled, l:ale_is_linting ]
+endfunction
+
+function! ResumeALE(previous_state)
+    call setbufvar(a:previous_state[0], 'ale_enabled', a:previous_state[1])
+    if a:previous_state[2] == 1
+        ALELint
+    endif
+endfunction
+
+function! SophTag(str, type)
+    if v:version > 704 || (v:version == 704 && has('patch957'))
+        let l:tagcase_saved=&tagcase
+        let &tagcase='match'
+    endif
+    " echomsg "searched str [" . a:str . "]"
     try
-        call SophTag(a:word)
+        "if a:type ==# 'tjump'
+        "    let l:ale_previous_state = PauseALE()
+        "endif
+        call <SID>get_tag_internal(a:str, a:type)
+        "if a:type ==# 'tjump'
+        "    call ResumeALE(l:ale_previous_state)
+        "endif
     finally
-        let &csto=csto_saved
-        unlet csto_saved
+        if v:version > 704 || (v:version == 704 && has('patch957'))
+            let &tagcase=l:tagcase_saved
+            unlet l:tagcase_saved
+        endif
+    endtry
+endfunction
+
+nmap <silent><C-]> :call SophTag('', 'tag')<Enter>
+imap <silent><C-]> <C-o>:call SophTag('', 'tag')<Enter>
+vmap <silent><C-]> <Esc>:call SophTag(<SID>get_visual_selection(), 'tag')<Enter>gv
+nmap <silent>g<C-]> :call SophTag('', 'tjump')<Enter>
+vmap <silent>g<C-]> <Esc>:call SophTag(<SID>get_visual_selection(), 'tjump')<Enter>gv
+
+function! CscopeCtagsSearch(word)
+    let l:csto_saved=&csto
+    let &csto=0
+    try
+        call SophTag(a:word, 'tag')
+    finally
+        let &csto=l:csto_saved
+        unlet l:csto_saved
+    endtry
+endfunction
+
+function! CtagsCscopeSearch(word)
+    let l:csto_saved=&csto
+    let &csto=1
+    try
+        call SophTag(a:word, 'tag')
+    finally
+        let &csto=l:csto_saved
+        unlet l:csto_saved
     endtry
 endfunction
 
@@ -2703,11 +3201,6 @@ nnoremap <silent>g<LeftMouse> <LeftMouse>:call CscopeCtagsSearch("")<CR>
 nnoremap <silent>g<RightMouse> <C-T>
 nmap <C-LeftMouse> g<LeftMouse>
 nmap <C-RightMouse> g<RightMouse>
-
-nnoremap <silent>z<LeftMouse> <LeftMouse>:exe "cs f s " . expand("<cword>")<CR>
-nnoremap <silent>z<RightMouse> <LeftMouse>:exe "cs f c " . expand("<cword>")<CR>
-nmap <A-LeftMouse> z<LeftMouse>
-nmap <A-RightMouse> z<RightMouse>
 
 nnoremap <X1Mouse> <C-O>
 nnoremap <X2Mouse> <C-I>
@@ -2886,7 +3379,7 @@ function! DiffOrig()
     else
         let ftype = &filetype
         let actualfilename=expand('%:p')
-        vert new
+        topleft vert new
         setlocal bt=nofile
         r #
         let &titlestring = "saved copy" . " <-> " . actualfilename
@@ -2915,8 +3408,8 @@ function! RefreshAll()
         "call sy#util#refresh_windows()
         execute "SignifyRefresh"
     endif
-    if exists('*SyntasticReset')
-        call SyntasticReset()
+    if exists('*ale#highlight#UpdateHighlights')
+        call ale#highlight#UpdateHighlights()
     endif
     if exists(':YcmRestartServer')
         execute "YcmRestartServer"
@@ -2980,6 +3473,9 @@ command! -nargs=+ -complete=file LoadCrashBacktrace :call LoadCrashBacktrace(<f-
 cabbrev loadcrashbacktrace <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'LoadCrashBacktrace' : 'loadcrashbacktrace')<CR>
 
 function! OpenGitModifiedFiles(opentype, whatfiles, diffstyle)
+    echohl ModeMsg
+    echomsg 'Opening all ' . (a:whatfiles == 'modified' ? 'modified' : 'branch modified') . ' files ' . (a:diffstyle == 'diff' ? 'and showing the diffs' : '')
+    echohl None
     let l:file_list = []
     if a:whatfiles == "modified"
         let l:file_list = split(system("list_git_modified_files.sh -r"), "\n")
@@ -3042,7 +3538,7 @@ endfunc
 " This callback will be executed when the entire command is completed
 function! BackgroundCommandClose(channel)
     " Read the output from the command into the quickfix window
-    execute "cfile! " . g:backgroundCommandOutput
+    execute 'cfile! ' . g:backgroundCommandOutput
     " Open the quickfix window
     copen
     unlet g:backgroundCommandOutput
@@ -3177,73 +3673,103 @@ function! ExpandCMacroAsyncCommandClose(channel)
     """execute "cfile! " . g:backgroundCommandOutput
     """" Open the quickfix window
     """copen
-    unlet g:backgroundCommandOutput
 
+    unlet g:backgroundCommandOutput
     call delete(g:tmp_file)
     "read result into tiny window
     "echomsg "done"
+
+    " TODO after async job finished when in 'c' or 'r' modes the window is garbled
+    " start a timer and wait until mode != 'c' && mode != 'r', then finish
+    "
+    " if mode() !=# 'n'
+    "     return
+    " endif
+
+    let l:sm = g:StoreSelectionMode()
+    " preview window once again does something special - selection is not saved
+    " unless the preview window is closed before opening with new content
+    silent! execute 'wincmd z'
+
     "silent! execute "bot 10split " . g:preprocessed_file
-    silent! execute ":pedit " . g:preprocessed_file
+    silent! execute ':pedit ' . g:preprocessed_file
     call delete(g:preprocessed_file)
     "store syntax to set the same for preview
     let l:syntax = &syntax
     "recalculate file_window
-    let l:file_window = bufwinnr("%")
+    let l:file_window = bufwinnr('%')
     "echomsg "win:" . l:file_window
-    silent! execute "wincmd P"
+    silent! execute 'wincmd P'
     "set no modifiable for preview
     setlocal nomodifiable
     let &syntax=l:syntax
     "resize window
     let l:expand_lines = line('$')
     let l:winheight = winheight('%')
-    if l:expand_lines < l:winheight
-        execute "resize " . l:expand_lines
-    elseif l:expand_lines > l:winheight
-        if l:expand_lines > &previewheight
-            let l:expand_lines = &previewheight
-        endif
-        execute "resize " . l:expand_lines
-    endif
+"    if l:expand_lines < l:winheight
+"        execute "resize " . l:expand_lines
+"    elseif l:expand_lines > l:winheight
+"        if l:expand_lines > &previewheight
+"            let l:expand_lines = &previewheight
+"        endif
+"        execute "resize " . l:expand_lines
+"    endif
     "return to origin place
     "redraw
-    silent! execute l:file_window . "wincmd w"
+    silent! execute l:file_window . 'wincmd w'
     "highlight origin line
     "Todo: add slash escapes (make it work - works only after searching was
     "already used at least once in current buffer/vim ?
     "let @/ = "\\V" . getline('.')
     "redraw!
+
+    call g:RestoreSelectionMode(l:sm)
     execute '2match none'
 endfunction
 
 function! ExpandCMacroAsync()
     "get current info
+    let l:file_name = expand('%')
+    if !filereadable(l:file_name)
+        echohl WarningMsg
+        echo 'Can be used only on regular file (not on ' . l:file_name . ')'
+        echohl None
+        return
+    endif
+
+    if &filetype !=# 'c' && &filetype !=# 'cpp'
+        echohl WarningMsg
+        echo 'Can be used only on c/cpp filetypes (not on filetype ' . &filetype . ')'
+        echohl None
+        return
+    endif
+
     execute '2match Search /\%'.line('.').'l/'
-    let l:macro_file_name = "__macroexpand__" . tabpagenr()
-    let l:file_row = line(".")
-    let l:file_name = expand("%")
-    let g:tmp_file = expand("%:h") . "/." . expand("%:t:r") . "." . expand("%:e")
+    let l:macro_file_name = '__macroexpand__' . tabpagenr()
+    let l:file_row = line('.')
+    let g:tmp_file = expand('%:h') . '/.' . expand('%:t:r') . '.' . expand('%:e')
     let l:rnd = localtime() % 0x10000
-    let g:preprocessed_file = "/tmp" . "/" . expand("$USER") . "." .  l:rnd . "." . l:macro_file_name
-    silent! execute "w! " . g:tmp_file
+    let g:preprocessed_file = '/tmp' . '/' . expand('$USER') . '.' .  l:rnd . '.' . l:macro_file_name
 
-    "silent! execute "!code_expand_macro.sh " . g:tmp_file . " " . l:file_row . " " . l:preprocessed_file
+    "silent! execute "w! " . g:tmp_file
+    " this does not trigger buffer write autocmds (like linting)
+    call writefile(getline(1,'$'), g:tmp_file, 'b')
 
-    let l:async_command = "code_expand_macro.sh " . g:tmp_file . " " . l:file_row . " " . g:preprocessed_file
+    let l:async_command = 'supernice code_expand_macro.sh ' . g:tmp_file . ' ' . l:file_row . ' ' . g:preprocessed_file
     " Make sure we're running VIM version 8 or higher.
     if v:version < 800
         echomsg 'Async expand C macro requires VIM version 8 or higher (running sync version)'
         let g:backgroundCommandOutput = 1
-        silent! execute "!" . l:async_command
+        call system(l:async_command)
         call ExpandCMacroAsyncCommandClose(0)
         redraw!
         return
     endif
 
     if exists('g:backgroundCommandOutput')
-        echo 'Already running expand C macro in background'
+        let l:infomsg = 'Already running expand C macro in background'
     else
-        echo 'Running expand C macro in background'
+        let l:infomsg = 'Running expand C macro in background'
         " Launch the job.
         " Notice that we're only capturing out, and not err here. This is because, for some reason, the callback
         " will not actually get hit if we write err out to the same file. Not sure if I'm doing this wrong or?
@@ -3253,15 +3779,18 @@ function! ExpandCMacroAsync()
         let g:backgroundCommandOutput = 1
         "echo "async: " . l:async_command
         call job_start(l:async_command, {'close_cb': 'ExpandCMacroAsyncCommandClose'})
+        """ call job_start('sleep 2', {'close_cb': 'ExpandCMacroAsyncCommandClose'})
     endif
+
+    echo l:infomsg
 endfunction
 
-nmap <F4> :call ExpandCMacroAsync()<Enter>
-imap <F4> <C-o>:call ExpandCMacroAsync()<Enter>
-vmap <F4> <Esc>:call ExpandCMacroAsync()<Enter>gv
+nmap <silent><F4> :call ExpandCMacroAsync()<Enter>
+imap <silent><F4> <C-o>:call ExpandCMacroAsync()<Enter>
+vmap <silent><F4> <Esc>:call ExpandCMacroAsync()<Enter>gv
 
 function! RefreshTagsAsyncCommandClose(channel)
-    if g:refreshTagsCommandVar == "mibupdate"
+    if g:refreshTagsCommandVar ==# 'mibupdate'
         let &l:enc=&l:enc
     else
         cs reset
@@ -3271,12 +3800,12 @@ function! RefreshTagsAsyncCommandClose(channel)
 endfunction
 
 function! RefreshTagsAsync(subcommand)
-    let l:async_command = "sr_cscope.sh " . a:subcommand
+    let l:async_command = 'supernice sr_cscope.sh ' . a:subcommand
     " Make sure we're running VIM version 8 or higher.
     if v:version < 800
         echomsg 'Async refresh tags requires VIM version 8 or higher (running sync version)'
         let g:refreshTagsCommandVar = a:subcommand
-        silent! execute "!" . l:async_command
+        silent! execute '!' . l:async_command
         call RefreshTagsAsyncCommandClose(0)
         redraw!
         return
@@ -3297,6 +3826,426 @@ function! RefreshTagsAsync(subcommand)
     endif
 endfunction
 
+function! CodeRenameSymbolAtCursor()
+    let l:file_name = expand('%')
+    if !filereadable(l:file_name)
+        echohl WarningMsg
+        echo 'Can be used only on regular file (not on ' . l:file_name . ')'
+        echohl None
+        return
+    endif
+
+    if &filetype !=# 'c' && &filetype !=# 'cpp'
+        echohl WarningMsg
+        echo 'Can be used only on c/cpp filetypes (not on filetype ' . &filetype . ')'
+        echohl None
+        return
+    endif
+
+    " Note: offset calculation  makes it hard to do visual selection rename - because of line2byte (still could be done with getpos("'<"))
+    let l:offset = line2byte(line('.'))+col('.') - 2
+    let l:current_symbol = expand('<cword>')
+
+    let l:new_symbol = input('Enter new symbol name:', l:current_symbol)
+    if l:new_symbol ==# ''
+        return
+    endif
+
+    let l:input_file = expand('%:h') . '/.' . expand('%:t:r') . '.' . expand('%:e')
+    let l:output_file_name = '__coderenamesymbol__' . tabpagenr()
+    let l:ed_script_file_name = '__edscript__' . tabpagenr()
+    let l:rnd = localtime() % 0x10000
+    let l:output_file = '/tmp' . '/' . expand('$USER') . '.' .  l:rnd . '.' . l:output_file_name
+    let l:ed_script_file = '/tmp' . '/' . expand('$USER') . '.' .  l:rnd . '.' . l:ed_script_file_name
+
+    " write input_file based on current buffer's content in current buffer's directory with the same extension (to allow clang-rename to work properly)
+    "silent! execute 'w! ' . l:input_file
+    " this does not trigger buffer write autocmds (like linting)
+    call writefile(getline(1,'$'), l:input_file, 'b')
+
+    " rename symbol and store result in output_file
+    let l:sync_command = 'code_rename_symbol.sh ' . l:input_file . ' ' . l:output_file . ' ' . l:new_symbol . ' ' . l:offset
+    "silent! execute '!' . l:sync_command | let l:shell_error = v:shell_error
+    call system(l:sync_command) | let l:shell_error = v:shell_error
+    "let l:job = job_start(l:sync_command) | while job_status(l:job) ==# 'run' | sleep 10m | endwhile | let l:shell_error = job_info(l:job).exitval
+
+    if l:shell_error == 0
+        " produce ed script via diff command (direct redirection is failing via job_start, but works via job_start(['sh', '-c', l:diffcommand]))
+        let l:diff_command = 'diff -e ' . l:input_file . ' ' . l:output_file . ' ' . ' >' . l:ed_script_file
+        "silent! execute '!' . l:diff_command | let l:shell_error = v:shell_error
+        call system(l:diff_command) | let l:shell_error = v:shell_error
+        "let l:job = job_start(['sh', '-c', l:diff_command]) | while job_status(l:job) ==# 'run' | sleep 10m | endwhile | let l:shell_error = job_info(l:job).exitval
+
+        let l:was_in_diff_mode = 0
+        if &diff
+            " source ed script does not work while in diff mode
+            " so quit diff mode to source the ed script and then reenter diff mode
+            let l:was_in_diff_mode = 1
+            diffoff
+        endif
+
+        " source the ed script (no need to jump or mess with history, undo)
+        silent! execute 'source ' . l:ed_script_file
+
+        if l:was_in_diff_mode == 1
+            diffthis
+        endif
+
+        " refresh screen
+        "redraw!
+
+        " delete temporary files
+        call delete(l:ed_script_file)
+    else
+        " refresh screen
+        redraw
+
+        echohl WarningMsg
+        echo 'Renaming of symbol ' . expand('<cword>') . ' failed (place cursor directly above the symbol)'
+        echohl None
+    endif
+
+    call delete(l:input_file)
+    call delete(l:output_file)
+endfunction
+
+function! CodeIncludeSymbolAtCursor(mode)
+    " Todo: put include_symbols_tags somewhere at global level
+    let l:include_symbols_tags = expand('$CSCOPE_FILES_DIR') . '/' .  'include_symbols.tags'
+    if !filereadable(l:include_symbols_tags)
+        echohl WarningMsg
+        echo 'Include symbols tag file not found (' . l:include_symbols_tags . ')'
+        echohl None
+        return
+    endif
+
+    let l:file_name = expand('%')
+    if !filereadable(l:file_name)
+        echohl WarningMsg
+        echo 'Can be used only on regular file (not on ' . l:file_name . ')'
+        echohl None
+        return
+    endif
+
+    if &filetype !=# 'c' && &filetype !=# 'cpp'
+        echohl WarningMsg
+        echo 'Can be used only on c/cpp filetypes (not on filetype ' . &filetype . ')'
+        echohl None
+        return
+    endif
+
+    if a:mode ==? 'v' || a:mode ==# "\<c-v>" || a:mode ==? 's' || a:mode ==# "\<c-s>"
+        let l:current_symbol = <SID>get_visual_selection()
+    else
+        let l:current_symbol = expand('<cword>')
+    endif
+
+    let l:panos = expand('$PANOS')
+    if l:panos !=# '$PANOS'
+        " strip panos/panos_get_subdir or panos/ from the fullpath provided by ctags
+        let l:panos_gen_subdir = ''
+        let l:output_list = systemlist('ws_automation.py --print-panos-gen-subdir-with-fallback')
+        if len(l:output_list) > 0
+            let l:panos_gen_subdir = l:output_list[0]
+        endif
+    else
+        let l:panos = ''
+    endif
+
+    let l:candidate_list = []
+    let l:oldtags = &tags
+    let l:oldtagcase = &tagcase
+    let &tags = l:include_symbols_tags
+    let &tagcase = l:include_symbols_tags
+    let &tagcase ='match'
+    let l:ftags = taglist('^'.l:current_symbol.'$')
+    let &tagcase = l:oldtagcase
+    let &tags = l:oldtags
+    for l:i in l:ftags
+        let l:filename = l:i.filename
+
+        if l:panos !=# ''
+            " strip panos/panos_get_subdir or panos/ from the fullpath provided by ctags
+            let l:needle = l:panos . '/' . l:panos_gen_subdir . '/'
+            if l:filename =~# l:needle
+                let l:filename = substitute(l:filename, l:needle, '', '')
+            else
+                let l:needle = l:panos . '/'
+                let l:filename = substitute(l:filename, l:needle, '', '')
+            endif
+
+            " wrap with "" or <>
+            if l:filename =~# 'wind/target/h/'
+                let l:filename = substitute(l:filename, 'wind/target/h/stl\.[^/]+/mips-wrs-vxworks', '', '')
+                let l:filename = substitute(l:filename, 'wind/target/h/stl\.[^/]+/ext', '', '')
+                let l:filename = substitute(l:filename, 'wind/target/h/stl\.[^/]+/backward', '', '')
+                let l:filename = substitute(l:filename, 'wind/target/h/stl\.[^/]+/', '', '')
+                let l:filename = substitute(l:filename, 'wind/target/h/snmp', '', '')
+                let l:filename = substitute(l:filename, 'wind/target/h/', '', '')
+                let l:filename = '<' . l:filename . '>'
+            else
+                let l:filename = '"' . l:filename . '"'
+            endif
+        else
+            " default for non-panos sources
+            let l:filename = '"' . l:filename . '"'
+        endif
+
+        call add(l:candidate_list, l:filename)
+    endfor
+
+    " sort and make unique candidates
+    call uniq(sort(l:candidate_list))
+
+    " prefer *_api.h, then common/*, then system includes (e.g. wind/target/h) and then the rest alphabetically
+    let l:input_list = []
+
+    let l:idx = 0
+    for l:item in l:candidate_list
+        if l:item[:len(l:item)-2] =~# '_api\.h$' || l:item[:len(l:item)-2] =~# '_api/'
+            call add(l:input_list, l:item)
+            call remove(l:candidate_list, l:idx)
+        else
+            let l:idx = l:idx + 1
+        endif
+    endfor
+
+    let l:idx = 0
+    for l:item in l:candidate_list
+        if l:item[1:] =~# '^common/'
+            call add(l:input_list, l:item)
+            call remove(l:candidate_list, l:idx)
+        else
+            let l:idx = l:idx + 1
+        endif
+    endfor
+
+    let l:idx = 0
+    for l:item in l:candidate_list
+        if l:item[0] ==# '<'
+            call add(l:input_list, l:item)
+            call remove(l:candidate_list, l:idx)
+        else
+            let l:idx = l:idx + 1
+        endif
+    endfor
+
+    for l:item in l:candidate_list
+        call add(l:input_list, l:item)
+    endfor
+
+    let l:display_list = []
+    "add number to items in the list
+    let l:index = 1
+    while l:index <= len(l:input_list)
+        let l:item = l:input_list[l:index - 1]
+
+        call add(l:display_list, l:index . ' ' . l:item)
+        let l:index = l:index + 1
+
+    endwhile
+    let l:include_file = ''
+
+    if len(l:input_list) > 0
+        call insert(l:input_list, 'DUMMY', 0)
+        call insert(l:display_list, 'Select include file for "' .  l:current_symbol . '" from the list:', 0)
+        if len(l:input_list) > 2
+            let l:chosen_number = inputlist(l:display_list)
+        else
+            " autoselect if only one result
+            let l:chosen_number = 1
+        endif
+        if l:chosen_number > 0 && l:chosen_number < len(l:input_list)
+            let l:include_file = l:input_list[l:chosen_number]
+            let l:system_header = 0
+            if l:include_file[0] ==# '<'
+                let l:system_header = 1
+            endif
+            let l:include_line = '#include ' . l:include_file . ''
+            "echomsg 'New include line: ' . l:include_line
+            let l:saved_cursor = getcurpos()
+            call cursor(1,1)
+            " skip if already in the file
+            if search(l:include_file, 'n') == 0
+                let l:stop_walking = 0
+                let l:walk_over = 0
+                let l:searched_line = '#include ' . ((l:system_header == 1) ? '<' : '"')
+                let l:line = search(l:searched_line, 'n')
+                if l:line > 0
+                    " we have starting line
+                else
+                    " no proper include yet (search for any include)
+                    let l:searched_line = '#include '
+                    let l:line = search(l:searched_line, 'n')
+                    "echomsg 'line ' . l:line
+                    if l:line > 0
+                        " we have a reasonable starting line
+                        if l:system_header == 1
+                            let l:stop_walking = 1
+                        else
+                            let l:walk_over = 1
+                        endif
+                    endif
+                endif
+
+                if l:line > 0
+                    " now walk the include lines and search for correct place (TODO skip whitespace lines not only '')
+                    while l:line <= line('$') && l:stop_walking == 0
+                        if getline(l:line) !=# '' && getline(l:line) !~# '#include '
+                            break
+                        endif
+                        if l:walk_over == 0 && getline(l:line) >= l:include_line
+                            break
+                        endif
+                        let l:line = l:line + 1
+                    endwhile
+                    " skip if duplicate
+                    if getline(l:line) !~# l:include_line
+                        call append(l:line-1, l:include_line)
+                        " add the added line to the saved position lnum to go back correctly
+                        let l:saved_cursor[1] += 1
+                        redrawstatus!
+                        echohl ModeMsg
+                        echomsg 'Added new include at line ' . string(l:line) . ': ' . l:include_line
+                        echohl None
+                    endif
+                else
+                    call append(l:line, l:include_line)
+                    " add the added line to the saved position lnum to go back correctly
+                    let l:saved_cursor[1] += 1
+                    redrawstatus!
+                    echohl ModeMsg
+                    echomsg 'Added first include at line ' . string(1) . ': ' . l:include_line
+                    echohl None
+                endif
+            endif
+
+            call setpos('.', l:saved_cursor)
+        else
+            "aborted by user
+        endif
+    else
+        " no candidates
+        echomsg 'No include files found for symbol "' . l:current_symbol . '"'
+    endif
+endfunction
+
+function! s:create_keyvals(key, val) abort
+    if type(a:val) == type({})
+        return a:key . ': {' . s:stringize_options(a:val) . '}'
+    else
+        return a:key . ': ' . a:val
+    endif
+endfunction
+
+function! s:stringize_options(opts) abort
+    let dict_type = type({})
+    let keyvals = map(items(a:opts), 's:create_keyvals(v:val[0], v:val[1])')
+    return join(keyvals, ',')
+endfunction
+
+function! s:build_extra_options()
+    let extra_options = ""
+
+    let opts = copy(g:clang_format_style_options)
+
+    let extra_options .= ', ' . s:stringize_options(opts)
+
+    return extra_options
+endfunction
+
+function! s:make_style_options()
+    let extra_options = s:build_extra_options()
+    return printf("'{BasedOnStyle: %s, IndentWidth: %d, UseTab: %s%s}'",
+                        \ g:clang_format_code_style,
+                        \ (exists('*shiftwidth') ? shiftwidth() : &l:shiftwidth),
+                        \ &l:expandtab==1 ? 'false' : 'true',
+                        \ extra_options)
+endfunction
+
+function! CodeFormatSelectedLines(line1, line2)
+    let l:args = printf(' -lines=%d:%d', a:line1, a:line2)
+    let l:args .= printf(' -style=%s ', s:make_style_options())
+    let l:args .= printf('-assume-filename=%s ', shellescape(escape(expand('%'), " \t")))
+
+    " TODO use tempname() with getpid() to generate temporary file names
+    let l:input_file_name = '__clangformat_in__' . tabpagenr()
+    let l:output_file_name = '__clangformat__' . tabpagenr()
+    let l:ed_script_file_name = '__edscript__' . tabpagenr()
+    let l:rnd = localtime() % 0x10000
+    "let l:input_file = expand('%:h') . '/.' . expand('%:t:r') . '.' . expand('%:e')
+    let l:input_file = '/tmp' . '/' . expand('$USER') . '.' .  l:rnd . '.' . l:input_file_name
+    let l:output_file = '/tmp' . '/' . expand('$USER') . '.' .  l:rnd . '.' . l:output_file_name
+    let l:ed_script_file = '/tmp' . '/' . expand('$USER') . '.' .  l:rnd . '.' . l:ed_script_file_name
+
+    " write input_file based on current buffer's content
+    call writefile(getline(1,'$'), l:input_file, 'b')
+
+    " format input_file and store result in output_file
+    "let l:clang_format_cmd = printf("%s %s --", g:clang_format_executable, l:args)
+    "return s:system(l:clang_format_cmd, join(getline(1, '$'), "\n"))
+    let l:clang_format_cmd = printf('%s %s %s > %s', g:clang_format_executable, l:args, l:input_file, l:output_file)
+    call system(l:clang_format_cmd) | let l:shell_error = v:shell_error
+
+    if l:shell_error == 0
+        " produce ed script via diff command (direct redirection is failing via job_start, but works via job_start(['sh', '-c', l:diffcommand]))
+        let l:diff_command = 'diff -e ' . l:input_file . ' ' . l:output_file . ' ' . ' >' . l:ed_script_file
+        call system(l:diff_command) | let l:shell_error = v:shell_error
+
+        " source the ed script (no need to jump or mess with history, undo)
+        silent! execute 'source ' . l:ed_script_file
+
+        " delete temporary files
+        call delete(l:ed_script_file)
+    else
+        echohl WarningMsg
+        echo 'Formatting of lines ' . a:line1 . ' - ' . a:line2 . ' failed'
+        echohl None
+    endif
+
+    call delete(l:input_file)
+    call delete(l:output_file)
+endfunction
+
+let g:clang_format_executable = 'clang-format'
+let g:clang_format_code_style = 'Google'
+let g:clang_format_style_options = {
+            \ 'BreakBeforeBraces' : 'Allman',
+            \ 'ColumnLimit' : '120',
+            \ 'AllowShortIfStatementsOnASingleLine' : 'false',
+            \ 'AllowShortLoopsOnASingleLine' : 'false',
+            \ 'AllowShortFunctionsOnASingleLine' : 'Empty',
+            \ }
+
+" check for clang-format and update formatexpr only when existing
+if has('autocmd')
+    if executable(g:clang_format_executable)
+        autocmd FileType c,cpp,objc,java,javascript,typescript setlocal formatexpr=CodeFormatSelectedLines(v:lnum,v:lnum+v:count-1)
+    endif
+endif
+
+function! TogglePedanticLinting()
+    if g:ale_pedantic_linting == 0
+        let g:ale_pedantic_linting = 1
+        echo 'ALE pedantic linting is turned to level 1 (running ALELint...)'
+    elseif g:ale_pedantic_linting == 1
+        let g:ale_pedantic_linting = 2
+        echo 'ALE pedantic linting is turned to level 2 (running ALELint...)'
+    elseif g:ale_pedantic_linting == 2
+        let g:ale_pedantic_linting = 3
+        echo 'ALE pedantic linting is turned to level 3 (running ALELint...)'
+    else
+        let g:ale_pedantic_linting = 0
+        echo 'ALE pedantic linting is turned off (running ALELint...)'
+    endif
+    ALELint
+endfunction
+
+nmap <Leader>r :call CodeRenameSymbolAtCursor()<CR>
+nmap <Leader>i :call CodeIncludeSymbolAtCursor('n')<CR>
+vmap <Leader>i <Esc>:call CodeIncludeSymbolAtCursor('v')<CR>gv
+nmap <Leader>? :ALEDetail<cr>
+nmap <Leader>P :call TogglePedanticLinting()<cr>
 " =========================================
 " = Project/Versioning system integration =
 " =========================================
@@ -3331,13 +4280,6 @@ if g:PROJECT_name == "SR"
     " start in $PANOS folder in CtrlP file mode
     let g:ctrlp_working_path_mode = 'p'
 
-    " ,f to show current line nested feature info for setup_cli.cfg/teardown_cli.cfg updates
-    map <Leader>f :call ToggleFeatureInfoWindow("")<CR>
-    " ,t to show current .yang file customer tree
-    map <Leader>t :call ToggleYangTreeWindow("")<CR>
-    " ,T to show customer config and state .yang trees
-    map <Leader>T :call ToggleNokiaYangTreeWindows("")<CR>
-
     nmap <silent><F1> :call RefreshTagsAsync("update")<CR>
     imap <silent><F1> <C-o>:call RefreshTagsAsync("update")<CR>
     vmap <silent><F1> <Esc>:call RefreshTagsAsync("update")<CR>gv
@@ -3351,9 +4293,9 @@ else "other projects
     let s:project_specific_path = ""
 
     " F1 to display help
-    nmap <F1> :call SophHelp()<Enter>
-    imap <F1> <C-o>:call SophHelp()<Enter>
-    vmap <F1> <Esc>:call SophHelp()<Enter>gv
+    nmap <silent><F1> :call SophHelp()<Enter>
+    imap <silent><F1> <C-o>:call SophHelp()<Enter>
+    vmap <silent><F1> <Esc>:call SophHelp()<Enter>gv
 endif
 
 let g:default_search_path = substitute('.,**,../include/**,../src/**,' . s:project_specific_path . g:OS_system_includes_dir, '[\/]', g:OS_dir_separator, 'g')
@@ -3375,54 +4317,53 @@ if g:VCS_name == "cvs"
     imap <silent><F6> <C-o>:VCSVimDiff BRANCH<Enter>
     vmap <silent><F6> <Esc>:VCSVimDiff BRANCH<Enter>gv
 
-    nmap <F9> :VCSBlame!<Enter>
-    imap <F9> <C-o>:VCSBlame!<Enter>
-    vmap <F9> <Esc>:VCSBlame!<Enter>gv
+    nmap <silent><F9> :VCSBlame!<Enter>
+    imap <silent><F9> <C-o>:VCSBlame!<Enter>
+    vmap <silent><F9> <Esc>:VCSBlame!<Enter>gv
 
-    nmap <S-F9> :VCSLog<Enter>
-    imap <S-F9> <C-o>:VCSLog<Enter>
-    vmap <S-F9> <Esc>:VCSLog<Enter>gv
+    nmap <silent><S-F9> :VCSLog<Enter>
+    imap <silent><S-F9> <C-o>:VCSLog<Enter>
+    vmap <silent><S-F9> <Esc>:VCSLog<Enter>gv
 
 elseif g:VCS_name == "clearcase"
     let g:loaded_ccase = 0
 
-    nmap <F5> :call DiffOrig()<Enter>
-    imap <F5> <C-o>:call DiffOrig()<Enter>
-    vmap <F5> <Esc>:call DiffOrig()<Enter>gv
+    nmap <silent><F5> :call DiffOrig()<Enter>
+    imap <silent><F5> <C-o>:call DiffOrig()<Enter>
+    vmap <silent><F5> <Esc>:call DiffOrig()<Enter>gv
 
-    nmap <F6> :call DiffCCPred()<Enter>
-    imap <F6> <C-o>:call DiffCCPred()<Enter>
-    vmap <F6> <Esc>:call DiffCCPred()<Enter>gv
+    nmap <silent><F6> :call DiffCCPred()<Enter>
+    imap <silent><F6> <C-o>:call DiffCCPred()<Enter>
+    vmap <silent><F6> <Esc>:call DiffCCPred()<Enter>gv
 
-    nmap <F9> :Ctxlsv<Enter>
-    imap <F9> <C-o>:Ctxlsv<Enter>
-    vmap <F9> <Esc>:Ctxlsv<Enter>gv
+    nmap <silent><F9> :Ctxlsv<Enter>
+    imap <silent><F9> <C-o>:Ctxlsv<Enter>
+    vmap <silent><F9> <Esc>:Ctxlsv<Enter>gv
 
 elseif g:VCS_name == "ecms"
-    nmap <F5> :call MyEcmsGetCmd("vdload")<Enter>
-    imap <F5> <C-o>:call MyEcmsGetCmd("vdload")<Enter>
-    vmap <F5> <Esc>:call MyEcmsGetCmd("vdload")<Enter>gv
+    nmap <silent><F5> :call MyEcmsGetCmd("vdload")<Enter>
+    imap <silent><F5> <C-o>:call MyEcmsGetCmd("vdload")<Enter>
+    vmap <silent><F5> <Esc>:call MyEcmsGetCmd("vdload")<Enter>gv
 
-    nmap <F6> :call MyEcmsGetCmd("vdlatest")<Enter>
-    imap <F6> <C-o>:call MyEcmsGetCmd("vdlatest")<Enter>
-    vmap <F6> <Esc>:call MyEcmsGetCmd("vdlatest")<Enter>gv
+    nmap <silent><F6> :call MyEcmsGetCmd("vdlatest")<Enter>
+    imap <silent><F6> <C-o>:call MyEcmsGetCmd("vdlatest")<Enter>
+    vmap <silent><F6> <Esc>:call MyEcmsGetCmd("vdlatest")<Enter>gv
 
-    nmap <F9> :call MyEcmsGetCmd("mdesc", "-e")<Enter>
-    imap <F9> <C-o>:call MyEcmsGetCmd("mdesc", "-e")<Enter>
-    vmap <F9> <Esc>:call MyEcmsGetCmd("mdesc", "-e")<Enter>gv
+    nmap <silent><F9> :call MyEcmsGetCmd("mdesc", "-e")<Enter>
+    imap <silent><F9> <C-o>:call MyEcmsGetCmd("mdesc", "-e")<Enter>
+    vmap <silent><F9> <Esc>:call MyEcmsGetCmd("mdesc", "-e")<Enter>gv
 
-    nmap <S-F9> :call MyEcmsGetCmd("mdesc", "-v")<Enter>
-    imap <S-F9> <C-o>:call MyEcmsGetCmd("mdesc", "-v")<Enter>
-    vmap <S-F9> <Esc>:call MyEcmsGetCmd("mdesc", "-v")<Enter>gv
+    nmap <silent><S-F9> :call MyEcmsGetCmd("mdesc", "-v")<Enter>
+    imap <silent><S-F9> <C-o>:call MyEcmsGetCmd("mdesc", "-v")<Enter>
+    vmap <silent><S-F9> <Esc>:call MyEcmsGetCmd("mdesc", "-v")<Enter>gv
 
 else "no versioning system
-    nmap <F5> :call DiffOrig()<Enter>
-    imap <F5> <C-o>:call DiffOrig()<Enter>
-    vmap <F5> <Esc>:call DiffOrig()<Enter>gv
+    nmap <silent><F5> :call DiffOrig()<Enter>
+    imap <silent><F5> <C-o>:call DiffOrig()<Enter>
+    vmap <silent><F5> <Esc>:call DiffOrig()<Enter>gv
 endif
 
 let s:localrc=expand("$HOME" . g:OS_dir_separator . ".vimrc_local")
 if filereadable(s:localrc)
     execute "source " . s:localrc
 endif
-
