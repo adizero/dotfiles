@@ -187,7 +187,7 @@ if !has('gui_running')
 
             "Todo: specify correct version for old/new xterm bindings (for now 278 - Ubuntu 13.04 timeframe is the limit)
             if s:term_program ==# 'lxterminal' || s:term_program ==# 'gnome-terminal' ||
-                        \ s:term_program ==# 'xterm' && s:term_version < 278
+                        \ s:term_program ==# 'xterm' && (s:term_version < 278 && s:term_version != 95)
                 "old xterm/lxterminal/gnome terminal (e.g. lxterminal in Lubuntu 13.04)
                 execute "set <xF1>=\eO1;*P"
                 execute "set <xF2>=\eO1;*Q"
@@ -567,22 +567,22 @@ endif
 let b:old_ycm_status = 0
 
 function! Multiple_cursors_before()
-    "let g:ycm_auto_trigger = 0
-    if exists('b:ycm_largefile')
-        let b:old_ycm_status = 0
-    else
-        let b:old_ycm_status = 1
-        let b:ycm_largefile = 1
-    endif
+    call youcompleteme#DisableCursorMovedAutocommands()
+    " if exists('b:ycm_largefile')
+    "     let b:old_ycm_status = 0
+    " else
+    "     let b:old_ycm_status = 1
+    "     let b:ycm_largefile = 1
+    " endif
 endfunction
 
 function! Multiple_cursors_after()
-    "let g:ycm_auto_trigger = 1
-    if b:old_ycm_status == 1
-        if exists('b:ycm_largefile')
-            unlet b:ycm_largefile
-        endif
-    endif
+    call youcompleteme#EnableCursorMovedAutocommands()
+    " if b:old_ycm_status == 1
+    "     if exists('b:ycm_largefile')
+    "         unlet b:ycm_largefile
+    "     endif
+    " endif
 endfunction
 
 """" this does not really trigger YCM, but omni cpp completion instead
@@ -1825,7 +1825,7 @@ function! Quickfix_window_move(type, direction)
         echohl WarningMsg
         if a:type == "quickfix"
             echomsg "Quickfix list is empty"
-            echomsg "Quickfix list is empty"
+        else
             echomsg "Location list for current window is empty"
         endif
         echohl None
@@ -2683,7 +2683,7 @@ let g:VCSCommandDisableExtensionMappings = 1
 nmap _ <Plug>VinegarUp
 
 " === vim-ALE ===
-let g:ycm_show_diagnostics_ui = 0  "disable YCM syntax checking (not needed ALE)
+let g:ycm_show_diagnostics_ui = 0  "disable YCM syntax checking (not needed with ALE)
 "let g:loaded_ale_dont_use_this_in_other_plugins_please = 1
 let g:ale_lint_on_text_changed = 'normal'  " disable with 'never' - see :help ALE
 let g:ale_lint_delay = 200
@@ -3952,6 +3952,8 @@ function! CodeIncludeSymbolAtCursor(mode)
         let l:panos = ''
     endif
 
+    let l:kind_x_list = []
+    let l:kind_normal_list = []
     let l:candidate_list = []
     let l:oldtags = &tags
     let l:oldtagcase = &tagcase
@@ -3991,18 +3993,28 @@ function! CodeIncludeSymbolAtCursor(mode)
             let l:filename = '"' . l:filename . '"'
         endif
 
-        call add(l:candidate_list, l:filename)
+        if l:i.kind ==# 'x'
+            call add(l:kind_x_list, l:filename)
+        else
+            call add(l:kind_normal_list, l:filename)
+        endif
     endfor
+
+    if len(l:kind_normal_list) > 0
+        let l:candidate_list = l:kind_normal_list
+    else
+        let l:candidate_list = l:kind_x_list
+    endif
 
     " sort and make unique candidates
     call uniq(sort(l:candidate_list))
 
-    " prefer *_api.h, then common/*, then system includes (e.g. wind/target/h) and then the rest alphabetically
+    " prefer *_api.h, [_/]api/, then common/*, then system includes (e.g. wind/target/h) and then the rest alphabetically
     let l:input_list = []
 
     let l:idx = 0
     for l:item in l:candidate_list
-        if l:item[:len(l:item)-2] =~# '_api\.h$' || l:item[:len(l:item)-2] =~# '_api/'
+        if l:item[:len(l:item)-2] =~# '_api\.h$' || l:item[:len(l:item)-2] =~# '[_/]api/'
             call add(l:input_list, l:item)
             call remove(l:candidate_list, l:idx)
         else
@@ -4118,6 +4130,8 @@ function! CodeIncludeSymbolAtCursor(mode)
                     echomsg 'Added first include at line ' . string(1) . ': ' . l:include_line
                     echohl None
                 endif
+            else
+                echomsg 'Include line ' . l:include_line . ' is already in the file'
             endif
 
             call setpos('.', l:saved_cursor)
