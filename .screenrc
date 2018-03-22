@@ -21,6 +21,7 @@ altscreen on
 
 # main options
 vbell off
+bell_msg "Bell in window % ... ringing again here \07"
 startup_message off
 defscrollback 20000
 bufferfile "$HOME/.screen/exchange"
