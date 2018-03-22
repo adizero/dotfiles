@@ -150,6 +150,7 @@ auto_view text/html                                      # view html automatical
 
 auto_view text/calendar                                      # view calendar automatically
 
+auto_view application/gzip
 auto_view application/x-gzip
 auto_view application/x-gunzip
 auto_view application/x-tar-gz
@@ -345,6 +346,7 @@ bind index B bounce-message
 macro index b '<enter-command>toggle sidebar_visible<enter><refresh>'
 macro pager b '<enter-command>toggle sidebar_visible<enter><redraw-screen>'
 
+macro index,pager E "<pipe-message>ripmime -i - -d "
 
 # Mutt-kz: Virtual notmuch mailboxes (does not work with vanilla mutt) -----------------------------------------
 
