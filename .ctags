@@ -1,0 +1,53 @@
+--langdef=mib
+--langmap=mib:.mib
+--regex-mib=/^[ \t]*([a-zA-Z0-9_]+)[ \t]*MODULE-IDENTITY[ \t]*$/\1/m,module/
+--regex-mib=/^([a-zA-Z0-9_]+)[ \t]*.*[ \t]*TEXTUAL-CONVENTION/\1/c,conventions/
+--regex-mib=/^[ \t]*([a-zA-Z0-9_]+)[ \t]*OBJECT-TYPE[ \t]*$/\1/d,definitions/
+--regex-mib=/^[ \t]*([a-zA-Z0-9_]+)[ \t]*NOTIFICATION-GROUP[ \t]*$/\1/n,notifications/
+--regex-mib=/^[ \t]*([a-zA-Z0-9_]+)[ \t]*MODULE-COMPLIANCE[ \t]*$/\1/o,compliances/
+--regex-mib=/^[ \t]*([a-zA-Z0-9_]+)[ \t]*OBJECT-GROUP[ \t]*$/\1/g,groups/
+
+--langdef=yaml
+--langmap=yaml:.yaml
+--regex-yaml=/^struct[ \t]+([a-zA-Z0-9_][a-zA-Z0-9_]*):/\1/s,struct/
+--regex-yaml=/^([a-zA-Z0-9_][a-zA-Z0-9_]*):/\1/s,struct/
+--regex-yaml=/^[ \t]*-[ \t]*([a-zA-Z0-9_]?[^.]*[.])*([a-zA-Z0-9_][a-zA-Z0-9_]*)[ \t]*:/\2/m,member/
+
+--langdef=yang
+--langmap=yang:.yang
+--regex-yang=/^[ \t]*module[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/m,Modules/
+--regex-yang=/^[ \t]*submodule[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/s,Submodules/
+--regex-yang=/^[ \t]*import[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/i,Imports/
+--regex-yang=/^[ \t]*typedef[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/t,Types/
+--regex-yang=/^[ \t]*sros:type-translator[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/t,Types/
+--regex-yang=/^[ \t]*sros:request-translator[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/t,Types/
+--regex-yang=/^[ \t]*sros:error-translator[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/t,Types/
+--regex-yang=/^[ \t]*sros:observer[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/t,Types/
+--regex-yang=/^[ \t]*sros:macro[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/t,Types/
+--regex-yang=/^[ \t]*sros:field-template[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/t,Types/
+--regex-yang=/^[ \t]*container[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/c,Containers/
+--regex-yang=/^[ \t]*list[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/a,Lists/
+--regex-yang=/^[ \t]*grouping[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/g,Groupings/
+--regex-yang=/^[ \t]*leaf[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/l,Leafs/
+--regex-yang=/^[ \t]*leaf-list[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/e,Leaflists/
+--regex-yang=/^[ \t]*choice[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/h,Choices/
+--regex-yang=/^[ \t]*enum[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/u,Enums/
+--regex-yang=/^[ \t]*include[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/x,Includes/
+--regex-yang=/^[ \t]*feature[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/f,Features/
+--regex-yang=/^[ \t]*identity[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/y,Identities/
+--regex-yang=/^[ \t]*notification[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/n,Notifications/
+--regex-yang=/^[ \t]*sros-snmp:([a-zA-Z0-9_-]+)[ \t]+([a-zA-Z_][a-zA-Z0-9_-]*)[ \t]*[{]/\2/o,SNMPobjects/
+--regex-yang=/^[ \t]*rpc[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{;]/\1/r,RPCs/
+--regex-yang=/^[ \t]*extension[ \t]+([a-zA-Z0-9_-]+)[ \t]*[{]/\1/z,Extensions/
+
+# --langdef=Rust
+# --langmap=Rust:.rs
+# --regex-Rust=/fn +([a-zA-Z0-9_]+) *[(<{]/\1/f,functions,function definitions/
+# --regex-Rust=/(type|enum|struct|trait)[ \t]+([a-zA-Z0-9_]+) *[<{(;]/\2/T,types,type definitions/
+# --regex-Rust=/mod[ \t]+([a-zA-Z0-9_]+) *[<{(;]/\1/M,modules,module definitions/
+# --regex-Rust=/(static|const) +([a-zA-Z0-9_]+) *[:=]/\2/c,consts,static constants/
+# --regex-Rust=/macro_rules! +([a-zA-Z0-9_]+) *[{]/\1/d,macros,macro definitions/
+# --regex-Rust=/impl([ \t\n]*<[^>]*>)?[ \t]+(([a-zA-Z0-9_:]+)[ \t]*(<[^>]*>)?[ \t]+(for)[ \t]+)?([a-zA-Z0-9_]+)/\6/i,impls,trait implementations/
+
+--languages=C,C++,Tcl,TclOO,ITcl,mib,yaml,yang,Python,Perl,Make,Sh,Vim,Go,Rust,Protobuf,CMake,Asciidoc
+--python-kinds=-i

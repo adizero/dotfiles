@@ -1,0 +1,57 @@
+[general]
+ui = ttyui
+accounts = alu
+#fsync = False
+
+[Account alu]
+localrepository = alu-Local
+remoterepository = alu-Remote
+#status_backend = sqlite
+
+[Repository alu-Local]
+type = Maildir
+localfolders = ~/Mail/Maildir/alu
+#nametrans = lambda folder: {'drafts':  '[Gmail]/Drafts',
+#                            'sent':    '[Gmail]/Sent Mail',
+#                            'important':    '[Gmail]/Important',
+#                            'spam':    '[Gmail]/Spam',
+#                            'starred': '[Gmail]/Starred',
+#                            'trash':   '[Gmail]/Trash',
+#                            'archive': '[Gmail]/All Mail',
+#                            }.get(folder, folder)
+sep = /
+
+[Repository alu-Remote]
+maxconnections = 1
+type = IMAP
+#remotehost = mail.eu.alcatel-lucent.com
+#remoteuser = akocis
+#remotepassfile = ~/.emea_password
+remotehost = outlook.office365.com
+remoteuser = adrian.kocis@nokia.com
+remotepassfile = ~/.microsoft_imap_app_password
+port = 993
+ssl = yes
+realdelete = no
+#nametrans = lambda folder: {'[Gmail]/Drafts':    'drafts',
+#                            '[Gmail]/Sent Mail': 'sent',
+#                            '[Gmail]/Starred':   'starred',
+#                            '[Gmail]/Important':   'important',
+#                            '[Gmail]/Spam':   'spam',
+#                            '[Gmail]/Trash':     'trash',
+#                            '[Gmail]/All Mail':  'archive',
+#                            }.get(folder, folder)
+
+folderfilter = lambda folder: folder not in [
+                                             'Calendar',
+                                             'Contacts',
+                                            ]
+#sslcacertfile = /etc/ssl/certs/ca-certificates.crt
+
+[mbnames]
+enabled = yes
+filename = ~/.mutt/mailboxes
+header = "mailboxes "
+peritem = "+%(accountname)s/%(foldername)s"
+sep = " "
+footer = "\n"

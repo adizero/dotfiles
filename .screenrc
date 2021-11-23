@@ -4,7 +4,7 @@
 attrcolor b ".I"
 
 # tell screen how to set colors. AB = background, AF=foreground (does not work on Solaris)
-termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
+termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm:sitm=\E[3m:ritm=\E[23m'
 #termcapinfo rxvt-unicode 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
 #termcapinfo rxvt-unicode-256color 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
 
@@ -23,7 +23,7 @@ altscreen on
 vbell off
 bell_msg "Bell in window % ... ringing again here \07"
 startup_message off
-defscrollback 20000
+defscrollback 50000
 bufferfile "$HOME/.screen/exchange"
 hardcopydir "$HOME/.screen/hardcopy"
 sorendition dY

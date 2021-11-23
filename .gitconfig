@@ -1,0 +1,48 @@
+[alias]
+    set-hooks = !/usr/local/timostools/git.d/git-helper.sh set-hooks
+    logg = !/usr/local/timostools/git.d/git-helper.sh logg
+    update-helper = "!cd /usr/local/timostools/git.d; git pull; /usr/local/timostools/git.d/git-helper.sh install /usr/local/timostools/git.d"
+    edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; $EDITOR `f`"
+    add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; git add `f`"
+    s = status
+    sh = show
+    d = diff
+    dc = diff --cached
+    lg = log --decorate --graph --all --oneline
+[push]
+    default = upstream
+[diff]
+    renameLimit = 25000
+    tool = vimdiff
+[difftool]
+    prompt = false
+    trustExitCode = true
+[user]
+    name = akocis
+    email = adrian.kocis@nokia.com
+[sr]
+    githelperver = 6da5ed8593604f5c38e962f74419705f29c5afe7
+[apply]
+    whitespace = nowarn
+[helper]
+    verbose = 1
+    showhint = 1
+    showinfo = 1
+[merge]
+    renameLimit = 25000
+    tool = vimconflicts
+[status]
+    submoduleSummary = true
+[mergetool "vimconflicts"]
+    cmd = vim -c ConflictsResolve \"$MERGED\" \"$BASE\" \"$LOCAL\" \"$REMOTE\"
+    trustExitCode = true
+[mergetool]
+    keepBackup = false
+[pull]
+    rebase = true
+[rebase]
+    autoStash = true
+[core]
+    excludesfile = /home/akocis/.gitignore
+[difftool "vimdiff"]
+    trustExitCode = true

@@ -1,0 +1,26 @@
+SYSTEM_MAIL: /usr/local/bin/msmtp
+
+SET_COOKIES:TRUE
+ACCEPT_ALL_COOKIES:TRUE
+PERSISTENT_COOKIES:TRUE
+COOKIE_FILE:/tmp/.lynx_cookies
+COOKIE_SAVE_FILE:/tmp/.lynx_cookies
+#COOKIE_LOOSE_INVALID_DOMAINS:sports.espn.go.com,espn.go.com,.go.com,
+FORCE_SSL_COOKIES_SECURE:FALSE
+
+FORCE_SSL_PROMPT:TRUE
+FORCE_COOKIE_PROMPT:TRUE
+
+#CHARACTER_SET:utf-8
+LOCALE_CHARSET:TRUE
+
+USE_MOUSE:TRUE
+
+# Added by Red Hat:
+DOWNLOADER:View with less:less %s:TRUE
+
+CONNECT_TIMEOUT:3000
+READ_TIMEOUT:3000
+
+STARTFILE:file:/usr/share/doc/HTML/index.html
+HELPFILE:file://localhost/home/akocis/apps/share/lynx_help/lynx_help_main.html

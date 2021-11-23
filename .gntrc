@@ -1,0 +1,115 @@
+# [colors]
+# # The RGB values range in [0, 1000]
+# black = 0; 0; 0
+# red = 1000; 0; 0
+# green = 0; 1000; 0
+# blue = 1000; 500; 500
+# white = 1000; 1000; 1000
+# gray = 700; 700; 700
+# darkgray = 256; 256; 256
+#
+# Note: not possible to define new color names, e.g. yellow = 256; 256; 256
+# Note: ncurses must detect that the terminal is capable of redefining colors
+#       only TERM=xterm-256color seems to do it, but there is not need to redefine colors
+# Note: even setting TERM to xterm-256color does not work within screen (in regard to redefining colors)
+# Note: best setting for TERM is screen-256color (this does not produce visual artifacts - no leftover underscores)
+
+[colorpairs]
+normal = 244; 234
+highlight = 37; 235
+highlightd = 254; 235
+shadow = 232; 234
+title = 254; 235
+titled = 244; 235
+text = 254; 234
+disabled = 245; 234
+# urgent = 234; 136
+urgent = 136; 235
+
+[general]
+color-available = 136; 234
+color-idle = 94; 234
+color-away = 27; 234
+color-offline = 124; 234
+color-message-sent = 37; 234
+# maybe 160 for nickname of the received message (brighter red)
+color-message-received = 124; 234
+color-message-highlight = 234; 136
+color-message-action = 27; 234
+color-timestamp = 27; 234
+
+#shadow = 0
+# There is experimental mouse support (should work in xterm-256color or screen-256color terminals, even rxvt looks to work)
+mouse = 1
+# To use some custom window-manager
+#wm = /usr/lib/gnt/irssi.so
+# This is needed only when really changing terminal colors (not when using from the available colors via colorpairs)
+customcolor = 0
+
+[GntWM::binding]
+c-n = window-next
+c-p = window-prev
+c-r = start-resize
+c-t = start-move
+
+#See below for details on color
+#
+#
+#SOLARIZED HEX     16/8 TERMCOL  XTERM/HEX   L*A*B      RGB         HSB            FINCH COLOR DEFS (RGB * 4)
+#--------- ------- ---- -------  ----------- ---------- ----------- -----------    --------------------------
+#base03    #002b36  8/4 brblack  234 #1c1c1c 15 -12 -12   0  43  54 193 100  21          0 ; 172 ; 216 
+#base02    #073642  0/4 black    235 #262626 20 -12 -12   7  54  66 192  90  26          28 ; 216 ; 264
+#base01    #586e75 10/7 brgreen  240 #585858 45 -07 -07  88 110 117 194  25  46         352 ;440 ;468  
+#base00    #657b83 11/7 bryellow 241 #626262 50 -07 -07 101 123 131 195  23  51        404 ;492 ;524   
+#base0     #839496 12/6 brblue   244 #808080 60 -06 -03 131 148 150 186  13  59        524 ;592 ;600   
+#base1     #93a1a1 14/4 brcyan   245 #8a8a8a 65 -05 -02 147 161 161 180   9  63        588 ;644 ;644   
+#base2     #eee8d5  7/7 white    254 #e4e4e4 92 -00  10 238 232 213  44  11  93        952 ;928 ;852   
+#base3     #fdf6e3 15/7 brwhite  230 #ffffd7 97  00  10 253 246 227  44  10  99        1000 ;984 ;908  
+#yellow    #b58900  3/3 yellow   136 #af8700 60  10  65 181 137   0  45 100  71        724 ;548 ;  0   
+#orange    #cb4b16  9/3 brred    166 #d75f00 50  50  55 203  75  22  18  89  80        812 ; 300 ; 88  
+#red       #dc322f  1/1 red      160 #d70000 50  65  45 220  50  47   1  79  86        880 ; 200 ; 188 
+#magenta   #d33682  5/5 magenta  125 #af005f 50  65 -05 211  54 130 331  74  83        844 ; 216 ;520  
+#violet    #6c71c4 13/5 brmagenta 61 #5f5faf 50  15 -45 108 113 196 237  45  77        432 ;452 ;784   
+#blue      #268bd2  4/4 blue      33 #0087ff 55 -10 -45  38 139 210 205  82  82         152 ;556 ;840  
+#cyan      #2aa198  6/6 cyan      37 #00afaf 60 -35 -05  42 161 152 175  74  63         168 ;644 ;608  
+#green     #859900  2/2 green     64 #5f8700 60 -20  65 133 153   0  68 100  60        532 ;612 ;  0   
+#
+#[colorpairs]
+##normal = base1; black
+##highlight = base2; black
+##highlightd = base3; black
+##shadow = grey; black
+##title = base2; blue
+##titled = base2; black
+##text = base1; black
+##disabled = base0; black
+##urgent = yellow; base01
+#normal = white; black
+#highlight = white; blue
+#highlightd = black; gray
+#shadow = black; darkgray
+#title = white; blue
+#titled = white; gray
+#text = white; blue
+#disabled = gray; black
+#urgent = green; black
+#
+#[Finch]
+##color-available = green; black
+##color-away = blue; black
+##color-idle = base00; black
+##color-offline = shadow; red
+##color-message-sent = cyan; base01
+##color-message-received = red; base01
+##color-message-highlight = black; green
+##color-message-action = yellow; base01
+##color-timestamp = blue; base01
+#color-available = green; black
+#color-away = blue; black
+#color-idle = gray; black
+#color-offline = red; black
+#color-message-sent = cyan; default
+#color-message-received = red; default
+#color-message-highlight = black; green
+#color-message-action = white; default
+#color-timestamp = blue; default

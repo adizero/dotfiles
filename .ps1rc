@@ -72,7 +72,15 @@ function __git_prompt_function () {
         git_ps1=$(__git_ps1)
         if [ "$git_ps1" != "" ]; then
             if [ "$REL" != "" -a "$ROOT" != "" ]; then
-                printf "\033]0;$REL $git_ps1 | $ROOT\007" &
+                # printf "\033]0;$REL $git_ps1 | $ROOT\007" &
+                if [ -n "$PANOS" ]; then
+                    if [ -x "$HOME/bin/cron_ws_automation.sh" ]; then
+                        BUILD_TYPE=" $("$HOME"/bin/cron_ws_automation.sh --print-panos-build-type)"
+                    fi
+                fi
+                printf "\033]0;$REL$BUILD_TYPE$git_ps1 | $ROOT\007" &
+            elif [ "$WS" != "" ] && [ "$SRLINUX" != "" ]; then
+                printf "\033]0;$WS $git_ps1 | $SRLINUX\007" &
             else
                 printf "\033]0;$git_ps1\007" &
             fi
@@ -92,16 +100,21 @@ function __git_prompt_function () {
 
 # Function to set prompt_command to.
 function promptcmd () {
-    history -a
+    # history -a  # this is run automatically by bash (I think)
+    run_on_prompt_command
+
     local SSH_FLAG=0
     local TTY=$(tty | awk -F/dev/ '{print $2}')
     if [[ ${TTY} ]]; then
         local SESS_SRC=$(who | grep "$TTY "  | awk '{print $6 }')
     fi
 
+
     # Titlebar
+    # Ideally this gets the proper sequences from the terminfo (and not hardcoded \e]0;<text>\a)
+    # e.g. tput hs 2>/dev/null && tput tsl && echo <text> && tput fsl
     case ${TERM} in
-        xterm*|screen*  )
+        xterm*|screen*|tmux*  )
             if [ "$CLEARCASE_ROOT" != "" ]; then
                 printf "\033]0;`cleartool lsview -cview -short 2>/dev/null` | $CLEARCASE_ROOT\007"
                 local TITLEBAR=''
@@ -141,6 +154,11 @@ function promptcmd () {
                     disown "%$prompts"
                     local TITLEBAR=''
                 fi
+            elif [ "$WS" != "" ]; then
+                __git_prompt_function "\033]0;$WS | $SRLINUX\007" &
+                prompts=$(jobs | grep __git_prompt_function | awk -F\] '{print $1}' | tr '[' ' ' | xargs)
+                disown "%$prompts"
+                local TITLEBAR=''
             else
 ###             if function_exists __git_ps1; then
 ###                    #git_ps1=`__git_ps1`
@@ -239,6 +257,10 @@ function promptcmd () {
         PS1="${PS1}\[${COLOR_RED}\]\h "
     fi
 
+    if [[ -n ${VIRTUAL_ENV} ]]; then
+        PS1="${PS1}\[${COLOR_GREEN}\](venv) "
+    fi
+
     # Detached Screen Sessions
     #local screen_path=$(which --skip-alias --skip-functions screen 2>/dev/null)
     #local screen_path=$(which screen 2>/dev/null | grep -v "alias ")
@@ -246,14 +268,24 @@ function promptcmd () {
         local screen_path=$(where screen | head -n 1 2>/dev/null | grep -v "alias ")
     elif [ "$CURRENT_OS" == "Linux" ]; then
         local screen_path=$(which screen 2>/dev/null | grep -v "alias ")
+        local tmux_executable=$(command -v tmux)
     fi
 
     if [ -x "${screen_path}" ]; then
-        local DTCHSCRN=$(screen -ls | grep -c Detach | sed "s/ //g")
+        local DTCHSCRN=$(timeout -s SIGKILL 1 "${screen_path}" -ls | grep -c Detach | sed "s/ //g")
         if [ ${DTCHSCRN} -gt 2 ]; then
             PS1="${PS1}\[${COLOR_RED}\][scr:${DTCHSCRN}] "
         elif [ ${DTCHSCRN} -gt 0 ]; then
             PS1="${PS1}\[${COLOR_YELLOW}\][scr:${DTCHSCRN}] "
+        fi
+    fi
+
+    if [ -x "${tmux_executable}" ]; then
+        local DTCHSCRN=$(timeout -s SIGKILL 1 "${tmux_executable}" ls 2>/dev/null | grep -c -v "\(attached\)")
+        if [ ${DTCHSCRN} -gt 2 ]; then
+            PS1="${PS1}\[${COLOR_RED}\][tmx:${DTCHSCRN}] "
+        elif [ ${DTCHSCRN} -gt 0 ]; then
+            PS1="${PS1}\[${COLOR_YELLOW}\][tmx:${DTCHSCRN}] "
         fi
     fi
 

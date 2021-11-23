@@ -1,0 +1,95 @@
+source ~/.muttrc.common
+
+# override cache folders (make sure to create the parent folder: mkdir -p ~/.cache/neomutt)
+set header_cache="~/.cache/neomutt/headers"
+set message_cachedir="~/.cache/neomutt/bodies"
+
+# setup NeoMutt specific features
+
+# set new_mail_command="notify-send --icon='/home/santiago/Pictures/neomutt.png' \
+#                       'New Email' '%n new messages, %u unread.' &"
+#
+
+# the mailbox is not known at the time of sending notification                       
+# NeoMutt limitation: https://neomutt.org/feature/new-mail
+set new_mail_command = '~/.mutt/new_mail.sh'
+
+set sidebar_folder_indent
+set sidebar_short_path
+set mail_check_stats
+set sidebar_format = "%B%* %?N?(%N) ?%?F?[%F] ?%S"
+
+# Note: sidebar-toggle-virtual is not implemented in NeoMutt ???
+# bind index,pager \cb sidebar-toggle-virtual
+# macro index \cb '<sidebar-toggle-virtual>'
+
+macro index \cq '<vfolder-from-query>'
+macro index \\ '<vfolder-from-query>'
+bind index,pager X change-vfolder
+bind index,pager + entire-thread
+bind index - limit-current-thread
+
+
+# Attach Headers Color Feature
+# Color if the attachment is autoviewed
+color   attach_headers     brightgreen     default    "Autoview"
+# Color only the brackets around the headers
+color   attach_headers     brightyellow    default    "^\\[--"
+color   attach_headers     brightyellow    default    "--]$"
+# Color the mime type and the size
+color   attach_headers     green           default    "Type: [a-z]+/[a-z0-9\-]+"
+color   attach_headers     green           default    "Size: [0-9\.]+[KM]"
+# Color GPGME signature checks
+color   attach_headers     brightgreen     default    "Good signature from.*"
+color   attach_headers     brightred       default    "Bad signature from.*"
+color   attach_headers     brightred       default    "BAD signature from.*"
+color   attach_headers     brightred       default    "Note: This key has expired!"
+color   attach_headers     brightmagenta   default    "Problem signature from.*"
+color   attach_headers     brightmagenta   default    "WARNING: This key is not certified with a trusted signature!"
+color   attach_headers     brightmagenta   default    "         There is no indication that the signature belongs to the owner."
+color   attach_headers     brightmagenta   default    "can't handle these multiple signatures"
+color   attach_headers     brightmagenta   default    "signature verification suppressed"
+color   attach_headers     brightmagenta   default    "invalid node with packet of type"
+
+
+# Index-color feature
+## # Entire index line
+## color index white black '.*'
+## # Author name, %A %a %F %L %n
+## # Give the author column a dark grey background
+## color index_author default color234 '.*'
+## # Highlight a particular from (~f)
+## color index_author brightyellow color234 '~fRay Charles'
+## # Message flags, %S %Z
+## # Highlight the flags for flagged (~F) emails
+## color index_flags default red '~F'
+## # Subject, %s
+## # Look for a particular subject (~s)
+## color index_subject brightcyan default '~s\(closes #[0-9]+\)'
+## # Number of messages in a collapsed thread, %M
+## color index_collapsed default brightblue
+## # Date field
+## color index_date green default
+## # Message label, %y %Y
+## color index_label default brightgreen
+## # Message number, %C
+## color index_number red default
+## # Message size, %c %l
+## color index_size cyan default
+
+
+# The 'forgotten-attachment' feature provides a new setting for NeoMutt that
+# alerts the user if the message body contains a certain regular expression but there are
+# no attachments added. This is meant to ensure that the user does not forget
+# to attach a file after promising to do so in the mail.
+
+# Ask if the user wishes to abort sending if $abort_noattach_regex is found in the
+# body, but no attachments have been added
+# It can be set to:
+#    "yes"     : always abort
+#    "ask-yes" : ask whether to abort
+#    "no"      : send the mail
+set abort_noattach = ask-yes
+# Search for the following regular expression in the body of the email
+# English: attach, attached, attachment, attachments
+set abort_noattach_regex = "\\<attach(|ed|ments?)\\>"
