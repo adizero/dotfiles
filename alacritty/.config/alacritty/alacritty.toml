@@ -1,0 +1,14 @@
+[window]
+decorations = "None"
+[font]
+# normal = { family = "DejaVuSansMNerdFont" }
+normal = { family = "HackNerdFont" }
+# size = 10.25
+# offset = { y = -2 }
+# glyph_offset = { x = 1, y = -2 }
+size = 10
+[colors]
+# primary = { background = "#000000" }
+[keyboard]
+# completely disable Ctrl+Insert keybinding to reach tty (only copies selected text to clipboard)
+bindings = [ { key = "Insert", mods = "Control", action = "None" } ]
