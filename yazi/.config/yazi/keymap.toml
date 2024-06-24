@@ -1,0 +1,20 @@
+[[manager.prepend_keymap]]
+on   = [ "<Backspace>" ]
+run  = "leave"
+desc = "Go back to the parent directory"
+[[manager.prepend_keymap]]
+on   = [ "<C-s>" ]
+run  = 'shell "$SHELL" --block --confirm'
+desc = "Open shell here"
+[[input.prepend_keymap]]
+on   = [ "<Esc>" ]
+run  = "close"
+desc = "Cancel input"
+[[manager.prepend_keymap]]
+on   = [ "<Enter>" ]
+run  = "plugin --sync smart-enter"
+desc = "Enter the child directory, or open the file"
+[[manager.prepend_keymap]]
+on   = [ "p" ]
+run  = "plugin --sync smart-paste"
+desc = "Paste into the hovered directory or CWD"
