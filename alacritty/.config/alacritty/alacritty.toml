@@ -11,4 +11,7 @@ size = 10
 # primary = { background = "#000000" }
 [keyboard]
 # completely disable Ctrl+Insert keybinding to reach tty (only copies selected text to clipboard)
-bindings = [ { key = "Insert", mods = "Control", action = "None" } ]
+bindings = [
+             { key = "Insert", mods = "Control", action = "None" },
+             { key = "ContextMenu", mods = "None", action = "ResetFontSize" }
+           ]
