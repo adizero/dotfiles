@@ -13,14 +13,15 @@ size = 10
 [keyboard]
 # completely disable Ctrl+Insert keybinding to reach tty (only copies selected text to clipboard)
 bindings = [
+             # { key = "Insert", mods = "Control", chars = "\u001b[2;5~" },
              { key = "Insert", mods = "Control", action = "None" },
              { key = "ContextMenu", mods = "None", action = "ResetFontSize" },
-             { key = "-", mods = "Control", action = "None" },
-             { key = "=", mods = "Control", action = "None" },
+             { key = "-", mods = "Control", chars = "\u001f" },
+             { key = "=", mods = "Control", chars = "=" },  # could be bound to something else
              { key = "_", mods = "Control|Shift", action = "DecreaseFontSize" },
              { key = "+", mods = "Control|Shift", action = "IncreaseFontSize" },
-             { key = "NumpadSubtract", mods = "Control", action = "None" },
-             { key = "NumpadAdd", mods = "Control", action = "None" },
+             { key = "NumpadSubtract", mods = "Control", chars = "" },  # somehow triggers regular Ctrl-- (bug?)
+             { key = "NumpadAdd", mods = "Control", chars = "+" },  # could be bound to something else
              { key = "NumpadSubtract", mods = "Control|Shift", action = "DecreaseFontSize" },
              { key = "NumpadAdd", mods = "Control|Shift", action = "IncreaseFontSize" },
            ]
