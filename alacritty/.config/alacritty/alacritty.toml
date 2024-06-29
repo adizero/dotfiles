@@ -14,5 +14,13 @@ size = 10
 # completely disable Ctrl+Insert keybinding to reach tty (only copies selected text to clipboard)
 bindings = [
              { key = "Insert", mods = "Control", action = "None" },
-             { key = "ContextMenu", mods = "None", action = "ResetFontSize" }
+             { key = "ContextMenu", mods = "None", action = "ResetFontSize" },
+             { key = "-", mods = "Control", action = "None" },
+             { key = "=", mods = "Control", action = "None" },
+             { key = "_", mods = "Control|Shift", action = "DecreaseFontSize" },
+             { key = "+", mods = "Control|Shift", action = "IncreaseFontSize" },
+             { key = "NumpadSubtract", mods = "Control", action = "None" },
+             { key = "NumpadAdd", mods = "Control", action = "None" },
+             { key = "NumpadSubtract", mods = "Control|Shift", action = "DecreaseFontSize" },
+             { key = "NumpadAdd", mods = "Control|Shift", action = "IncreaseFontSize" },
            ]
