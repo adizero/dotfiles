@@ -1,0 +1,113 @@
+# echo -e "\e" does not work as escape sequence in MacOS (\x1b or \033 do work)
+alias reset_terminal='echo -ne "\x1b[?1002l" ; echo -ne "\x1b[?1003l" ; echo -ne "\x1b[0 q" ; tput smcup; tput rmcup'
+
+# setterm is not in MacOS (add existence check to it)
+alias sanitize_terminal='echo -e "\x1bc" ; stty sane; if command -v setterm &>/dev/null; then setterm -reset; fi; reset; tput reset; clear'
+
+# # Home
+# alias ssh_hp='ssh akocis@192.168.1.101; reset_terminal'
+# alias ssh_macbook='ssh laurabartova@192.168.1.102; reset_terminal'
+# alias ssh_router='ssh admin@192.168.1.1'
+# 
+# # Palkovicova
+# # alias ssh_home_router='ssh admin@84.16.38.156 -p 443'
+# alias ssh_home_router='ssh admin@84.16.38.156'
+# alias ssh_home_core2quad='ssh adrian@84.16.38.156 -p 80'
+# 
+# # Bratislava Lab
+# # alias akocis_devpc="ssh -o \"HostKeyAlgorithms +ssh-rsa\" -o \"PubkeyAcceptedKeyTypes +ssh-rsa\" akocis@135.243.194.247 ; reset_terminal"
+# alias akocis_devpc="ssh akocis@135.243.194.247 ; reset_terminal"
+# # alias akocis_devpc2='ssh akocis@135.243.195.45 ; reset_terminal'
+# # alias lbartova_devpc='ssh lbartova@135.243.195.205 ; reset_terminal'
+# # alias lbartova_devpc2='ssh lbartova@135.243.195.46 ; reset_terminal'
+
+# tunnel via Palkovicova router ASUS-RC58
+# alias tunnel_devpc='ssh akocis@84.16.38.156 -p 19999 ; reset_terminal'
+# alias auto_devpc="ssh -t akocis@84.16.38.156 -p 19999 \"bash -lc 'tmux a' ; bash -l\" ; reset_terminal"
+
+# tunnel via Palkovicova router ASUS-AC66U_B1
+alias tunnel_devpc="ssh -o \"HostKeyAlgorithms +ssh-rsa\" -o \"PubkeyAcceptedKeyTypes +ssh-rsa\" akocis@84.16.38.156 -p 19999 ; reset_terminal"
+alias auto_devpc="ssh -t -o \"HostKeyAlgorithms +ssh-rsa\" -o \"PubkeyAcceptedKeyTypes +ssh-rsa\" akocis@84.16.38.156 -p 19999 \"bash -lc 'tmux a' ; bash -l\" ; reset_terminal"
+# alias auto_lbartova_devpc="ssh -t lbartova@84.16.38.156 -p 19998 \"bash -lc 'screen -x' ; bash -l\" ; reset_terminal"
+alias sshuttle_devpc="sudo sshuttle --dns -r akocis@84.16.38.156:19999 ${intranet_ip_ranges}"
+
+#ipdlabauth.sk.alcatel-lucent.com 135.247.67.185
+##alias ipdlabauth='ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 akocis@ipdlabauth.sk.alcatel-lucent.com'
+#akocisdevpc.lab.sk.alcatel-lucent.com 135.243.194.247
+
+# # Mountain View Lab (Almanor)
+# alias akocis_mvpc='ssh -Y akocis@135.231.194.32 ; reset_terminal'
+# alias akocis_mvpc2='ssh -Y akocis@135.231.194.98 ; reset_terminal'
+# alias lbartova_mvpc='ssh -Y lbartova@135.231.194.38 ; reset_terminal'
+# alias lbartova_mvpc2='ssh -Y lbartova@135.231.193.73 ; reset_terminal'
+
+# # tunnel via Windows 10 virtual box (Palo Alto GlobalProtect firewall)
+# alias auto_bapc="ssh -t -o \"HostKeyAlgorithms +ssh-rsa\" -o \"PubkeyAcceptedKeyTypes +ssh-rsa\" akocis@localhost -p 8181 \"bash -lc 'tmux a' ; bash -l\" ; reset_terminal"
+# # alias auto_bapc_laura="ssh -t -o \"HostKeyAlgorithms +ssh-rsa\" -o \"PubkeyAcceptedKeyTypes +ssh-rsa\" akocis@localhost -p 8181 \"bash -lc 'ssh -t lbartova@balbartova1 tmux a' ; bash -l\" ; reset_terminal"
+
+# alias auto_mvpc="ssh -t akocis@localhost -p 8080 \"bash -lc 'tmux a' ; bash -l\" ; reset_terminal"
+# alias auto_mvpc_laura="ssh -t lbartova@localhost -p 8282 \"bash -lc 'tmux a' ; bash -l\" ; reset_terminal"
+
+alias auto_mvpc_openconnect="ssh -t akocis@localhost -p 9090 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \"bash -lc 'tmux a' ; bash -l\" ; reset_terminal"
+alias auto_mvpc_globalprotect="ssh -t akocis@localhost -p 9191 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \"bash -lc 'tmux a' ; bash -l\" ; reset_terminal"
+
+# adding this causes network issues and almost immediate openconnect disconnects 131.228.0.0/16
+alias sshuttle_mvpc="sudo sshuttle --dns -r akocis@localhost:8080 ${intranet_ip_ranges}"
+alias sshuttle_mvpc_openconnect="sudo sshuttle --dns -r akocis@localhost:9090 ${intranet_ip_ranges} -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'"
+alias sshuttle_mvpc_openconnect_laura="sudo sshuttle --dns -r lbartova@localhost:9090 ${intranet_ip_ranges} -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'"
+
+alias nokiavpn='$HOME/Dropbox/Homework/tmux_vpn.sh '
+alias nokiavpnba='$HOME/Dropbox/Homework/tmux_vpn_ba.sh '
+alias nokiavpn2='$HOME/Dropbox/Homework/tmux_vpn2.sh '
+
+# Personal
+alias ls='ls --color=auto'
+alias ll='ls -al'
+alias vi='vim'
+
+alias bell='echo -ne "\a"'
+
+phgrep() { grep --color --no-filename "$@" ~/.persistent_history; }
+
+# runs vim with the last command executed in the shell (indented for rg commands)
+alias vimh='__h="$(fc -nl -1) -n --column | cat"; vim -c "cexpr system(\"$__h\")" ; unset __h'
+
+# alias t='todo.sh'
+
+# Faster navigation to parent directory
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+alias ......="cd ../../../../.."
+alias .......="cd ../../../../../.."
+
+# Yazi change cwd on exit wrapper
+yy() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+}
+
+# Eza
+alias l="eza -l --icons --git -a -s modified"
+alias ll="eza -l --icons --git -a"
+alias lt="eza --tree --level=2 --long --icons --git"
+alias lt3="eza --tree --level=3 --long --icons --git"
+alias lt4="eza --tree --level=4 --long --icons --git"
+alias l.="eza -dF .*"
+# %N in time-style crashes eza (workaround is to use full-iso even though it has the superfluous time zone)
+# alias ltime="eza -l --icons --git -a --time-style='+%Y-%m-%d %H:%M:%S.%N'"
+alias ltime="eza -l --icons --git -a -s time --time-style='full-iso'"
+alias lsize="eza -l --icons --git -a -s size"
+alias lsized="eza -l --icons --git -a -s size --total-size"
+
+cx() { cd "${@}" && l; }
+fcd() { cd "$(find . -type d -not -path '*/.*' 2>/dev/null | fzf)" && l; }
+fv() { $EDITOR "$(find . -type f -not -path '*/.*' 2>/dev/null | fzf)"; }
+
+# Zoxide
+zx() { z "${@}" && l; }
