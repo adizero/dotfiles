@@ -13,16 +13,23 @@ set -o emacs
 HISTFILE=~/.zsh_history
 HISTSIZE=100000000
 SAVEHIST=100000000
-# setopt APPEND_HISTORY
-setopt INC_APPEND_HISTORY
-setopt HIST_FIND_NO_DUPS
-# setopt HIST_IGNORE_DUPS
 setopt EXTENDED_HISTORY
+setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_DUPS
+# setopt HIST_IGNORE_ALL_DUPS
+# setopt HIST_IGNORE_SPACE
+setopt INC_APPEND_HISTORY
 
 # Persistent history
-PERSISTENT_HISTORY_FILE=~/.zsh_persistent_history
+PERSISTENT_HISTORY_FILE=~/.persistent_history
 zshaddhistory() {
-    print -r -- "${$} [$(date +%F\ %T)] ${1%%$'\n'}" >> "${PERSISTENT_HISTORY_FILE}"
+    typeset -g __persistent_history_last
+    local command="${1%%$'\n'}"
+    # print -r -- "${$} [$(date +%F\ %T)] ${1%%$'\n'}" >> "${PERSISTENT_HISTORY_FILE}"
+    if [ "$command" != "$__persistent_history_last" ]; then
+        print -r -- "${$} [$(date +%F\ %T)] ${command}" >> "${PERSISTENT_HISTORY_FILE}"
+        __persistent_history_last="$command"
+    fi
     # print -sr -- ${1%%$'\n'}
     # fc -p "${HISTFILE}"
 }

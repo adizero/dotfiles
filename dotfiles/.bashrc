@@ -13,6 +13,7 @@ export PS4='\e[33m+ ${BASH_SOURCE:${#BASH_SOURCE}<80?0:-80}:${LINENO} \e[0m'
 
 [ -r ~/.commonrc ] && source ~/.commonrc
 
+HISTCONTROL=ignoredups
 # persistent history
 PERSISTENT_HISTORY_FILE=~/.persistent_history
 export HISTTIMEFORMAT="[%F %T] "
