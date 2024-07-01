@@ -43,15 +43,21 @@ bindkey "\e[A" up-line-or-search
 bindkey "\e[B" down-line-or-search
 bindkey " " magic-space
 
-# bindkey "\e[3~" delete-char
+# Terminal specific insert key bindings
+bindkey "\e[2~" quoted-insert
+
+# Terminal specific delete key bindings
+bindkey "\e[3~" delete-char
+# st
+bindkey "\e[P" delete-char
 # # "\C-H": delete-char
 # bindkey "\C-?" delete-char
 
 # Terminal specific home/end key bindings
-# vt
+# vt, st(end)
 bindkey "\e[1~" beginning-of-line
 bindkey "\e[4~" end-of-line
-# kvt
+# xterm, kvt, st(home)
 bindkey "\e[H" beginning-of-line
 bindkey "\e[F" end-of-line
 # rxvt and konsole (i.e. the KDE-app...)
@@ -66,29 +72,6 @@ bindkey "\e[8~" end-of-line
 bindkey '\e' vi-cmd-mode
 # Make Vi mode transitions faster (KEYTIMEOUT is in hundredths of a second)
 export KEYTIMEOUT=1
-# function zle-line-init zle-keymap-select {
-#   RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
-#   RPS2=$RPS1
-#   zle reset-prompt
-# }
-# zle -N zle-line-init
-# zle -N zle-keymap-select
-
-# export PREFIX="main"
-# zle-keymap-select() {
-#   # RPS1="${${KEYMAP/vicmd/-- NORMAL --}/(main|viins)/-- INSERT --}"
-#   # RPS2=$RPS1;
-#   if [ -z "${PREFIX}" ]; then
-#     PROMPT="${KEYMAP} ${PROMPT}"
-#   else
-#     PROMPT="${KEYMAP} ${PROMPT##${PREFIX} }"
-#   fi
-#   PREFIX="${KEYMAP}"
-#   zle reset-prompt
-# }
-# # zle -N zle-line-init
-# zle -N zle-keymap-select
-
 
 # Transient zsh prompts (will shorten left prompt and clear right prompt on enter)
 zle-line-init() {
@@ -170,29 +153,6 @@ zle -N earlier-last-word
 # Switched to custom wrapper to store __earlier_last_word flag
 # bindkey '\e.' insert-last-word
 bindkey '\e.' earlier-last-word
-
-# earlier-word() {
-#     emulate -L zsh
-#     setopt typesetsilent
-# 
-#     echo "WORD  ${__copyword} LAST $LASTWIDGET WIDGET $WIDGET NUM $NUMERIC" 
-#     typeset -g __copyword
-#     if (( ${NUMERIC:-0} )); then
-#         # 1 means last word, 2 second last, etc.
-#         (( __copyword = ${NUMERIC:-0} ))
-#         zstyle -s :$WIDGET widget __copywidget
-#     elif [[ -n $__copyword && $WIDGET = $LASTWIDGET ]]; then
-#         (( __copyword-- ))
-#     elif [[ $LASTWIDGET = *insert-last-word ]]; then
-#         __copyword=-2
-#         typeset -g __copywidget=$LASTWIDGET
-#     else
-#         __copyword=-1
-#         zstyle -s :$WIDGET widget __copywidget
-#     fi
-# 
-#     zle ${__copywidget:-.insert-last-word} 0 $__copyword
-# }
 
 earlier-word() {
     emulate -L zsh
