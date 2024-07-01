@@ -62,7 +62,6 @@ pathadd $HOME/bin
 pathadd $HOME/.local/bin after
 
 # Environment variables
-# PATH="/home/akocis/perl5/bin${PATH:+:${PATH}}"; export PATH;
 pathadd $HOME/perl5/bin
 PERL5LIB="/home/akocis/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
 PERL_LOCAL_LIB_ROOT="/home/akocis/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
@@ -81,7 +80,7 @@ setterm --bfreq 7000 --blength 50 2>/dev/null
 
 # Setup terminal apps
 export PAGER=less
-[ -x "$(command -v nvim)" ] && { export EDITOR=nvim VISUAL=nvim } || { export EDITOR=vim VISUAL=vim }
+[ -x "$(command -v nvim)" ] && { export EDITOR=nvim VISUAL=nvim; } || { export EDITOR=vim VISUAL=vim; }
 
 # FZF
 [ -x "$(command -v fd)" ] && export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'

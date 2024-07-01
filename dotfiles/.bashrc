@@ -9,6 +9,8 @@ fi
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# Bash uses GNU Readline and therefore immediately sources ~/.inputrc (fallback is /etc/inputrc)
+
 export PS4='\e[33m+ ${BASH_SOURCE:${#BASH_SOURCE}<80?0:-80}:${LINENO} \e[0m'
 
 [ -r ~/.commonrc ] && source ~/.commonrc
