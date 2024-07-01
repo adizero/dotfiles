@@ -5,30 +5,16 @@ if [ -z "${USER}" ]; then
     fi
 fi
 
-# Turn off flow control <C-S> and <C-Q> key only for interactive session to not collide with scp/ssh
-[[ $- == *i* ]] && stty -ixon
-
-#Xterm does not support setting of --bfreq and --blength (hence the 2>/dev/null)
-setterm --bfreq 7000 --blength 50 2>/dev/null
-
 # Locale (should be set already via /etc/profile.d/locale.sh -> /etc/locale.conf)
 export LANG=en_US.UTF-8
 
-# Setup terminal apps
-export PAGER=less
-export EDITOR=vim
-export VISUAL=vim
-
-# FZF
-[ -x "$(command -v fd)" ] && export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
-
-# Nokia intranet ip ranges
-intranet_ip_ranges() { if [ -x $HOME/get_intranet_ranges.sh ]; then $HOME/get_intranet_ranges.sh; else $HOME/Dropbox/Homework/get_intranet_ranges.sh; fi; }
-
+# Path functions (assuming /usr/bin/{sed,grep} exists)
 pathadd() {
     dir="${1%/}"
-    if [ -d "${dir}" ] && ! echo "$PATH" | grep -E -q "(^|:)${dir}($|:)"; then
-        if [ "$2" = "after" ] ; then
+    if [ -d "${dir}" ] && ! echo "$PATH" | /usr/bin/grep -E -q "(^|:)${dir}($|:)"; then
+        if [ -z "$PATH" ]; then
+            PATH="${dir}"
+        elif [ "$2" = "after" ] ; then
             PATH="$PATH:${dir}"
         else
             PATH="${dir}:$PATH"
@@ -37,13 +23,15 @@ pathadd() {
 }
 
 pathrm() {
-    PATH="$(echo "$PATH" | sed -e "s;\(^\|:\)${1%/}\(:\|\$\);\1\2;g" -e 's;^:\|:$;;g' -e 's;::;:;g')"
+    PATH="$(echo "$PATH" | /usr/bin/sed -e "s;\(^\|:\)${1%/}\(:\|\$\);\1\2;g" -e 's;^:\|:$;;g' -e 's;::;:;g')"
 }
 
 python_pathadd() {
     dir="${1%/}"
-    if [ -d "${dir}" ] && ! echo "$PYTHONPATH" | grep -E -q "(^|:)${dir}($|:)" ; then
-        if [ "$2" = "after" ] ; then
+    if [ -d "${dir}" ] && ! echo "$PYTHONPATH" | /usr/bin/grep -E -q "(^|:)${dir}($|:)" ; then
+        if [ -z "$PATH" ]; then
+            PYTHONPATH="${dir}"
+        elif [ "$2" = "after" ] ; then
             PYTHONPATH="$PYTHONPATH:${dir}"
         else
             PYTHONPATH="${dir}:$PYTHONPATH"
@@ -52,13 +40,15 @@ python_pathadd() {
 }
 
 python_pathrm() {
-    PYTHONPATH="$(echo "$PYTHONPATH" | sed -e "s;\(^\|:\)${1%/}\(:\|\$\);\1\2;g" -e 's;^:\|:$;;g' -e 's;::;:;g')"
+    PYTHONPATH="$(echo "$PYTHONPATH" | /usr/bin/sed -e "s;\(^\|:\)${1%/}\(:\|\$\);\1\2;g" -e 's;^:\|:$;;g' -e 's;::;:;g')"
 }
 
 xdg_data_dirs_add() {
     dir="${1%/}"
-    if [ -d "${dir}" ] && ! echo "$XDG_DATA_DIRS" | grep -E -q "(^|:)${dir}($|:)"; then
-        if [ "$2" = "after" ] ; then
+    if [ -d "${dir}" ] && ! echo "$XDG_DATA_DIRS" | /usr/bin/grep -E -q "(^|:)${dir}($|:)"; then
+        if [ -z "$PATH" ]; then
+            XDG_DATA_DIRS="${dir}"
+        elif [ "$2" = "after" ] ; then
             XDG_DATA_DIRS="$XDG_DATA_DIRS:${dir}"
         else
             XDG_DATA_DIRS="${dir}:$XDG_DATA_DIRS"
@@ -80,6 +70,24 @@ PERL_MB_OPT="--install_base \"/home/akocis/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/home/akocis/perl5"; export PERL_MM_OPT;
 
 export PATH
+
+# assuming /usr/bin is in path below this point
+
+# Turn off flow control <C-S> and <C-Q> key only for interactive session to not collide with scp/ssh
+[[ $- == *i* ]] && stty -ixon
+
+#Xterm does not support setting of --bfreq and --blength (hence the 2>/dev/null)
+setterm --bfreq 7000 --blength 50 2>/dev/null
+
+# Setup terminal apps
+export PAGER=less
+[ -x "$(command -v nvim)" ] && { export EDITOR=nvim VISUAL=nvim } || { export EDITOR=vim VISUAL=vim }
+
+# FZF
+[ -x "$(command -v fd)" ] && export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+
+# Nokia intranet ip ranges
+intranet_ip_ranges() { if [ -x $HOME/get_intranet_ranges.sh ]; then $HOME/get_intranet_ranges.sh; else $HOME/Dropbox/Homework/get_intranet_ranges.sh; fi; }
 
 # Basic prompt
 # PS1='[\u@\h \W]\$ '
