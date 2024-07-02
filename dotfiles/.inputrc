@@ -1,0 +1,38 @@
+$include /etc/inputrc
+
+"\e[3~": delete-char
+# "\C-H": delete-char
+"\C-?": delete-char
+# this is actually equivalent to "\C-?": delete-char
+# VT
+"\e[1~": beginning-of-line
+"\e[4~": end-of-line
+# kvt
+"\e[H":beginning-of-line
+"\e[F":end-of-line
+# rxvt and konsole (i.e. the KDE-app...)
+"\e[7~":beginning-of-line
+"\e[8~":end-of-line
+
+# By default up/down are bound to previous-history
+# and next-history respectively. The following does the
+# same but gives the extra functionality where if you
+# type any text (or more accurately, if there is any text
+# between the start of the line and the cursor),
+# the subset of the history starting with that text
+# is searched (like 4dos for e.g.).
+# Note to get rid of a line just Ctrl-C
+"\e[B": history-search-forward
+"\e[A": history-search-backward
+
+$if Bash
+  # F10 toggles mc on and off
+  # Note Ctrl-o toggles panes on and off in mc
+  #"\e[21~": "mc\C-M"
+
+  #do history expansion when space entered
+  Space: magic-space
+$endif
+
+set show-all-if-ambiguous on
+set visible-stats on
