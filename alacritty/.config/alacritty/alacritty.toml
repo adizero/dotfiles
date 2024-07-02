@@ -10,6 +10,8 @@ offset = { y = -2 }
 size = 10
 [colors]
 # primary = { background = "#000000" }
+[mouse]
+hide_when_typing = true
 [keyboard]
 # completely disable Ctrl+Insert keybinding to reach tty (only copies selected text to clipboard)
 bindings = [
