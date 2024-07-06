@@ -82,7 +82,7 @@ editor_backup_extension=~
 editor_filesize_threshold=64M
 editor_stop_format_chars=-+*\\,.;:&>
 mcview_eof=
-skin=default
+skin=yadt256-defbg
 
 shadows=true
 
@@ -147,9 +147,22 @@ permission_mode=false
 torben_fj_mode=false
 quick_search_mode=2
 select_flags=6
+simple_swap=false
+
+[FindFile]
+file_case_sens=true
+file_shell_pattern=true
+file_find_recurs=true
+follow_symlinks=false
+file_skip_hidden=false
+file_all_charsets=false
+content_case_sens=true
+content_regexp=false
+content_first_hit=false
+content_whole_words=false
+content_all_charsets=false
+ignore_dirs_enable=true
+ignore_dirs=
 
 [Panelize]
-Find rejects after patching=find . -name \\*.rej -print
-Find SUID and SGID programs=find . \\( \\( -perm -04000 -a -perm /011 \\) -o \\( -perm -02000 -a -perm /01 \\) \\) -print
 Modified git files=git ls-files --modified
-Find *.orig after patching=find . -name \\*.orig -print
