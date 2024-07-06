@@ -20,6 +20,32 @@ setopt HIST_IGNORE_DUPS
 # setopt HIST_IGNORE_SPACE
 setopt INC_APPEND_HISTORY
 
+# Wrap builtin zsh history in a function to replicate bash behavior
+# - without args bash shows full history, zsh shows only last 15 lines
+# - with positive number bash shows only that many last lines, zsh instead starts from that number
+# - zsh uses negative number to start from the end of the history
+history() {
+    # if no arguments, call zsh builtin history 1 (to emulate bash)
+    if [[ $# -eq 0 ]]; then
+        builtin history 1
+        return
+    fi
+
+    # if the first argument is a number, call zsh builtin history with that negative number (to emulate bash)
+    local number="${1#[-+]}"
+    case ${number} in
+        ''|*[!0-9]*) break;;
+        *)
+            set -- "-${number}" "${@:2}"
+            builtin history "$@"
+            return
+            ;;
+    esac
+
+    # in all other cases forward everything to zsh builtin history
+    builtin history "$@"
+}
+
 # Persistent history
 PERSISTENT_HISTORY_FILE=~/.persistent_history
 zshaddhistory() {
