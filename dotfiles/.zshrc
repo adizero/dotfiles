@@ -34,7 +34,7 @@ history() {
     # if the first argument is a number, call zsh builtin history with that negative number (to emulate bash)
     local number="${1#[-+]}"
     case ${number} in
-        ''|*[!0-9]*) break;;
+        ''|*[!0-9]*) ;;
         *)
             set -- "-${number}" "${@:2}"
             builtin history "$@"
@@ -51,13 +51,16 @@ PERSISTENT_HISTORY_FILE=~/.persistent_history
 zshaddhistory() {
     typeset -g __persistent_history_last
     local command="${1%%$'\n'}"
-    # print -r -- "${$} [$(date +%F\ %T)] ${1%%$'\n'}" >> "${PERSISTENT_HISTORY_FILE}"
     if [ "$command" != "$__persistent_history_last" ]; then
-        print -r -- "${$} [$(date +%F\ %T)] ${command}" >> "${PERSISTENT_HISTORY_FILE}"
-        __persistent_history_last="$command"
+        case "${command}" in
+            (*[![:space:]]*)
+                # command contains at least one non-whitespace character => store it in persistent history file
+                print -r -- "${$} [$(date +%F\ %T)] ${command}" >> "${PERSISTENT_HISTORY_FILE}"
+                __persistent_history_last="$command"
+                ;;
+            (*) ;;
+        esac
     fi
-    # print -sr -- ${1%%$'\n'}
-    # fc -p "${HISTFILE}"
 }
 
 # Inputrc emulation in zsh (~/.inputrc or /etc/inputrc are not sourced)
