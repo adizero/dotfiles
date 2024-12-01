@@ -81,6 +81,15 @@ setterm --bfreq 7000 --blength 50 2>/dev/null
 # Setup terminal apps
 export PAGER=less
 [ -x "$(command -v nvim)" ] && { export EDITOR=nvim VISUAL=nvim; } || { export EDITOR=vim VISUAL=vim; }
+# export COLORTERM=truecolor  # is set automatically by almost all terminals
+export LESS=aeiMR
+# export BROWSER=elinks
+
+# ls colors
+if [ ! -f ~/.dir_colors ] ; then
+    dircolors -p > ~/.dir_colors
+fi
+eval "$(dircolors -b ~/.dir_colors)"
 
 # FZF
 [ -x "$(command -v fd)" ] && export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
