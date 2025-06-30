@@ -59,6 +59,7 @@ alias sshuttle_mvpc_openconnect_laura="sudo sshuttle --dns -r lbartova@localhost
 alias nokiavpn='$HOME/Dropbox/Homework/tmux_vpn.sh '
 alias nokiavpnba='$HOME/Dropbox/Homework/tmux_vpn_ba.sh '
 alias nokiavpn2='$HOME/Dropbox/Homework/tmux_vpn2.sh '
+alias nokiavpn2_laura='$HOME/Dropbox/Homework/tmux_vpn2_laura.sh '
 
 # Personal
 alias ls='ls --color=auto'
