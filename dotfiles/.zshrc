@@ -144,8 +144,11 @@ autoload -Uz compinit
 compinit
 
 # Autosuggestion (requires installed zsh-autosuggestions)
-# source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+if [ -r /usr/share/zsh/site-functions/zsh-autosuggestions.zsh ]; then
+    source /usr/share/zsh/site-functions/zsh-autosuggestions.zsh
+elif [ -r /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
 # bindkey '^L' vi-forward-word
 bindkey '\ey' autosuggest-toggle
 bindkey '\el' autosuggest-accept
