@@ -5,6 +5,15 @@
 # this file and re-run i3-config-wizard(1).
 #
 
+# Debugging i3
+# start logging
+# i3-msg 'debuglog on; shmlog on; reload'
+# ... do actions ...
+# dump the log to the screen (use redirects to save it to a file or pipe to editor like nv)
+# i3-dump-log
+# stop logging
+# i3-msg 'debuglog off; shmlog off; reload'
+
 # i3 config file (v4)
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
@@ -13,11 +22,11 @@ set $mod Mod4
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:monospace 8
+# font pango:monospace 8
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-#font pango:DejaVu Sans Mono 8
+font pango:DejaVu Sans Mono 8
 
 # Before i3 v4.8, we used to recommend this one as the default:
 # font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
@@ -32,10 +41,10 @@ floating_modifier $mod
 hide_edge_borders smart
 
 # start a terminal
-# bindsym $mod+Return exec i3-sensible-terminal
+bindsym $mod+Return exec i3-sensible-terminal
 # bindsym $mod+Return exec termite
 # bindsym $mod+Return exec gnome-terminal
-bindsym $mod+Return exec alacritty
+# bindsym $mod+Return exec alacritty
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -50,12 +59,12 @@ bindsym $mod+d exec dmenu_path | rofi -dmenu -matching fuzzy -levenshtein-sort
 # installed.
 # bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
-#rofi -modi "window,run,ssh,Workspaces:$HOME/bin/i3_switch_workspaces.sh" -show Workspaces
+#rofi -modi "window,run,ssh,Workspaces:~/.config/i3/scripts/i3_switch_workspaces.sh" -show Workspaces
 
-bindsym $mod+F9  exec rofi -show run    -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort
-bindsym $mod+F10 exec rofi -show drun   -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort
-bindsym $mod+F11 exec rofi -show window -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort
-bindsym $mod+F12 exec "rofi -combi-modi window,drun -show combi -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort"
+bindsym $mod+F9  exec rofi -dpi 1 -show run    -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort
+bindsym $mod+F10 exec rofi -dpi 1 -show drun   -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort -drun-display-format '{name}: {exec}'
+bindsym $mod+F11 exec rofi -dpi 1 -show window -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort
+bindsym $mod+F12 exec "rofi -dpi 1 -combi-modi window,drun -show combi -fg '#f1f1f1' -bg '#333333' -hlfg '#ffffff' -hlbg '#336699' -o 85 -matching fuzzy -levenshtein-sort"
 
 # change focus
 #bindsym $mod+j focus left
@@ -69,12 +78,12 @@ bindsym $mod+l focus right
 
 # alternatively, you can use the cursor keys:
 # bindsym $mod+Left focus left
-bindsym $mod+Left exec "$HOME/bin/i3_switch_to_neighboring_workspace.sh left"
+bindsym $mod+Left exec "~/.config/i3/scripts/i3_switch_to_neighboring_workspace.sh left"
 bindsym $mod+Down focus down
 bindsym $mod+Up focus up
 # bindsym $mod+Right focus right
-bindsym $mod+Right exec "$HOME/bin/i3_switch_to_neighboring_workspace.sh right"
-bindsym $mod+Tab exec "$HOME/bin/i3_switch_to_previously_focused_container.sh"
+bindsym $mod+Right exec "~/.config/i3/scripts/i3_switch_to_neighboring_workspace.sh right"
+bindsym $mod+Tab exec "~/.config/i3/scripts/i3_switch_to_previously_focused_container.sh"
 
 # move focused window
 #bindsym $mod+Shift+j move left
@@ -161,10 +170,10 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 bindsym $mod+Shift+d --release exec --no-startup-id "killall dunst; notify-send 'dunst was restarted'"
 
 # non-interactive screenshot by pressing printscreen (screenshot is saved in home directory as ~/<date-time>_scrot.png)
-bindsym Print exec i3-scrot
+bindsym Print exec ~/.config/i3/scripts/i3-scrot
 
 # interactive crop-area screenshot by pressing Mod + printscreen
-bindsym --release Shift+Print exec i3-scrot -s
+bindsym --release Shift+Print exec ~/.config/i3/scripts/i3-scrot -s
 
 # resize window (you can also use the mouse for that)
 mode "resize" {
@@ -316,21 +325,21 @@ bindsym Hyper_L exec polybar-msg cmd toggle
 #bindcode Mod2+233 exec xbacklight -inc 20 # increase screen brightness
 
 # Fn+PgUp (Pause)
-bindsym Pause exec --no-startup-id "$HOME/bin/fuzzy_screen_lock.sh"
+bindsym Pause exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
 
 # Fn+PgDn (Break)
-bindsym Control+Break exec --no-startup-id "$HOME/bin/fuzzy_screen_lock.sh"
+bindsym Control+Break exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
 
 #the numlock is not issue with bindsym definitions
 #Fn+F3 (sleep) this puts the computer to sleep before calling this handler (so no need to call suspend here)
-bindsym XF86Sleep exec --no-startup-id "$HOME/bin/fuzzy_screen_lock.sh"
+bindsym XF86Sleep exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
 #Fn+F4 (display)
-#bindsym XF86Display exec --no-startup-id "$HOME/bin/fuzzy_screen_lock.sh; systemctl suspend"
-bindsym XF86Display exec --no-startup-id "$HOME/bin/display_setup.sh"
+#bindsym XF86Display exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh; systemctl suspend"
+bindsym XF86Display exec --no-startup-id "~/.config/i3/scripts/display_setup.sh"
 #Fn+F6 (screensaver)
-bindsym XF86ScreenSaver exec --no-startup-id "$HOME/bin/fuzzy_screen_lock.sh"
+bindsym XF86ScreenSaver exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
 #Fn+F8 (battery)
-bindsym XF86Battery exec --no-startup-id "/usr/bin/xset dpms force standby"
+bindsym XF86Battery exec --no-startup-id xset dpms force standby
 #Fn+F9 (brightness down)
 bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # decrease screen brightness
 #Fn+F10 (brightness up)
@@ -339,18 +348,15 @@ bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
 #mail key
 bindsym XF86Mail exec --no-startup-id playerctl play-pause
 #browser key
-bindsym XF86HomePage exec --no-startup-id "$HOME/bin/fuzzy_screen_lock.sh"
+bindsym XF86HomePage exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
 #calculator key
-bindsym XF86Calculator exec --no-startup-id "$HOME/bin/fuzzy_screen_lock.sh"
+bindsym XF86Calculator exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
 #mute key
-# bindsym XF86AudioMute exec amixer set Master toggle
-bindsym XF86AudioMute exec pamixer -t
+bindsym XF86AudioMute exec --no-startup-id "~/.config/i3/scripts/i3_volume.sh mute"
 #volume down key
-# bindsym XF86AudioLowerVolume exec amixer set Master 5%-
-bindsym XF86AudioLowerVolume exec pamixer -d 5
+bindsym XF86AudioLowerVolume exec --no-startup-id "~/.config/i3/scripts/i3_volume.sh down 5"
 #volume up key
-# bindsym XF86AudioRaiseVolume exec amixer set Master 5%+
-bindsym XF86AudioRaiseVolume exec pamixer -i 5
+bindsym XF86AudioRaiseVolume exec --no-startup-id "~/.config/i3/scripts/i3_volume.sh up 5"
 
 # Aeropex headset multifunction button (or keyboard multimedia keys), requires playerctl application
 bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
@@ -390,8 +396,8 @@ exec --no-startup-id sudo nbfc start
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
 exec --no-startup-id dropbox start
-exec_always --no-startup-id $HOME/bin/autolock.sh
-exec_always --no-startup-id $HOME/bin/i3_monitor_previously_focused_containers.sh
+exec_always --no-startup-id ~/.config/i3/scripts/autolock.sh
+exec_always --no-startup-id ~/.config/i3/scripts/i3_monitor_previously_focused_containers.sh
 
 # redshift
 # requires ahahi-daemon service to be running (otherwise geoclue service will not start)
