@@ -1,0 +1,58 @@
+# Required additional tools:
+# - difftastic (https://github.com/Wilfred/difftastic)
+# - delta (https://github.com/dandavison/delta)
+# - nvim
+# - conflicts.vim plugin for nvim (https://github.com/adizero/conflicts.vim)
+#
+# some aliases require delta and difftastic
+# difftool/mergetool requires nvim with conflicts.vim plugin
+
+[include]
+    path = ~/.gitconfig.credentials
+    path = ~/.gitconfig.timostools
+[alias]
+    logg = log --abbrev-commit --date=relative --decorate --pretty=format:'%Cred%h%Creset %w(100,0,8)%s %Cgreen(%cr) %C(bold blue)<%an>%Creset %C(yellow)%d%Creset'
+    s = status
+    sh = show
+    d = diff
+    dc = diff --cached
+    lg = log --decorate --graph --all --oneline
+    my = !git log --author "${USER}"
+    staash = stash --all
+    c = commit --no-verify -m
+    de = "!f() { git diff \"${@}\" | delta; }; f"
+    dh = "!f() { git diff \"${@}\" | delta --diff-highlight; }; f"
+    df = "!f() { git diff \"${@}\" | delta --diff-so-fancy --hunk-header-style 'line-number' --file-decoration-style 'blue ol ul' --file-style 'white bold'; }; f"
+    des = "!f() { git diff \"${@}\" | delta -s; }; f"
+    dhs = "!f() { git diff \"${@}\" | delta -s --diff-highlight; }; f"
+    dfs = "!f() { git diff \"${@}\" | delta -s --diff-so-fancy --hunk-header-style 'line-number' --file-decoration-style 'blue ol ul' --file-style 'white bold'; }; f"
+    difft = -c diff.external=difft diff
+    dt = difft
+[apply]
+    whitespace = fix
+[diff]
+    renameLimit = 25000
+    tool = nvimdiff
+[merge]
+    renameLimit = 25000
+    tool = nvimconflicts
+[push]
+    default = upstream
+[difftool]
+    prompt = false
+    trustExitCode = true
+[mergetool "vimconflicts"]
+    cmd = "vim -c ConflictsResolve $MERGED $BASE $LOCAL $REMOTE"
+    trustExitCode = true
+[mergetool "nvimconflicts"]
+    cmd = "nvim -c ConflictsResolve \"$MERGED\" \"$BASE\" \"$LOCAL\" \"$REMOTE\""
+    trustExitCode = true
+[mergetool]
+    keepBackup = false
+[log]
+    date = iso-local
+# [core]
+#     fsmonitor = true
+#     untrackedCache = true
+# [feature]
+#     manyFiles = true
