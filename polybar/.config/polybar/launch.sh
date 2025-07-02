@@ -21,7 +21,7 @@ elif [ "${short_hostname}" == "probook" ]; then
     # GENTOO HP6550B NOTEBOOK
     export MONITOR=LVDS-1
     # export ETH=enp0s25
-    export MODLIST="system-usb-udev filesystem-root memory xbacklight wifi dropbox eth load-average cpu-cores custom-battery temperature fans date custom-redshift
+    export MODLIST="system-usb-udev filesystem-root memory backlight wifi dropbox eth load-average cpu-cores custom-battery temperature fans date custom-redshift
     openweathermap-fullfeatured powermenu"
 elif [[ "${short_hostname}" == "mvakocis"* ]]; then
     # CENTOS 7 DEVPC DESKTOP
