@@ -23,7 +23,7 @@ usb_print() {
     output=""
     counter=0
 
-    for unmounted in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true) | select(.mountpoint == null) | .name'); do
+    for unmounted in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true or .rm == "1") | select(.mountpoint == null) | .name'); do
         unmounted=$(echo "$unmounted" | tr -d "[:digit:]")
         unmounted=$(echo "$devices" | jq -r '.blockdevices[]  | select(.name == "'"$unmounted"'") | .vendor')
         unmounted=$(echo "$unmounted" | tr -d ' ')
@@ -38,7 +38,7 @@ usb_print() {
         output="$output$space $unmounted"
     done
 
-    for mounted in $(echo "$devices" | jq -r '.blockdevices[] | select(.type == "part") | select(.rm == true) | select(.mountpoint != null) | .size'); do
+    for mounted in $(echo "$devices" | jq -r '.blockdevices[] | select(.type == "part") | select(.rm == true or .rm == "1") | select(.mountpoint != null) | .size'); do
         if [ $counter -eq 0 ]; then
             space=""
         else
@@ -65,7 +65,7 @@ action_mount() {
     devices=$(lsblk -Jplno NAME,TYPE,RM,MOUNTPOINT)
 
     log_print "block devices before mount: ${devices}"
-    for mount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true) | select(.mountpoint == null) | .name'); do
+    for mount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true or .rm == "1") | select(.mountpoint == null) | .name'); do
         # udisksctl mount --no-user-interaction -b "$mount"
 
         # mountpoint=$(udisksctl mount --no-user-interaction -b $mount)
@@ -73,9 +73,9 @@ action_mount() {
         # terminal -e "bash -lc 'filemanager $mountpoint'"
 
         mountpoint=$(udisksctl mount --no-user-interaction -b "$mount")
-        mountpoint=$(echo "$mountpoint" | cut -d " " -f 4-)
+        mountpoint=$(echo "$mountpoint" | cut -d " " -f 4- | tr -d ".")
         log_print "mounted ${mount} at ${mountpoint}"
-        xterm -e "bash -lc 'mc \"${home}\" \"${mountpoint}\"'" &
+        xterm -e "bash -lc 'mc \"${HOME}\" \"${mountpoint}\"'" &
         # nohup mc & 1>/tmp/mc_log 2>/tmp/mc_err_log
     done
 
@@ -87,21 +87,21 @@ action_unmount() {
     log_print "block devices before unmount (type=${unmount_type}): ${devices}"
 
     if [ "${unmount_type}" -eq 1 ]; then
-        for unmount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true) | select(.mountpoint != null) | .name'); do
+        for unmount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true or .rm == "1") | select(.mountpoint != null) | .name'); do
             udisksctl unmount --no-user-interaction -b "$unmount"
             udisksctl power-off --no-user-interaction -b "$unmount"
         done
     elif [ "${unmount_type}" -eq 2 ]; then
-        for unmount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true) | select(.mountpoint != null) | .name'); do
+        for unmount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true or .rm == "1") | select(.mountpoint != null) | .name'); do
             udisksctl unmount --no-user-interaction -b "$unmount"
         done
     elif [ "${unmount_type}" -eq 3 ]; then
-        for ejectmount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true) | select(.mountpoint != null) | .name'); do
+        for ejectmount in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "part") | select(.rm == true or .rm == "1") | select(.mountpoint != null) | .name'); do
             log_print "ejecting mount: ${ejectmount}"
             sudo eject "${ejectmount}"
         done
         sleep 0.5
-        for ejectdrive in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "disk") | select(.rm == true) | select(.mountpoint == null) | .name'); do
+        for ejectdrive in $(echo "$devices" | jq -r '.blockdevices[]  | select(.type == "disk") | select(.rm == true or .rm == "1") | select(.mountpoint == null) | .name'); do
             log_print "unejecting drive: ${ejectdrive}"
             sudo eject -t "${ejectdrive}"
         done

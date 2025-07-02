@@ -22,10 +22,16 @@ elif [[ "${short_hostname}" == "mvakocis"* ]]; then
     export MONITOR=DP-1
     export ETH=eno1
     export DBX=dropbox
-    export MODLIST="ticker removable_disks system-usb-udev filesystem-root-and-home memory xbacklight
+    export MODLIST="removable_disks system-usb-udev filesystem-root-and-home memory xbacklight
     pulseaudio-rofi-output pulseaudio-rofi-input wifi eth load-average cpu-cores battery temperature date
     custom-redshift openweathermap-fullfeatured powermenu"
 fi
+
+# DPI detection relies on Xft.dpi setting in .Xresources
+DPI=$(xrdb -query | grep Xft.dpi | awk '{print $2}')
+DPI=${DPI:-96}
+export DPI
+export POLYBAR_HEIGHT=$((18 * DPI / 96))
 
 # Replace newlines with spaces
 MODLIST="${MODLIST//$'\n'/ }"
@@ -35,4 +41,4 @@ MODLIST="${MODLIST//$'\n'/ }"
 # polybar bar2 &
 polybar --config=$HOME/.config/polybar/config.ini -r mybar &
 
-echo "Bars launched..."
+echo "Bars launched... (DPI: $DPI, Height: $POLYBAR_HEIGHT)"
