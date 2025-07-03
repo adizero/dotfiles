@@ -7,9 +7,17 @@ set -e
 # Treat unset variables as an error
 set -u
 
+info() {
+    if [ -n "${TMUX}" ]; then
+        tmux display-message "${@}"
+    else
+        echo "${@}"
+    fi
+}
+
 # Check if plugins.list exists and is readable
-if [ ! -f plugins.list ]; then
-    echo "[ERROR] plugins.list file not found!"
+if [ ! -r plugins.list ]; then
+    info "[ERROR] plugins.list file not found!"
     exit 1
 fi
 
@@ -25,4 +33,6 @@ cd plugins
 source ../plugins.list
 
 # Reload tmux configuration (plugins will be loaded automatically and run their one-time generation/installation scripts)
-tmux source-file /home/akocis/.tmux.conf \; display-message "Config reloaded."
+if [ -n "${TMUX}" ]; then
+    tmux source-file ~/.tmux.conf \; display-message "Config reloaded."
+fi
