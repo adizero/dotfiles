@@ -1,0 +1,6 @@
+git clone https://github.com/laktak/extrakto
+git clone https://github.com/tmux-plugins/tmux-pain-control
+git clone https://github.com/adizero/tmux-picker
+git clone https://github.com/tmux-plugins/tmux-resurrect
+git clone https://github.com/tmux-plugins/tmux-sensible
+git clone https://github.com/tmux-plugins/tmux-yank
