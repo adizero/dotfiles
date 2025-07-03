@@ -11,15 +11,18 @@
     path = ~/.gitconfig.credentials
     path = ~/.gitconfig.timostools
 [alias]
+    # bb = !better-git-branch.sh
     logg = log --abbrev-commit --date=relative --decorate --pretty=format:'%Cred%h%Creset %w(100,0,8)%s %Cgreen(%cr) %C(bold blue)<%an>%Creset %C(yellow)%d%Creset'
+    lg = log --decorate --graph --all --oneline
+    l = log --graph --topo-order --pretty='%w(100,0,6)%C(yellow)%h%C(bold)%C(red)%d %C(cyan)%ar %C(green)%an%n%C(bold)%C(white)%s %N' --abbrev-commit
+    my = !git log --author "${USER}"
     s = status
     sh = show
-    d = diff
-    dc = diff --cached
-    lg = log --decorate --graph --all --oneline
-    my = !git log --author "${USER}"
     staash = stash --all
     c = commit --no-verify -m
+    bl = blame
+    d = diff
+    dc = diff --cached
     de = "!f() { git diff \"${@}\" | delta; }; f"
     dh = "!f() { git diff \"${@}\" | delta --diff-highlight; }; f"
     df = "!f() { git diff \"${@}\" | delta --diff-so-fancy --hunk-header-style 'line-number' --file-decoration-style 'blue ol ul' --file-style 'white bold'; }; f"
@@ -28,6 +31,8 @@
     dfs = "!f() { git diff \"${@}\" | delta -s --diff-so-fancy --hunk-header-style 'line-number' --file-decoration-style 'blue ol ul' --file-style 'white bold'; }; f"
     difft = -c diff.external=difft diff
     dt = difft
+[core]
+    pager = less -F -X
 [apply]
     whitespace = fix
 [diff]
