@@ -15,14 +15,14 @@ info() {
     fi
 }
 
+# Move to scripts directory
+cd "$(dirname "$0")"
+
 # Check if plugins.list exists and is readable
 if [ ! -r plugins.list ]; then
     info "[ERROR] plugins.list file not found!"
     exit 1
 fi
-
-# Move to scripts directory
-cd "$(dirname "$0")"
 
 # Create plugins directory if it doesn't exist and navigate into it
 mkdir -p plugins
