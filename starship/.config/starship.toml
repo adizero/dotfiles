@@ -60,6 +60,7 @@ vimcmd_symbol = '[V](bold green)'
 [username]
 # format = "[$user]($style) in "
 format = "[$user]($style)"
+show_always = true
 
 [hostname]
 # format = "[$ssh_symbol$hostname]($style) in "
