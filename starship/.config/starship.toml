@@ -8,7 +8,7 @@ format = """$directory$character"""
 # right_format = """$all"""
 right_format = """
 $username\
-$hostname\
+${custom.local_remote_hostname}\
 $localip\
 $shlvl\
 $singularity\
@@ -48,7 +48,8 @@ $time\
 $status\
 $os\
 $container\
-$shell"""
+$shell\
+"""
 
 [character]
 # success_symbol = '[➜](bold green) '
@@ -61,8 +62,10 @@ vimcmd_symbol = '[V](bold green)'
 format = "[$user]($style)"
 
 [hostname]
-# ssh_symbol = " "
+# format = "[$ssh_symbol$hostname]($style) in "
+format = "[@$hostname$ssh_symbol]($style) "
 ssh_symbol = ""
+ssh_only = false
 
 [directory]
 read_only = " 󰌾"
@@ -70,6 +73,12 @@ truncation_length = 5
 truncate_to_repo = false
 truncation_symbol = "..."
 fish_style_pwd_dir_length = 2
+
+[custom.local_remote_hostname]
+command = '[ -z "${SSH_CONNECTION}" ] && echo @$(hostname -s) || echo $(hostname -s)'
+when = true
+style = "bold dimmed green"
+format = "[$output]($style) "
 
 [custom.upstream_commit]
 require_repo = true
