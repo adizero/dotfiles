@@ -9,6 +9,12 @@ fi
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# Nicer tracing output
+# version with source file:line number
+# export PS4='\e[33m+ ${BASH_SOURCE:${#BASH_SOURCE}<80?0:-80}:${LINENO} \e[0m' 
+# version with timestamp and source file:line number
+export PS4='\e[33m+ $(date "+%T.%N") ${BASH_SOURCE:${#BASH_SOURCE}<80?0:-80}:${LINENO} \e[0m' 
+
 # Terminal emulator detection
 if [ -r ~/.term_detect ]; then
     source ~/.term_detect
@@ -41,12 +47,6 @@ shopt -s checkwinsize
 # CDPATH does for cd what path does for executables
 export BASE_CDPATH=.:~
 export CDPATH="${BASE_CDPATH}"
-
-# Nicer traceing output
-# version with source file:line number
-# export PS4='\e[33m+ ${BASH_SOURCE:${#BASH_SOURCE}<80?0:-80}:${LINENO} \e[0m' 
-# version with timestamp and source file:line number
-export PS4='\e[33m+ $(date "+%T.%N") ${BASH_SOURCE:${#BASH_SOURCE}<80?0:-80}:${LINENO} \e[0m' 
 
 # History bash settings
 export HISTTIMEFORMAT="[%F %T] "

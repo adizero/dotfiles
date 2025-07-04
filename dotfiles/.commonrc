@@ -26,6 +26,21 @@ pathrm() {
     PATH="$(echo "$PATH" | /usr/bin/sed -e "s;\(^\|:\)${1%/}\(:\|\$\);\1\2;g" -e 's;^:\|:$;;g' -e 's;::;:;g')"
 }
 
+cdpathadd() {
+    dir="${1%/}"
+    if [ -d "${dir}" ] && ! echo "$CDPATH" | /usr/bin/grep -E -q "(^|:)${dir}($|:)"; then
+        if [ "$2" == "after" ] ; then
+            CDPATH="$CDPATH:${dir}"
+        else
+            CDPATH="${dir}:$CDPATH"
+        fi
+    fi
+}
+
+cdpathrm() {
+    CDPATH="$(echo "$CDPATH" | /usr/bin/sed -e "s;\(^\|:\)${1%/}\(:\|\$\);\1\2;g" -e 's;^:\|:$;;g' -e 's;::;:;g')"
+}
+
 python_pathadd() {
     dir="${1%/}"
     if [ -d "${dir}" ] && ! echo "$PYTHONPATH" | /usr/bin/grep -E -q "(^|:)${dir}($|:)" ; then
