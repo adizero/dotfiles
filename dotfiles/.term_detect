@@ -1,0 +1,176 @@
+#this file is meant to be sourced from .bashrc
+#after sourcing call termInitialDetection (still from .bashrc)
+
+#to later force detection of terminal use termDetect command
+# (this is useful, when reattaching to running screen/tmux from different
+# terminal)
+
+#TODO: add iTerm detection (also leverage environent variables for Konsole, iTerm(2) detection,
+# when not in screen/tmux)
+
+#Screen                  "old versions???"                   (nothing)
+#Xterm                   Xterm(278)                          ^[[>0;278;0c
+#Xterm                   Xterm(317)                          ^[[>41;317;0c
+#Gnome-terminal/VTE      3.34.2 using VTE 0.58.3             ^[[>65;5803;1c
+#Lxterminal              lxterminal (0.1.11-4ubuntu3)        ^[[>1;2802;0c
+#Cygwin                                                      ^[[>77;10103;0c
+#KiTTY/PuTTY             0.62+                               ^[[>0;136;0c
+#Screen                  4.00.03 (FAU)                       ^[[>83;40003;0c
+#Screen                  4.01.00devel (GNU) 2-May-06         ^[[>83;40100;0c
+#Screen                  Screen version 4.03.01 28-Jun-15    ^[[>83;40301;0c
+#Tmux                    Tmux version 2.0+                   ^[[>84;0;0c
+#Gnome-terminal          old CentOS 6.9 GNOME Terminal       ^[[>1;2501;0c  //does not support bracketted paste mode correctly (exception in .vimrc)
+#Gnome-terminal          GNOME Terminal 3.6.2                ^[[>1;3409;0c
+#Konsole                 2.13.2                              ^[[>0;115;0c
+#crosh/SecureShell      (ChromeOS) XTerm(256)                ^[[>0;256;0c
+#old iTerm2/old Tmux     2.9.20 (any version ?)              ^[[>0;95;0c
+#Terminal                2.10(433) MacOS Catalina            ^[[>1;95;0c
+#XQuartz(Xterm)          Xterm(326) MacOS Catalina           ^[[>41;326;0c
+#iTerm2                  3.5.0beta2 MacOS Catalina           ^[[>1;314;0c
+#Alacritty               0.13.2 (not yet detected)           ^[[>0;2300;1c
+
+esc_seq=
+
+wrap_escape_sequence()
+{
+    #echo "preparing escape sequence before calling back..."
+    if [ ! -z "$STY" ]; then
+        esc_seq="\033P$1\033\\"
+    elif [ ! -z "$TMUX" ]; then
+        #duplicate escapes
+        esc_seq=`echo $1 | sed 's/\\\\033/\\\\033\\\\033/g'`
+        #add wrapping
+        esc_seq="\033Ptmux;$esc_seq\033\\"
+    else
+        esc_seq="$1"
+    fi
+}
+
+termInitialDetection()
+{
+    #echo "Gathering terminal specs..."
+
+    stty -echo
+
+    if [ -n "$VTE_VERSION" -a -z "$COLORFGBG" ]; then
+        wrap_escape_sequence '\033]10;?\a\033]11;?\a'
+        echo -ne $esc_seq
+        IFS=: read -t 0.5 -d $'\a' x fg
+        IFS=: read -t 0.5 -d $'\a' x bg
+        if [[ ${fg:0:1} =~ [01234567] ]]; then
+            export COLORFGBG='0;15'
+        else
+            export COLORFGBG='15;0'
+        fi
+        unset x fg bg
+    fi
+
+    TERM_PROGRAM=
+    TERM_VERSION=
+
+    export TERM_NO_X_FORWARDING=
+
+    #screen is tmux's default, we expect xterm-like terminal underneath (can be wrong assumption),
+    # when using rxvt-like, then change default TERM variable in tmux for new terminals to screen.rxvt for example
+    if [[ "$TERM" =~ "xterm" || "$TERM" =~ "tmux" || "$TERM" =~ "rxvt" || "$TERM" =~ "screen-bce" || "$TERM" =~ "screen" || "$TERM" =~ "alacritty" ]]; then
+        if [ -z "$TERM_RESPONSE" ]; then
+            wrap_escape_sequence '\033[>c'
+            echo -ne $esc_seq
+            read -r -t 0.5 -d $'c' termresponse
+            #we need to strip the first escape character from response
+            # and replace is by something harmless (its text representation)
+            export TERM_RESPONSE="^[${termresponse:1}c"
+            unset termresponse
+        fi
+        response="${TERM_RESPONSE:2}"
+        response="${response%;*}"
+        term_type="${response%;*}"
+        term_version="${response#*;}"
+
+        if [ "$term_type" == "[>0" -a "$term_version" == "2300" ]; then
+            TERM_PROGRAM="alacritty"
+        elif [ "$term_type" == "[>0" -a "$term_version" == "115" ]; then
+            TERM_PROGRAM="Konsole"
+        elif [ "$term_type" == "[>0" -a "$term_version" == "136" ]; then
+            TERM_PROGRAM="PuTTY"  #this is just a guess (KiTTY/PuTTY 0.62 sends 136 as version), will be confirmed via answerback)
+        elif [ "$term_type" == "[>0" -a "$term_version" == "95" ] || [ "$term_type" == "[>1" -a "$term_version" == "95" ]; then
+            TERM_PROGRAM="xterm"
+            TERM_VERSION="$term_version"
+            #when connecting from Mac OSX Sierra/Catalina (older iTerm2/Terminal), then do not do X forwarding in Vim (XQuartz server is too buggy)
+            export TERM_NO_X_FORWARDING="-X"
+        elif [ "$term_version" == "314" -a "$term_type" == "[>41" ] || [ "$term_version" == "326" -a "$term_type" == "[>41" ]; then
+            TERM_PROGRAM="xterm"
+            TERM_VERSION="$term_version"
+            #when connecting from Mac OSX Sierra/Catalina (XQuartz's Xterm), then do not do X forwarding in Vim (XQuartz server is too buggy)
+            export TERM_NO_X_FORWARDING="-X"
+        elif [ "$term_version" == "314" -a "$term_type" == "[>1" ]; then
+            TERM_PROGRAM="xterm"
+            TERM_VERSION="$term_version"
+            #when connecting from Mac OSX Sierra/Catalina (iTerm2 3.5.0), then do not do X forwarding in Vim (XQuartz server is too buggy)
+            export TERM_NO_X_FORWARDING="-X"
+        elif [ "$term_type" == "[>0" -o "$term_type" == "[>41" ]; then
+            TERM_PROGRAM="xterm"
+            TERM_VERSION="$term_version"
+            if [ "$term_version" == "256" ]; then
+                #when connecting from Chrome OS crosh/Secure Shell, then disable X forwarding (X server does not work properly in Chrome OS)
+                export TERM_NO_X_FORWARDING="-X"
+            fi
+        elif [ "$term_type" == "[>1" -o "$term_type" == "[>65" ]; then
+            if [ "$term_version" == "2802" ]; then
+                TERM_PROGRAM="lxterminal"  #exception
+            elif [ "$term_version" == "2501" ]; then
+                TERM_PROGRAM="old-gnome-terminal"
+            else
+                TERM_PROGRAM="gnome-terminal"
+            fi
+            TERM_VERSION="$term_version"
+        elif [ "$term_type" == "[>77" ]; then
+            TERM_PROGRAM="Cygwin"
+        elif [ "$term_type" == "[>85" ]; then
+            TERM_PROGRAM="urxvt"
+        elif [ "$term_type" == "[?1" ]; then
+            TERM_PROGRAM="rxvt"
+        fi
+
+        if [ "$TERM_PROGRAM" != "rxvt" -a "$TERM_PROGRAM" != "urxvt" -a -z "$TERM_ANSWERBACK" ]; then
+            wrap_escape_sequence '\005\033[>c'
+            echo -ne $esc_seq
+            read -r -t 0.5 -d $'\033' answerback
+            read -r -t 0.1 -d $'c' termresponse
+            export TERM_ANSWERBACK="${answerback:0}$"
+            unset answerback
+            unset termresponse
+        fi
+
+        if [ "$TERM_ANSWERBACK" == "PuTTY$" -o  "$TERM_ANSWERBACK" == "KiTTY$" ]; then
+            TERM_PROGRAM="PuTTY"
+        fi
+    fi
+
+    if [ ! -z "$TERM_PROGRAM" ]; then
+        export TERM_PROGRAM
+    fi
+
+    if [ ! -z "$TERM_VERSION" ]; then
+        export TERM_VERSION
+        XTERM_VERSION="XTerm($TERM_VERSION)"
+        export XTERM_VERSION
+    fi
+
+    stty echo
+
+    #echo "Terminal specs: $TERM_RESPONSE ($TERM_ANSWERBACK) [$COLORFGBG]"
+    #echo "Terminal program: $TERM_PROGRAM - $TERM_VERSION"
+}
+
+termDetect()
+{
+    #reset all terminal callback variables to force initial slow detection
+    if [ -n "$VTE_VERSION" ]; then
+        COLORFGBG=
+    fi
+    TERM_RESPONSE=
+    TERM_ANSWERBACK=
+
+    termInitialDetection
+}
