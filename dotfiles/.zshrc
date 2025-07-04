@@ -246,6 +246,12 @@ bindkey '\e,' earlier-word
 # bindkey '^[[1;5A' up-line-or-local-history    # [CTRL] + Cursor up
 # bindkey '^[[1;5B' down-line-or-local-history  # [CTRL] + Cursor down
 
+# Carapace completions
+export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+source <(carapace _carapace)
+zstyle ':completion:*:git:*' group-order 'main commands' 'alias commands' 'external commands'
+
 # Zoxide
 eval "$(zoxide init zsh)"
 
