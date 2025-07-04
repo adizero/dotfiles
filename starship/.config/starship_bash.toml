@@ -1,0 +1,319 @@
+command_timeout = 1000
+add_newline = false
+palette = "catppuccin_mocha"
+# left prompt
+# format = """$directory$character"""
+# right prompt
+# move the rest of the prompt to the right
+# Bash does not support right prompt, so we use a custom format
+format = """
+$username\
+$hostname\
+$localip\
+$shlvl\
+$singularity\
+$kubernetes\
+$vcsh\
+$fossil_branch\
+$fossil_metrics\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$hg_branch\
+${custom.upstream_commit}\
+$pijul_channel\
+$docker_context\
+$package\
+$buf\
+$nix_shell\
+$conda\
+$meson\
+$spack\
+$memory_usage\
+$aws\
+$gcloud\
+$openstack\
+$azure\
+$direnv\
+$env_var\
+$crystal\
+$sudo\
+$cmd_duration\
+$line_break\
+$jobs\
+$battery\
+$time\
+$status\
+$os\
+$container\
+$shell\
+$directory\
+$character\
+"""
+
+[character]
+# success_symbol = '[➜](bold green) '
+success_symbol = '[❯](bold green)'
+error_symbol = '[✗](bold red)'
+vimcmd_symbol = '[V](bold green)'
+
+[username]
+# format = "[$user]($style) in "
+format = "[$user]($style)"
+
+[hostname]
+# ssh_symbol = " "
+ssh_symbol = ""
+ssh_only = false
+
+[directory]
+read_only = " 󰌾"
+truncation_length = 5
+truncate_to_repo = false
+truncation_symbol = "..."
+fish_style_pwd_dir_length = 2
+
+[custom.upstream_commit]
+require_repo = true
+# command = 'git describe @{u} || git describe' # shows output of command
+command = 'starship_git_upstream_commit.sh' # shows output of command
+# when = ''' test $(basename "${PWD}") = "srlinux" && test $(git symbolic-ref --short HEAD) = "master" '''
+when = true
+format = "[$output]($style) "
+
+[cmd_duration]
+# does not work with bash with DEBUG trap (see https://starship.rs/config/#command-duration)
+min_time = 1000
+
+[git_branch]
+format = '[$symbol$branch(:$remote_branch)]($style) '
+symbol = " "
+
+# [shell]
+# disabled = false
+
+# [shlvl]
+# disabled = false
+# format = '[$symbol$shlvl]($style)'
+# repeat = true
+# symbol = '❯'
+# repeat_offset = 2
+# threshold = 3
+
+# [env_var.SHELL]
+# variable = "SHELL"
+# default = "unknown shell"
+# format = "[$env_value]($style) "
+# style = "bold cyan"
+#
+# [env_var.USER]
+# variable = "USER"
+# default = 'unknown user'
+# format = "[$env_value]($style) "
+# style = "red"
+
+# [aws]
+# format = '[$symbol(profile: "$profile" )(\(region: $region\) )]($style)'
+# disabled = false
+# style = 'bold blue'
+# symbol = " "
+# 
+# [golang]
+# format = '[ ](bold cyan)'
+# 
+# [kubernetes]
+# symbol = '☸ '
+# disabled = false
+# detect_files = ['Dockerfile']
+# format = '[$symbol$context( \($namespace\))]($style) '
+# contexts = [
+#   { context_pattern = "arn:aws:eks:us-west-2:577926974532:cluster/zd-pvc-omer", style = "green", context_alias = "omerxx", symbol = " " },
+# ]
+# 
+# [docker_context]
+# disabled = true
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
+overlay0 = "#6c7086"
+surface2 = "#585b70"
+surface1 = "#45475a"
+surface0 = "#313244"
+base = "#1e1e2e"
+mantle = "#181825"
+crust = "#11111b"
+
+###############################################
+# default starship symbols (kept for reference)
+###############################################
+[aws]
+symbol = "  "
+
+[buf]
+symbol = " "
+
+[c]
+symbol = " "
+
+[conda]
+symbol = " "
+
+[crystal]
+symbol = " "
+
+[dart]
+symbol = " "
+
+[docker_context]
+symbol = " "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[fennel]
+symbol = " "
+
+[fossil_branch]
+symbol = " "
+
+[golang]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[haskell]
+symbol = " "
+
+[haxe]
+symbol = " "
+
+[hg_branch]
+symbol = " "
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[kotlin]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[memory_usage]
+symbol = "󰍛 "
+
+[meson]
+symbol = "󰔷 "
+
+[nim]
+symbol = "󰆥 "
+
+[nix_shell]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[ocaml]
+symbol = " "
+
+[os.symbols]
+Alpaquita = " "
+Alpine = " "
+Amazon = " "
+Android = " "
+Arch = " "
+Artix = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = "󰛓 "
+Gentoo = " "
+HardenedBSD = "󰞌 "
+Illumos = "󰈸 "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+OpenBSD = "󰈺 "
+openSUSE = " "
+OracleLinux = "󰌷 "
+Pop = " "
+Raspbian = " "
+Redhat = " "
+RedHatEnterprise = " "
+Redox = "󰀘 "
+Solus = "󰠳 "
+SUSE = " "
+Ubuntu = " "
+Unknown = " "
+Windows = "󰍲 "
+
+[package]
+symbol = "󰏗 "
+
+[perl]
+symbol = " "
+
+[php]
+symbol = " "
+
+[pijul_channel]
+symbol = " "
+
+[python]
+symbol = " "
+
+[rlang]
+symbol = "󰟔 "
+
+[ruby]
+symbol = " "
+
+[rust]
+symbol = " "
+
+[scala]
+symbol = " "
+
+[swift]
+symbol = " "
+
+[zig]
+symbol = " "

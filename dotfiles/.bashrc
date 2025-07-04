@@ -129,6 +129,7 @@ if [ $bmajor -gt 4 ] || [ $bmajor -eq 4 -a $bminor -ge 4 ]; then
     source <(carapace _carapace)
 fi
 
+export STARSHIP_CONFIG=~/.config/starship_bash.toml
 # Starship prompt
 eval "$(starship init bash)"
 
