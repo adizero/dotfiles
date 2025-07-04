@@ -47,7 +47,7 @@ history() {
 }
 
 # Persistent history
-PERSISTENT_HISTORY_FILE=~/.persistent_history
+export PERSISTENT_HISTORY_FILE=~/.persistent_history
 zshaddhistory() {
     typeset -g __persistent_history_last
     local command="${1%%$'\n'}"

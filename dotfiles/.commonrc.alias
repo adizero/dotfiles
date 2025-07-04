@@ -64,13 +64,16 @@ alias nokiavpn2_laura='$HOME/Dropbox/Homework/tmux_vpn2_laura.sh '
 # Personal
 alias ls='ls --color=auto'
 alias ll='ls -al'
+alias v='vim'
 alias vi='vim'
+alias nv='nvim'
+alias nvi='nvim'
 
 alias bell='echo -ne "\a"'
 
-phgrep() { grep --color --no-filename "$@" ~/.persistent_history; }
+phgrep() { grep --color --no-filename "$@" "${PERSISTENT_HISTORY_FILE}"; }
 
-# runs vim with the last command executed in the shell (indented for rg commands)
+# runs vim with the last command executed in the shell (intended for rg commands)
 alias vimh='__h="$(fc -nl -1) -n --column | cat"; vim -c "cexpr system(\"$__h\")" ; unset __h'
 
 # alias t='todo.sh'

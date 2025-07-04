@@ -85,7 +85,7 @@ export PAGER=less
 export LESS=aeiMR
 # export BROWSER=elinks
 
-# ls colors
+# ls colors (sets up and exports LS_COLORS)
 if [ ! -f ~/.dir_colors ] ; then
     dircolors -p > ~/.dir_colors
 fi
@@ -93,6 +93,8 @@ eval "$(dircolors -b ~/.dir_colors)"
 
 # FZF
 [ -x "$(command -v fd)" ] && export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow'
+# although fzf supports 256 or true color schemes, the default 16 color one has much better contrast
+# export FZF_DEFAULT_OPTS='--color=16'
 
 # Nokia intranet ip ranges
 intranet_ip_ranges() { if [ -x $HOME/get_intranet_ranges.sh ]; then $HOME/get_intranet_ranges.sh; else $HOME/Dropbox/Homework/get_intranet_ranges.sh; fi; }
@@ -108,9 +110,6 @@ export MC_TEST_EXTFS_UNRAR_VERSION=5
 
 # Aliases
 [ -r ~/.commonrc.alias ] && source ~/.commonrc.alias
-
-# although fzf supports 256 or true color schemes, the default 16 color one has much better contrast
-# export FZF_DEFAULT_OPTS='--color=16'
 
 generate_vim_help_tags()
 {
