@@ -249,5 +249,6 @@ bindkey '\e,' earlier-word
 # Zoxide
 eval "$(zoxide init zsh)"
 
+unset STARSHIP_CONFIG
 # Starship prompt
 eval "$(starship init zsh)"
