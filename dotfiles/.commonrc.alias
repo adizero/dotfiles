@@ -71,6 +71,12 @@ alias nvi='nvim'
 
 alias bell='echo -ne "\a"'
 
+# Process listing aliases
+alias pstime='ps -axww -o user,ppid,pid,%cpu,%mem,vsz,rss,tname,stat,lstart,time,cmd --sort=start_time'
+alias pstimed='ps -axww -o user,ppid,pid,%cpu,%mem,vsz,rss,tname,stat,lstart,time,cmd --sort=time'
+alias psf='ps -axfww -o user,ppid,pid,%cpu,%mem,vsz,rss,tname,stat,lstart,time,cmd'
+
+# Persistent history grep
 phgrep() { grep --color --no-filename "$@" "${PERSISTENT_HISTORY_FILE}"; }
 
 # runs vim with the last command executed in the shell (intended for rg commands)
