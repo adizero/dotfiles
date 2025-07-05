@@ -248,13 +248,15 @@ bindkey '\e,' earlier-word
 
 # Carapace completions
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
-zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
-source <(carapace _carapace)
+# Caution: do not use direct escape sequences (they break end of line calculations esp. with right-prompts), use {color} tags instead
+# zstyle ':completion:*' format $'\e[2;37mCompleting %d\e[m'
+zstyle ':completion:*' format $'%F{236}%UCompleting %d%u%f'  # dark gray for completion groups (from the grayscale ramp)
 zstyle ':completion:*:git:*' group-order 'main commands' 'alias commands' 'external commands'
+source <(carapace _carapace)
 
 # Zoxide
 eval "$(zoxide init zsh)"
 
-unset STARSHIP_CONFIG
 # Starship prompt
+unset STARSHIP_CONFIG  # may have been set to custom starship.toml location in another shell
 eval "$(starship init zsh)"
