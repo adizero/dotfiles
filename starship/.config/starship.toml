@@ -2,9 +2,18 @@ command_timeout = 1000
 add_newline = false
 palette = "catppuccin_mocha"
 # left prompt
-format = """$directory$character"""
+format = """
+$jobs\
+$battery\
+$time\
+$status\
+$os\
+$container\
+$shell\
+$directory\
+$character\
+"""
 # right prompt
-# move the rest of the prompt to the right
 # right_format = """$all"""
 right_format = """
 $username\
@@ -41,14 +50,6 @@ $env_var\
 $crystal\
 $sudo\
 $cmd_duration\
-$line_break\
-$jobs\
-$battery\
-$time\
-$status\
-$os\
-$container\
-$shell\
 """
 
 [character]

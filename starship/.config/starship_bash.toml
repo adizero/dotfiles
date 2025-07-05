@@ -1,11 +1,7 @@
 command_timeout = 1000
 add_newline = false
 palette = "catppuccin_mocha"
-# left prompt
-# format = """$directory$character"""
-# right prompt
-# move the rest of the prompt to the right
-# Bash does not support right prompt, so we use a custom format
+# Bash does not support right prompt, so we can use only the format ($line_break splits the prompt into two lines)
 format = """
 $username\
 ${custom.local_remote_hostname}\
