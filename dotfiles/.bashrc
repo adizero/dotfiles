@@ -1,10 +1,7 @@
-if [ -r /etc/bash.bashrc ]; then
-    # Ubuntu
-    source /etc/bash.bashrc
-elif [ -r /etc/bashrc ]; then
-    # CentOS
-    source /etc/bashrc
-fi
+# Source global bashrc files
+[ -r /etc/bash/bashrc ] && source /etc/bash/bashrc # Gentoo
+[ -r /etc/bash.bashrc ] && source /etc/bash.bashrc # Ubuntu
+[ -r /etc/bashrc ] && source /etc/bashrc # CentOS
 
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
@@ -79,20 +76,23 @@ log_bash_persistent_history()
 
 [ -r ~/.bashrc.timostools ] && source ~/.bashrc.timostools
 
+# Setup simple promptcmd with persistent history logging when not using .ps1rc (sourced via .bashrc.timostools)
+if [ ! -r ~/.bashrc.timostools ]; then
+    function promptcmd()
+    {
+        # history -a  # this is run automatically by bash (I think)
+        run_on_prompt_command
+    }
+
+    PROMPT_COMMAND=promptcmd
+    export PROMPT_COMMAND
+fi
+
 # stuff to do on PROMPT_COMMAND
 run_on_prompt_command()
 {
     log_bash_persistent_history
 }
-
-function promptcmd()
-{
-    # history -a  # this is run automatically by bash (I think)
-    run_on_prompt_command
-}
-
-PROMPT_COMMAND=promptcmd
-export PROMPT_COMMAND
 
 # # Toggle between vi and emacs readline mode with Esc+a
 # set -o emacs
