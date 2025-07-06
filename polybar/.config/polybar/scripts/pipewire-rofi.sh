@@ -49,17 +49,21 @@ mute_source() {
 
 get_default_sink_id() {
     # default_sink_id=$(pw-play --list-targets | sed -n 's/^*[[:space:]]*\([[:digit:]]\+\):.*$/\1/p')
-    default_sink_id=$(pactl list sinks | grep -B2 "Name: $(pactl get-default-sink)" | grep Sink | awk '{print $2}' | awk -F# '{print $2}')
-    echo "${default_sink_id}"
+    sinks=$(pactl list sinks 2>/dev/null)
+    [ -n "${sinks}" ] && default_sink_id=$(echo ${sinks} | grep -B2 "Name: $(pactl get-default-sink 2>/dev/null)" | grep Sink | awk '{print $2}' | awk -F# '{print $2}')
+    echo "${default_sink_id:-?}"
 }
 
 get_default_sink_codec() {
-    pactl list sinks | sed -n "/^Sink #$(get_default_sink_id)/,/^\(Sink\|$\)/p" | grep codec | awk -F\" '{print $2}'
+    sinks=$(pactl list sinks 2>/dev/null)
+    default_sink_id=$(get_default_sink_id)
+    [ -n "${sinks}" ] && default_sink_codec=$(echo "${sinks}" | sed -n "/^Sink #${default_sink_id}/,/^\(Sink\|$\)/p" | grep codec | awk -F\" '{print $2}')
+    echo "${default_sink_codec:-}"
 }
 
 output_volume() {
-    volume=$(pamixer --sink $(get_default_sink_id) --get-volume-human)
-    echo "${volume}"
+    volume=$(pamixer --sink $(get_default_sink_id) --get-volume-human 2>/dev/null)
+    echo "${volume:-?}"
 }
 
 output_volume_and_codec() {
@@ -78,17 +82,18 @@ output_volume_and_codec() {
 
 get_default_source_id() {
     # default_source_id=$(pw-record --list-targets | sed -n 's/^*[[:space:]]*\([[:digit:]]\+\):.*$/\1/p')
-    default_source_id=$(pactl list sources | grep -B2 "Name: $(pactl get-default-source)" | grep Source | awk '{print $2}' | awk -F# '{print $2}')
-    echo "${default_source_id}"
+    sources=$(pactl list sources 2>/dev/null)
+    [ -n "${sources}" ] && default_source_id=$(echo "${sources}" | grep -B2 "Name: $(pactl get-default-source 2>/dev/null)" | grep Source | awk '{print $2}' | awk -F# '{print $2}')
+    echo "${default_source_id:-?}"
 }
 
 input_volume() {
-     volume=$(pamixer --source $(get_default_source_id) --get-volume-human)
-     echo "${volume}"
+     volume=$(pamixer --source $(get_default_source_id) --get-volume-human 2>/dev/null)
+     echo "${volume:-?}"
 }
 
 output_volume_listener() {
-    pactl subscribe | while read -r event; do
+    if ! pactl subscribe 2>/dev/null; then sleep 5; fi | while read -r event; do
         if echo "$event" | grep -q "change"; then
             output_volume
         fi
@@ -96,7 +101,7 @@ output_volume_listener() {
 }
 
 output_volume_and_codec_listener() {
-    pactl subscribe | while read -r event; do
+    if ! pactl subscribe 2>/dev/null; then sleep 5; fi | while read -r event; do
         if echo "$event" | grep -q "change"; then
             output_volume_and_codec
         fi
@@ -104,7 +109,7 @@ output_volume_and_codec_listener() {
 }
 
 input_volume_listener() {
-    pactl subscribe | while read -r event; do
+    if ! pactl subscribe 2>/dev/null; then sleep 5; fi | while read -r event; do
         if echo "$event" | grep -q "change"; then
             input_volume
         fi
