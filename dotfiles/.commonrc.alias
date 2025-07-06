@@ -68,6 +68,9 @@ alias v='vim'
 alias vi='vim'
 alias nv='nvim'
 alias nvi='nvim'
+alias h='history'
+# start bash without starship prompt (classic single line look)
+alias bsh='NO_STARSHIP_PROMPT=1 bash'
 
 alias bell='echo -ne "\a"'
 

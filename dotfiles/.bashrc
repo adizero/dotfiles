@@ -131,7 +131,7 @@ fi
 
 export STARSHIP_CONFIG=~/.config/starship_bash.toml
 # Starship prompt
-eval "$(starship init bash)"
+[ -z "${NO_STARSHIP_PROMPT}" ] && eval "$(starship init bash)"
 
 # Zoxide (prints warning when not at the end of .bashrc)
 eval "$(zoxide init bash)"
