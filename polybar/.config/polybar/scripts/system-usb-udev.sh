@@ -18,7 +18,7 @@ log_print() {
 }
 
 usb_print() {
-    log_print "usb_print called (pid: $(cat "${path_pid}"))"
+    # log_print "usb_print called (pid: $(cat "${path_pid}"))"
     devices=$(lsblk -Jplno NAME,TYPE,RM,SIZE,MOUNTPOINT,VENDOR)
     output=""
     counter=0
