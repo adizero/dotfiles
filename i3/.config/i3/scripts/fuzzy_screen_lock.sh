@@ -1,5 +1,15 @@
 #!/bin/sh -e
 
+cleanup()
+{
+    local exit_code="${1}"
+    rm -f /tmp/screenshot.png
+    rm -f /tmp/screen_locked.png
+    return "${exit_cde}"
+}
+
+trap 'cleanup ${?}' EXIT
+
 # Optional argument specifies how many seconds to wait until display 
 # is turned off after screen is locked (default is 60 seconds)
 monitor_off_delay=${1:-60}

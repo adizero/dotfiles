@@ -52,12 +52,12 @@ bindsym $mod+Shift+q kill
 # start dmenu (a program launcher)
 #bindsym $mod+d exec dmenu_run
 #rofi can be drop-in replacement for -dmenu
-bindsym $mod+d exec dmenu_path | rofi -dmenu -matching fuzzy -levenshtein-sort
+# bindsym $mod+d exec dmenu_path | rofi -dmenu -matching fuzzy -levenshtein-sort
 
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
 
 #rofi -modi "window,run,ssh,Workspaces:~/.config/i3/scripts/i3_switch_workspaces.sh" -show Workspaces
 
@@ -169,7 +169,7 @@ bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcu
 # reload Dunst (Dunst notification system does not have any signal handling or command line api for this)
 bindsym $mod+Shift+d --release exec --no-startup-id "killall dunst; notify-send 'dunst was restarted'"
 
-# non-interactive screenshot by pressing printscreen (screenshot is saved in home directory as ~/<date-time>_scrot.png)
+# non-interactive screenshot by pressing printscreen (screenshot is saved in home directory as ~/Pictures/<date-time>_scrot.png)
 bindsym Print exec ~/.config/i3/scripts/i3-scrot
 
 # interactive crop-area screenshot by pressing Mod + printscreen
@@ -275,12 +275,12 @@ bindsym $mod+apostrophe mode "$mode_ws"
 # system power commands
 set $mode_system System (l) lock, (e) logout, (s) suspend, (h) hibernate, (r) reboot, (Shift+s) shutdown
 mode "$mode_system" {
-    bindsym l exec --no-startup-id i3_exit.sh lock, mode "default"
-    bindsym e exec --no-startup-id i3_exit.sh logout, mode "default"
-    bindsym s exec --no-startup-id i3_exit.sh suspend, mode "default"
-    bindsym h exec --no-startup-id i3_exit.sh hibernate, mode "default"
-    bindsym r exec --no-startup-id i3_exit.sh reboot, mode "default"
-    bindsym Shift+s exec --no-startup-id i3_exit.sh shutdown, mode "default"
+    bindsym l exec --no-startup-id "~/.config/i3/scripts/i3_exit.sh lock", mode "default"
+    bindsym e exec --no-startup-id "~/.config/i3/scripts/i3_exit.sh logout", mode "default"
+    bindsym s exec --no-startup-id "~/.config/i3/scripts/i3_exit.sh suspend", mode "default"
+    bindsym h exec --no-startup-id "~/.config/i3/scripts/i3_exit.sh hibernate", mode "default"
+    bindsym r exec --no-startup-id "~/.config/i3/scripts/i3_exit.sh reboot", mode "default"
+    bindsym Shift+s exec --no-startup-id "~/.config/i3/scripts/i3_exit.sh shutdown", mode "default"
 
     # back to normal: Enter or Escape or $mod+End
     bindsym Return mode "default"
@@ -414,6 +414,10 @@ exec --no-startup-id /usr/lib/geoclue-2.0/demos/agent
 #
 # redshift service needs to be enabled: systemctl --user enable --now redshift
 # it is possible to toggle redshift on/off: pkill -USR1 redshift
+
+# start pipewire/pulseaudio on i3 init
+exec --no-startup-id gentoo-pipewire-launcher restart
+exec --no-startup-id redshift -P
 
 # check information about X windows with xprop
 # default_border pixel 0
