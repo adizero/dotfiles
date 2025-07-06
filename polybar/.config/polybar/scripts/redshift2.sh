@@ -5,11 +5,11 @@ status_file="${XDG_RUNTIME_DIR:-/tmp}/redshift_status"
 conf_file="${XDG_CONFIG_HOME:-/${HOME}/.config}/redshift/redshift.conf"
 
 get_state() {
-	if [ ! -r "${status_file}" ]; then
-		state="none"
-		return
-	fi
-    state=$(echo "$(tail -n1 "${status_file}" | awk '{print $NF}')")
+    if [ ! -r "${status_file}" ]; then
+        state="none"
+        return
+    fi
+    state=$(tail -n1 "${status_file}" | awk '{print $NF}')
     daytemp=$(grep temp-day "${conf_file}" | awk -F= '{print $2}')
     nighttemp=$(grep temp-night "${conf_file}" | awk -F= '{print $2}')
 }
@@ -20,10 +20,10 @@ show() {
         printf "D%dK" "${daytemp}"
         ;;
       transition)
-	printf "%%{F#ffa500}T%dK%%{F-}" "${daytemp}"
+        printf "%%{F#ffa500}T%dK%%{F-}" "${daytemp}"
         ;;
       night)
-	printf "%%{F#ff8c00}N%dK%%{F-}" "${nighttemp}"
+        printf "%%{F#ff8c00}N%dK%%{F-}" "${nighttemp}"
         ;;
       none)
         printf "off"
@@ -35,21 +35,21 @@ change_temp() {
     delta="${1}"
     case "${state}" in
       daytime)
-	# fallthrough
-	;&
+        # fallthrough
+        ;&
       transition)
         daytemp=$((daytemp+delta))
         [ "${daytemp}" -gt 1000 ] || daytemp=1000
         [ "${daytemp}" -lt 25000 ] || daytemp=25000
-	sed -i "s/temp-day=.*/temp-day=${daytemp}/g" "${conf_file}"
-	redshift -P -r -O "${daytemp}"
+        sed -i "s/temp-day=.*/temp-day=${daytemp}/g" "${conf_file}"
+        redshift -P -r -O "${daytemp}"
         ;;
       night)
         nighttemp=$((nighttemp+delta))
         [ "${nighttemp}" -gt 1000 ] || nighttemp=1000
         [ "${nighttemp}" -lt 25000 ] || nighttemp=25000
-	sed -i "s/temp-night=.*/temp-night=${nighttemp}/g" "${conf_file}"
-	redshift -P -r -O "${nighttemp}"
+        sed -i "s/temp-night=.*/temp-night=${nighttemp}/g" "${conf_file}"
+        redshift -P -r -O "${nighttemp}"
         ;;
     esac
 
@@ -63,8 +63,8 @@ change_temp() {
 
 get_state
 
-case $1 in 
-  toggle) 
+case $1 in
+  toggle)
     pkill -USR1 redshift
     show
     ;;
