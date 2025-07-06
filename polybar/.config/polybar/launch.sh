@@ -47,6 +47,6 @@ MODLIST="${MODLIST//$'\n'/ }"
 # Launch bar1 and bar2
 # polybar bar1 &
 # polybar bar2 &
-polybar --config=$HOME/.config/polybar/config.ini -r mybar &
+polybar --config="~/.config/polybar/config.ini" -r mybar &
 
 echo "Bars launched... (DPI: $DPI, Height: $POLYBAR_HEIGHT)"
