@@ -82,7 +82,7 @@ format = "[$output]($style) "
 [custom.upstream_commit]
 require_repo = true
 # command = 'git describe @{u} || git describe' # shows output of command
-command = 'starship_git_upstream_commit.sh' # shows output of command
+command = '~/.config/starship/scripts/starship_git_upstream_commit.sh' # shows output of command
 # when = ''' test $(basename "${PWD}") = "srlinux" && test $(git symbolic-ref --short HEAD) = "master" '''
 when = true
 format = "[$output]($style) "
