@@ -5,7 +5,7 @@ cleanup()
     local exit_code="${1}"
     rm -f /tmp/screenshot.png
     rm -f /tmp/screen_locked.png
-    return "${exit_cde}"
+    return ${exit_code}
 }
 
 trap 'cleanup ${?}' EXIT

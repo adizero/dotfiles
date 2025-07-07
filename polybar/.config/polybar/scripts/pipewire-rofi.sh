@@ -50,7 +50,7 @@ mute_source() {
 get_default_sink_id() {
     # default_sink_id=$(pw-play --list-targets | sed -n 's/^*[[:space:]]*\([[:digit:]]\+\):.*$/\1/p')
     sinks=$(pactl list sinks 2>/dev/null)
-    [ -n "${sinks}" ] && default_sink_id=$(echo ${sinks} | grep -B2 "Name: $(pactl get-default-sink 2>/dev/null)" | grep Sink | awk '{print $2}' | awk -F# '{print $2}')
+    [ -n "${sinks}" ] && default_sink_id=$(echo "${sinks}" | grep -B2 "Name: $(pactl get-default-sink 2>/dev/null)" | grep Sink | awk '{print $2}' | awk -F# '{print $2}')
     echo "${default_sink_id:-?}"
 }
 
