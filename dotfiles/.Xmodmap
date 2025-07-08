@@ -1,0 +1,15 @@
+! change Caps_Lock to Escape / Caps_Lock when held together with Shift
+remove Lock = Caps_Lock
+keysym Caps_Lock = Escape Caps_Lock
+
+! change Caps_Lock to Hyper_L / Caps_Lock when held together with Shift
+remove Mod4 = Hyper_L
+add Mod3 = Hyper_L
+keysym Caps_Lock = Hyper_L Caps_Lock
+
+! completely disable F2 key (needed only for a broken F2 key on the keyboard)
+! keycode 68 =
+
+! looks like it is impossible to simulate broken Del key with Shift+Backspace
+! the apps do not like modifier together with Del
+! keycode 22 = BackSpace Delete
