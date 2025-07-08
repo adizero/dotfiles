@@ -166,9 +166,6 @@ bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
-# reload Dunst (Dunst notification system does not have any signal handling or command line api for this)
-bindsym $mod+Shift+d --release exec --no-startup-id "killall dunst; notify-send 'dunst was restarted'"
-
 # non-interactive screenshot by pressing printscreen (screenshot is saved in home directory as ~/Pictures/<date-time>_scrot.png)
 bindsym Print exec ~/.config/i3/scripts/i3-scrot
 
@@ -292,11 +289,14 @@ bindsym $mod+End mode "$mode_system"
 
 workspace_auto_back_and_forth yes
 
+# reload Dunst (Dunst notification system does not have any signal handling or command line api for this)
+bindsym $mod+Shift+d --release exec --no-startup-id "killall dunst; notify-send 'dunst was restarted'"
 # Dunst notifications shortcuts
 bindsym ctrl+shift+space exec dunstctl close
 # bindsym ctrl+shift+space exec dunstctl close-all
 bindsym ctrl+grave exec dunstctl history-pop
 bindsym ctrl+shift+period exec dunstctl context
+
 
 # Polybar toggle with Caps Lock (first Caps Lock must be bound to Hyper_L in ~/.Xmodmap)
 # bindsym Hyper_L exec polybar-msg cmd show
