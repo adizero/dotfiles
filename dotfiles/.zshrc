@@ -1,4 +1,28 @@
+# Brief listing of what is being sourced by zsh and in which order
+#
+#       # unconditional ($ZDOTDIR becomes $HOME if unset)
+#       /etc/zshenv
+#       $ZDOTDIR/.zshenv
+#
+#       # only if login shell
+#       /etc/zprofile
+#       $ZDOTDIR/.zprofile
+#
+#       # only if interactive
+#       /etc/zshrc
+#       $ZDOTDIR/.zshrc
+#
+#       # only if login shell
+#       /etc/zlogin
+#       $ZDOTDIR/.zlogin
+#
+#       # only after login shell exits
+#       $ZDOTDIR/.zlogout
+#       /etc/zlogout    (installation-specific - /etc is the default)
+
+
 # If not running interactively, don't do anything
+# Technically this script is not executed directly during zsh startup when non-interactive (maybe be manually sourced)
 [[ $- != *i* ]] && return
 
 # export PS4='+%N:%i> '

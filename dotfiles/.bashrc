@@ -1,9 +1,31 @@
-# Source global bashrc files
+# Brief listing of what is being sourced by bash and in which order
+#
+#       # when executed as 'sh' or with --posix command line argument the bash will look
+#       # only at $ENV variable as the file path to source (nothing else is used!)
+#
+#       # only if interactive login shell (can be skipped with --noprofile bash command line argument)
+#       /etc/profile    (the profile script usually sources /etc/bash/bashrc or similar global bashrc file - OS specific)
+#       # Note: sources only the first readable file from these 3 paths (usually they source ~/.bashrc as well)
+#       ! ~/.bash_profile
+#       ! ~/.bash_login
+#       ! ~/.profile
+#
+#       # only if interactive non-login shell (can be skipped with --norc bash command line argument)
+#       ~/.bashrc
+#
+#       # non-interactive shell looks at $BASH_ENV variable as the file path to source
+#
+#       # only after interactive login shell exits
+#       ~/.bash_logout
+#       /etc/bash/bash_logout (if it exists - OS specific path, may be /etc/bash.bash_logout)
+
+# Source global bashrc files (it is a good practice in bash, not mandatory)
 [ -r /etc/bash/bashrc ] && source /etc/bash/bashrc # Gentoo
 [ -r /etc/bash.bashrc ] && source /etc/bash.bashrc # Ubuntu
 [ -r /etc/bashrc ] && source /etc/bashrc # CentOS
 
 # If not running interactively, don't do anything
+# Technically this script is not executed directly during bash  startup when non-interactive (maybe be manually sourced)
 [[ $- != *i* ]] && return
 
 # Nicer tracing output
