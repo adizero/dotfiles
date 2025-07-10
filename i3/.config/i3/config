@@ -417,7 +417,7 @@ exec --no-startup-id /usr/lib/geoclue-2.0/demos/agent
 
 # start pipewire/pulseaudio on i3 init
 exec --no-startup-id gentoo-pipewire-launcher restart
-exec --no-startup-id redshift -P
+exec_always --no-startup-id ~/.config/i3/scripts/redshift_restart.sh
 
 # check information about X windows with xprop
 # default_border pixel 0

@@ -58,7 +58,7 @@ change_temp() {
     # the pkill -9 will cause redshift to keep old gamma setting and not write new status off to the status file
     # however that means redshift needs to be started with -P option
     # update /usr/lib/systemd/user/redshift.service file and reload the service with systemctl --user daemon-reload
-    ( sleep 3.123 && pkill -9 redshift ) &
+    ( sleep 3.123 && ~/.config/i3/scripts/redshift_restart.sh ) &
 }
 
 get_state
