@@ -67,7 +67,8 @@ def main():
                 # Capture scrollback history of the pane (-S - means start from the beginning of the scrollback history)
                 # The history limit can be checked via: tmux show-options -gv history-limit
                 scrollback_output = subprocess.run(
-                    ["tmux", "capture-pane", "-p", "-S", "-", "-t", pane_id], capture_output=True, text=True, check=True
+                    ["tmux", "capture-pane", "-p", "-S", "-", "-t", pane_id],
+                    capture_output=True, text=True, encoding="utf-8", errors="backslashreplace", check=True
                 ).stdout.strip()
 
                 if not scrollback_output:
