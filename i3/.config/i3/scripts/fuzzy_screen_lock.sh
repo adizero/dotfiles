@@ -1,11 +1,20 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
 
 cleanup()
 {
     local exit_code="${1}"
     rm -f /tmp/screenshot.png
     rm -f /tmp/screen_locked.png
-    return ${exit_code}
+    return "${exit_code}"
+}
+
+background_screen_off()
+{
+    pid=$(pgrep --newest i3lock | head -n 1)
+    # compare pgrep i3lock with stored pid after sleep is over and blank display only when identical
+    if [ "${pid}" -eq "${orig_pid}" ]; then
+        pgrep i3lock && xset dpms force off
+    fi
 }
 
 trap 'cleanup ${?}' EXIT
@@ -29,9 +38,4 @@ i3lock -e -f -i /tmp/screen_locked.png
 orig_pid=$(pgrep --newest i3lock | head -n 1)
 
 # Turn the screen off after a delay.
-sleep "${monitor_off_delay}"
-pid=$(pgrep --newest i3lock | head -n 1)
-# compare pgrep i3lock with stored pid after sleep is over and blank display only when identical
-if [ "${pid}" -eq "${orig_pid}" ]; then
-    pgrep i3lock && xset dpms force off
-fi
+(sleep "${monitor_off_delay}" && background_screen_off) &
