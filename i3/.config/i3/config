@@ -348,7 +348,7 @@ bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
 #mail key
 bindsym XF86Mail exec --no-startup-id playerctl play-pause
 #browser key
-bindsym XF86HomePage exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
+bindsym XF86HomePage exec --no-startup-id playerctl next
 #calculator key
 bindsym XF86Calculator exec --no-startup-id "~/.config/i3/scripts/fuzzy_screen_lock.sh"
 #mute key
