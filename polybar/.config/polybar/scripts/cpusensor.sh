@@ -24,9 +24,11 @@
 nbfc_state_file=/run/nbfc_service.state.json
 
 if [ -r "${nbfc_state_file}" ]; then
-    temp=$(cat "${nbfc_state_file}" | grep temperature | awk -F: '{print $2}' | awk -F, '{print $1}' | awk '{print $1}')
-    fanperc=$(cat "${nbfc_state_file}" | grep current_speed | awk -F: '{print $2}' | awk -F, '{print $1}' | awk '{print $1}' | awk -F. '{print $1}')
-    result="${temp}°C[${fanperc}%]"
+    # temp=$(cat "${nbfc_state_file}" | grep temperature | awk -F: '{print $2}' | awk -F, '{print $1}' | awk '{print $1}')
+    # fanperc=$(cat "${nbfc_state_file}" | grep current_speed | awk -F: '{print $2}' | awk -F, '{print $1}' | awk '{print $1}' | awk -F. '{print $1}')
+    # result="${temp}°C[${fanperc}%]"
+    mapfile -t values <<< $(awk -F ' |,' '/temperature|current_speed/ {print $2}' "${nbfc_state_file}")
+    result="${values[0]}°C[${values[1]}%]"
 else
     result="?nbfc?"
 fi
