@@ -1,13 +1,26 @@
 #!/usr/bin/env bash
 
-# Terminate already running bar instances
-killall -q polybar
+# Terminate already running bar instance
+# killall -q polybar
+polybar_pid="$(pidof polybar)"
+if [ -n "${polybar_pid}" ]; then
+    pstree -p "${polybar_pid}" | awk -F'[()]' '{for(i=2;i<=NF;i+=2) print $i}' | xargs kill -TERM
+fi
 sleep 1
 # Escalate to signal KILL
-killall -9 -q polybar
+# killall -9 -q polybar
+if [ -n "${polybar_pid}" ]; then
+    pstree -p "${polybar_pid}" | awk -F'[()]' '{for(i=2;i<=NF;i+=2) print $i}' | xargs kill -KILL
+fi
 
 # Wait until the processes have been shut down
 while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+
+# Build polybar binary scripts if not already built
+if [ ! -d ~/.config/polybar/scripts/bin ]; then
+    echo "Building polybar binary scripts from sources..."
+    (cd ~/.config/polybar/scripts && make)
+fi
 
 # DPI detection relies on Xft.dpi setting in .Xresources
 DPI=$(xrdb -query | grep Xft.dpi | awk '{print $2}')
