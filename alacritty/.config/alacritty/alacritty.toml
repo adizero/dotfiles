@@ -12,11 +12,15 @@ size = 10
 # primary = { background = "#000000" }
 [mouse]
 hide_when_typing = true
+bindings = [
+             { mouse = "Middle", mods = "None", action = "PasteSelection" },
+           ]
 [keyboard]
 # completely disable Ctrl+Insert keybinding to reach tty (only copies selected text to clipboard)
 bindings = [
              # { key = "Insert", mods = "Control", chars = "\u001b[2;5~" },
              { key = "Insert", mods = "Control", action = "None" },
+             { key = "Insert", mods = "Shift", action = "Paste" },
              { key = "ContextMenu", mods = "None", action = "ResetFontSize" },
              { key = "-", mods = "Control", chars = "\u001f" },
              { key = "=", mods = "Control", chars = "=" },  # could be bound to something else
