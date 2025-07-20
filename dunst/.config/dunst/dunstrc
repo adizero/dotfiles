@@ -1,0 +1,30 @@
+# [urgency_low]
+#     msg_urgency = low
+#     background = "#3B4252"
+#     foreground = "#E5E9F0"
+#
+
+# [urgency_normal]
+#     msg_urgency = normal
+#     background = "#434C5E"
+#     foreground = "#E5E9F0"
+#
+
+# [urgency_critical]
+#     msg_urgency = critical
+#     background = "#ff0000"
+#     foreground = "#000000"
+
+# [notify-send]
+#     appname = "notify-send"
+#     background = "#336699"
+#     foreground = "#e0e0e0"
+#     frame_color = "#6699cc"
+#     separator_color = "#E5E9F0"
+#     timeout = 5
+
+[google-chrome]
+    appname = "Google Chrome"
+    background = "#ffffff"
+    foreground = "#000000"
+    frame_color = "#6699cc"
