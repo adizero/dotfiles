@@ -8,7 +8,9 @@ function starship_git_upstream_commit()
   fi
   git_root_base_dir_name=$(basename "${git_root}")
   branch_name=$(git symbolic-ref --short HEAD)
+  # first try git describe with narrow match pattern specific for srlinux/panos git repos for faster resolution, fallback to full git describe
   [ "${git_root_base_dir_name}" = "srlinux" ] && [ "${branch_name}" = "master" ] && git describe --match=v0.0* "@{u}" 2>/dev/null && return 0
+  [ "${git_root_base_dir_name}" = "panos" ] && [ "${branch_name}" = "master" ] && git describe --match=TiMOS_0_0_I8* "@{u}" 2>/dev/null && return 0
   git describe "@{u}" 2>/dev/null && return 0
   git log -1 --pretty=format:%h "@{u}" 2>/dev/null && return 0
   # try to describe the current commit (probably detached HEAD, or purely local branch/git)
