@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 function starship_git_upstream_commit()
 {
   local git_root git_root_base_dir_name branch_name
