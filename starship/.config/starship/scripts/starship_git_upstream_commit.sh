@@ -40,7 +40,7 @@ if [ -r "${cache_filename}" ]; then
   cached_head_commit=${cached_line%% *}
   cached_upstream_tag=${cached_line#* }
 fi
-head_commit=$(git rev-parse --short HEAD)
+head_commit=$(git rev-parse --short "@{u}" || git rev-parse --short HEAD)
 if [ "${head_commit}" == "${cached_head_commit}" ]; then
     echo "${cached_upstream_tag}"
     exit 0
