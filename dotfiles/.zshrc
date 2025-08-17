@@ -274,6 +274,9 @@ bindkey '\e,' earlier-word
 # bindkey '^[[1;5A' up-line-or-local-history    # [CTRL] + Cursor up
 # bindkey '^[[1;5B' down-line-or-local-history  # [CTRL] + Cursor down
 
+# command not found script
+[ -r /etc/bash/bashrc.d/command-not-found.sh ] && source /etc/bash/bashrc.d/command-not-found.sh
+
 # Carapace completions
 export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
 # Caution: do not use direct escape sequences (they break end of line calculations esp. with right-prompts), use {color} tags instead
