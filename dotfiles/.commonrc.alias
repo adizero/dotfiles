@@ -106,17 +106,17 @@ yy() {
 }
 
 # Eza
-alias l="eza -l --icons --git -a -s modified"
-alias ll="eza -l --icons --git -a"
-alias lt="eza --tree --level=2 --long --icons --git"
-alias lt3="eza --tree --level=3 --long --icons --git"
-alias lt4="eza --tree --level=4 --long --icons --git"
-alias l.="eza -dF .*"
+alias l="eza -F -l --icons --git -a -s modified"
+alias ll="eza -F -l --icons --git -a"
+alias lt="eza -F --tree --level=2 --long --icons --git"
+alias lt3="eza -F --tree --level=3 --long --icons --git"
+alias lt4="eza -F --tree --level=4 --long --icons --git"
+alias l.="eza -F -d .*"
 # %N in time-style crashes eza (workaround is to use full-iso even though it has the superfluous time zone)
-# alias ltime="eza -l --icons --git -a --time-style='+%Y-%m-%d %H:%M:%S.%N'"
-alias ltime="eza -l --icons --git -a -s time --time-style='full-iso'"
-alias lsize="eza -l --icons --git -a -s size"
-alias lsized="eza -l --icons --git -a -s size --total-size"
+# alias ltime="eza -F -l --icons --git -a --time-style='+%Y-%m-%d %H:%M:%S.%N'"
+alias ltime="eza -F -l --icons --git -a -s time --time-style='full-iso'"
+alias lsize="eza -F -l --icons --git -a -s size"
+alias lsized="eza -F -l --icons --git -a -s size --total-size"
 
 cx() { cd "${@}" && l; }
 
