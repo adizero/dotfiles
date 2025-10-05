@@ -1,12 +1,25 @@
+# Alacritty config is in ~\AppData\Roaming\alacritty\alacritty.toml
+
+# SSH setup
+# create host aliases in ~\.ssh\config:
+# vim $env:USERPROFILE\.ssh\config
+# run keygen to create private/public key pair
+# ssh-keygen.exe
+# copy the public key to the remote machine (ssh-copy-id equivalent in PowerShell):
+# type $env:USERPROFILE\.ssh\id_ed25519.pub | ssh devpc "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
 [window]
-decorations = "None"
+# decorations = "None"
+decorations = "Full"
 [font]
 # normal = { family = "DejaVuSansMNerdFont" }
 # normal = { family = "HackNerdFont" }
-normal = { family = "JetBrainsMonoNerdFont" }
+# normal = { family = "JetBrainsMonoNerdFont" }
+# normal = { family = "JetBrainsMono Nerd Font Mono", style = "Regular" }
+normal = { family = "JetBrainsMono Nerd Font Mono" }
 # size = 10.25
-size = 10
-offset = { y = -2 }
+size = 12
+offset = { y = 1 }
 # glyph_offset = { x = 1, y = -2 }
 [colors]
 # primary = { background = "#000000" }
@@ -17,10 +30,10 @@ bindings = [
            ]
 [keyboard]
 bindings = [
+             # by default Windows 10 swallows Ctrl+/ binding, this remaps it earlier in Alacritty
+             { key = "/", mods = "Control", chars = "\u001f" },
              { key = "N", mods = "Control|Shift", action = "CreateNewWindow" },
              # completely disable Ctrl+Insert keybinding to reach tty (only copies selected text to clipboard)
-             # { key = "Insert", mods = "Control", chars = "\u001b[2;5~" },
-             # { key = "Insert", mods = "Control", action = "None" },
              { key = "Insert", mods = "Control", action = "Copy" },
              { key = "Insert", mods = "Shift", action = "Paste" },
              { key = "ContextMenu", mods = "None", action = "ResetFontSize" },
