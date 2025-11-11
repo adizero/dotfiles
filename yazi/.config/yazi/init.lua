@@ -14,6 +14,9 @@ end
 
 Status:children_add(function()
     local h = cx.active.current.hovered
+    if not h then
+        return nil
+    end
     return ui.Line({
         ui.Span(os.date(_, tostring(h.cha.mtime):sub(1, 10))):fg("blue"),
         ui.Span(" "),
