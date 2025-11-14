@@ -121,8 +121,9 @@ alias lsized="eza -F -l --icons --git -a -s size --total-size"
 cx() { cd "${@}" && l; }
 
 # FZF
-fcd() { cd "$(find . -type d -not -path '*/.*' 2>/dev/null | fzf)" && l; }
-fv() { $EDITOR "$(find . -type f -not -path '*/.*' 2>/dev/null | fzf)"; }
+
+fcd() { cd $(FZF_DEFAULT_COMMAND= fzf --walker=dir,hidden --query="${*}") && l; }
+fv() { $EDITOR $(FZF_DEFAULT_COMMAND= fzf --walker=file,hidden --query="${*}"); }
 
 # Zoxide
 zx() { z "${@}" && l; }
